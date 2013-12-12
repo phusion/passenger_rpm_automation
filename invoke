@@ -12,7 +12,7 @@ fi
 set -e
 BASE_DIR=`dirname "$0"`
 BASE_DIR=`cd "$BASE_DIR"; pwd`
-exec docker run -privileged \
+exec docker run -privileged -rm \
 	-v "$PROJECT_DIR:/project" \
 	-v "$BASE_DIR/scripts:/scripts:ro" \
 	phusion/passenger_rpm_automation sudo -u app -H \
