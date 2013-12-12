@@ -1,13 +1,18 @@
 #!/bin/bash
-set -e
-
 PROJECT_DIR="$1"
 GIT_URL="$2"
+
+if [[ "$PROJECT_DIR" = "" || "$GIT_URL" = "" ]]; then
+	echo "Usage: ./create_project <DIR> <GIT_URL>"
+	exit 1
+fi
+
+set -e
 
 CONTAINER_APP_UID=9999
 
 set -x
 
-mkdir "$PROJECT_DIR"
+mkdir -p "$PROJECT_DIR"
 echo "$GIT_URL" > "$PROJECT_DIR/git_url"
 chown -R $CONTAINER_APP_UID:$CONTAINER_APP_UID "$PROJECT_DIR"

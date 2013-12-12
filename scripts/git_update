@@ -1,6 +1,8 @@
 #!/bin/bash
 # Clone or update git repo
-set -ex
+set -e
+source /scripts/config
+set -x
 
 if [[ -e /project/git ]]; then
 	cd /project/git
@@ -10,5 +12,4 @@ if [[ -e /project/git ]]; then
 else
 	git_url=`cat /project/git_url`
 	git clone "$git_url" /project/git
-	cd /project/git
 fi

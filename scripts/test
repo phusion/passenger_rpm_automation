@@ -1,0 +1,8 @@
+#!/bin/bash
+set -e
+source /scripts/config
+set -x
+
+/scripts/git_update
+cd /project/git
+exec ./dev/test_rpm_packaging.sh

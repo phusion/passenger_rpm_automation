@@ -1,14 +1,15 @@
 #!/bin/bash
-set -e
 PROJECT_DIR="$1"
 COMMAND="$2"
 shift
 shift
+
 if [[ "$PROJECT_DIR" = "" || "$COMMAND" = "" ]]; then
-	echo "Usage: ./invoke <COMMAND> [ARGS]"
+	echo "Usage: ./invoke <PROJECT_DIR> <COMMAND> [ARGS]"
 	exit 1
 fi
 
+set -e
 BASE_DIR=`dirname "$0"`
 BASE_DIR=`cd "$BASE_DIR"; pwd`
 exec docker run -privileged \
