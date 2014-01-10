@@ -9,7 +9,7 @@ fi
 
 set -e
 
-CONTAINER_APP_UID=9870
+CONTAINER_APP_UID=2467
 
 project_dir_parent=`dirname "$PROJECT_DIR"`
 fstype=`df -T "$project_dir_parent" | tail -n 1 | awk '{ print $2 }'`
