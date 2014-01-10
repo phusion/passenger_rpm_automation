@@ -1,0 +1,30 @@
+#!/bin/bash
+set -e
+
+function create_user()
+{
+	local name="$1"
+	local full_name="$2"
+	local id="$3"
+	create_group $name $id
+	if ! grep -q "^$name:" /etc/passwd; then
+		sudo adduser --uid $id --gid $id --disabled-password --gecos "$full_name" $name
+	fi
+	sudo usermod -L $name
+}
+
+function create_group()
+{
+	local name="$1"
+	local id="$2"
+	if ! grep -q "^$name:" /etc/group >/dev/null; then
+		sudo addgroup --gid $id $name
+	fi
+}
+
+set -x
+
+create_user psg_rpm_automation "Passenger RPM automation" 2466
+create_group passenger_ci 2450
+sudo usermod -a -G passenger_ci psg_rpm_automation
+mkdir -p /var/cache/passenger_ci

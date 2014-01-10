@@ -22,5 +22,6 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     "apt-get update -qq; apt-get install -q -y --force-yes lxc-docker; "
   # Add vagrant user to the docker group
   pkg_cmd << "usermod -a -G docker vagrant; "
+  pkg_cmd << "/vagrant/setup-system"
   config.vm.provision :shell, :inline => pkg_cmd
 end
