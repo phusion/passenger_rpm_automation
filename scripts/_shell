@@ -2,7 +2,7 @@
 set -e
 if [[ ! -e /project ]]; then
 	mkdir /project
-	chmod app:app /project
+	chown app:app /project
 	echo https://github.com/phusion/passenger.git > /project/git_url
 fi
 exec sudo -u app -H /bin/bash -l
