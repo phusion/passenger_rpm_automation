@@ -9,8 +9,6 @@ fi
 
 set -e
 
-CONTAINER_APP_UID=2467
-
 project_dir_parent=`dirname "$PROJECT_DIR"`
 fstype=`df -T "$project_dir_parent" | tail -n 1 | awk '{ print $2 }'`
 if [[ "$fstype" == vmhgfs || "$fstype" == vboxfs ]]; then
@@ -25,7 +23,14 @@ fi
 set -x
 
 mkdir -p "$PROJECT_DIR"
-mkdir "$PROJECT_DIR/contents"
-echo "$GIT_URL" > "$PROJECT_DIR/contents/git_url"
-chown -R $CONTAINER_APP_UID:$CONTAINER_APP_UID "$PROJECT_DIR"
-chmod 700 "$PROJECT_DIR"
+chown psg_rpm_automation:psg_rpm_automation_container "$PROJECT_DIR"
+chmod u=rwx,g=x,o= "$PROJECT_DIR"
+
+mkdir "$PROJECT_DIR/container"
+mkdir "$PROJECT_DIR/container/root"
+echo "$GIT_URL" > "$PROJECT_DIR/container/root/git_url"
+chown -R psg_rpm_automation_container:psg_rpm_automation_container "$PROJECT_DIR/container"
+chmod u=rwx,g=,o= "$PROJECT_DIR/container"
+
+mkdir "$PROJECT_DIR/log"
+chown psg_rpm_automation:psg_rpm_automation "$PROJECT_DIR/log"

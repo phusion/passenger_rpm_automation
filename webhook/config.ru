@@ -16,8 +16,9 @@ def find_project(payload)
 end
 
 def schedule_build(project_dir)
-  command = "/tools/silence-unless-failed chpst -l /var/cache/passenger_ci/lock " +
-    "./invoke #{project_dir} test"
+  command = "/tools/silence-unless-failed -f #{project_dir}/log/webhook.log " +
+    "chpst -l /var/cache/passenger_ci/lock " +
+    "/tools/timestamp ./invoke #{project_dir} test"
   log "Executing command: #{command}"
   IO.popen("at now", "w") do |f|
     f.puts("cd #{DIR}/..")

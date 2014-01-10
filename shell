@@ -4,7 +4,7 @@ BASE_DIR=`dirname "$0"`
 BASE_DIR=`cd "$BASE_DIR"; pwd`
 EXTRA_ARGS=""
 if [[ "$1" != "" ]]; then
-	EXTRA_ARGS="$EXTRA_ARGS -v $1/contents:/project"
+	EXTRA_ARGS="$EXTRA_ARGS -v $1/container/root:/project"
 fi
 exec docker run -privileged -rm -t -i \
 	-v "$BASE_DIR/scripts:/scripts:ro" \

@@ -19,9 +19,10 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   pkg_cmd = "if [[ -e /usr/bin/docker ]]; then exit; fi; " \
     "wget -q -O - https://get.docker.io/gpg | apt-key add -;" \
     "echo deb http://get.docker.io/ubuntu docker main > /etc/apt/sources.list.d/docker.list;" \
-    "apt-get update -qq; apt-get install -q -y --force-yes lxc-docker; "
+    "apt-get update -qq; apt-get install -q -y --force-yes lxc-docker git; "
   # Add vagrant user to the docker group
   pkg_cmd << "usermod -a -G docker vagrant; "
-  pkg_cmd << "/vagrant/setup-system"
+  pkg_cmd << "/vagrant/setup-system; "
+  pkg_cmd << "git clone https://github.com/phusion/phusion-server-tools.git /tools"
   config.vm.provision :shell, :inline => pkg_cmd
 end
