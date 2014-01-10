@@ -39,5 +39,5 @@ The webhook allows the RPM packaging to be tested every time a developer pushes 
         passenger_enabled on;
         passenger_spawn_method direct;
         passenger_min_instances 0;
-        passenger_user passenger_rpm_automation;
+        passenger_user psg_rpm_automation;
     }
