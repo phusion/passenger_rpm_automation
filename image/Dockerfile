@@ -7,7 +7,7 @@ RUN rpm -Uvh http://mirror.overthewire.com.au/pub/epel/6/i386/epel-release-6-8.n
 	yum install -y ruby ruby-devel rubygems rubygems-devel rubygem-rake httpd httpd-devel apr-devel apr-util-devel && \
 	yum install -y libxml2-devel libxslt-devel sqlite-devel libev-devel pcre-devel rubygem-rack source-highlight which && \
 	gem install nokogiri --no-rdoc --no-ri -v 1.5.9 && \
-	gem install mizuho bluecloth --no-rdoc --no-ri && \
+	gem install bundler mizuho bluecloth --no-rdoc --no-ri && \
 	groupadd --gid 9870 app && \
 	adduser --uid 9870 --gid 9870 --password '#' app && \
 	usermod -a -G mock app && \

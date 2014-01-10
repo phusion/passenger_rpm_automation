@@ -5,20 +5,11 @@ set -x
 
 /scripts/git_update
 cd /project/git
-if dir_has_gems /project/gem_cache; then
-	sudo cp -v /project/gem_cache/*.gem $RUBYGEMS_DIR/cache/
-fi
 
-set +e
-./dev/test_rpm_packaging.sh
-status=$?
-set -e
-set +x
-echo ---------------------------------------------
-echo RPM packaging tests exited with status $status
-echo
-echo Caching gems...
-if dir_has_gems /usr/lib/ruby/gems/1.8/cache; then
-	cp -v $RUBYGEMS_DIR/cache/*.gem /project/gem_cache/
-fi
-exit $status
+sudo tee /etc/sudoers.d/gem_home <<EOF
+Defaults env_keep += "GEM_HOME"
+Defaults env_keep += "GEM_PATH"
+EOF
+sudo chmod 440 /etc/sudoers.d/gem_home
+
+exec ./dev/test_rpm_packaging.sh

@@ -1,18 +1,10 @@
 export CCACHE_DIR=/project/ccache/x86_64
 export CCACHE_COMPRESS=1
 export CCACHE_COMPRESS_LEVEL=3
-export RUBYGEMS_DIR=`gem env | grep 'INSTALLATION DIRECTORY' | sed 's/.*: //'`
+export SYSTEM_RUBYGEMS_DIR=`gem env | grep 'INSTALLATION DIRECTORY' | sed 's/.*: //'`
 export PATH=/usr/lib64/ccache:$PATH
+export GEM_HOME=/project/gems
+export GEM_PATH=$GEM_HOME:$SYSTEM_RUBYGEMS_DIR
 
-mkdir -p /project/ccache/x86_64
-mkdir -p /project/gem_cache
-
-function dir_has_gems() {
-	(
-		set +ex
-		shopt -s nullglob
-		local -a files
-		files=("$1"/*.gem)
-		[ ${#files[@]} -gt 0 ]
-	)
-}
+mkdir -p $CCACHE_DIR
+mkdir -p $GEM_HOME
