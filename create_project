@@ -9,7 +9,7 @@ fi
 
 set -e
 
-CONTAINER_APP_UID=9999
+CONTAINER_APP_UID=9870
 
 project_dir_parent=`dirname "$PROJECT_DIR"`
 fstype=`df -T "$project_dir_parent" | tail -n 1 | awk '{ print $2 }'`
@@ -27,3 +27,4 @@ set -x
 mkdir -p "$PROJECT_DIR"
 echo "$GIT_URL" > "$PROJECT_DIR/git_url"
 chown -R $CONTAINER_APP_UID:$CONTAINER_APP_UID "$PROJECT_DIR"
+chmod 700 "$PROJECT_DIR"

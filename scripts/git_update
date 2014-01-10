@@ -1,14 +1,14 @@
 #!/bin/bash
 # Clone or update git repo
 set -e
-source /scripts/config
+source /scripts/_config
 set -x
 
 if [[ -e /project/git ]]; then
 	cd /project/git
 	rm -rf *
 	git fetch
-	git reset --hard HEAD
+	git reset --hard origin/master
 else
 	git_url=`cat /project/git_url`
 	git clone "$git_url" /project/git

@@ -9,4 +9,5 @@ fi
 exec docker run -privileged -rm -t -i \
 	-v "$BASE_DIR/scripts:/scripts:ro" \
 	$EXTRA_ARGS \
-	phusion/passenger_rpm_automation bash -l
+	phusion/passenger_rpm_automation \
+	/scripts/_shell

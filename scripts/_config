@@ -1,5 +1,6 @@
 export CCACHE_DIR=/project/ccache/x86_64
 export CCACHE_COMPRESS=1
 export CCACHE_COMPRESS_LEVEL=3
+export USE_CCACHE=1
 
 mkdir -p /project/ccache/x86_64
