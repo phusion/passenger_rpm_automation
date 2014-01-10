@@ -31,3 +31,12 @@ Run this to fetch the latest git commit and to test its RPM packaging:
 ## Webhook
 
 The webhook allows the RPM packaging to be tested every time a developer pushes to Github. To setup the webhook, deploy the web app in the `webhook` directory, and make it run under the user `psg_rpm_automation`.
+
+    server {
+        listen 80;
+        server_name webhook.somewhere.com;
+        root /srv/passenger_rpm_automation/webhook;
+        passenger_enabled on;
+        passenger_min_instances 0;
+        passenger_user passenger_rpm_automation;
+    }
