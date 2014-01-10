@@ -27,4 +27,6 @@ set -x
 create_user psg_rpm_automation "Passenger RPM automation" 2466
 create_group passenger_ci 2450
 sudo usermod -a -G passenger_ci psg_rpm_automation
-mkdir -p /var/cache/passenger_ci
+sudo mkdir -p /var/cache/passenger_ci
+sudo chown root:passenger_ci /var/cache/passenger_ci
+sudo chmod 770 /var/cache/passenger_ci
