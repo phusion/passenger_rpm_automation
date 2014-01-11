@@ -41,3 +41,9 @@ The webhook allows the RPM packaging to be tested every time a developer pushes 
         passenger_min_instances 0;
         passenger_user psg_rpm_automation;
     }
+
+The webhook uses `at` to invoke the tests, so make sure `at` is installed. If the test fails then `at` will send an email to the `psg_rpm_automation` user, so make sure such emails are redirected to the email address you want. For example, you can put this in /etc/aliases:
+
+    psg_rpm_automation: your-email-address@server.com
+
+After editing the file, run `sudo newaliases`.
