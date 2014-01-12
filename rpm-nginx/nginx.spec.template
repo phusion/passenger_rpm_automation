@@ -8,6 +8,8 @@
 %global  nginx_logdir        %{_localstatedir}/log/nginx
 %global  nginx_webroot       %{nginx_datadir}/html
 
+%global  passenger_version   <%= VERSION_STRING %>
+
 # gperftools exist only on selected arches
 %ifarch %{ix86} x86_64 ppc ppc64 %{arm}
 %global  with_gperftools     1
@@ -15,7 +17,7 @@
 
 Name:              nginx
 Epoch:             1
-Version:           1.4.4
+Version:           <%= PREFERRED_NGINX_VERSION %>
 Release:           1%{?dist}
 
 Summary:           A high performance web server and reverse proxy server
@@ -27,6 +29,7 @@ URL:               http://nginx.org/
 
 Source0:           http://nginx.org/download/nginx-%{version}.tar.gz
 Source1:           http://nginx.org/download/nginx-%{version}.tar.gz.asc
+Source2:           http://s3.amazonaws.com/phusion-passenger/releases/passenger-%{passenger_version}.tar.gz
 Source10:          nginx.service
 Source11:          nginx.logrotate
 Source12:          nginx.conf
@@ -74,18 +77,64 @@ Requires(preun):   chkconfig, initscripts
 Requires(postun):  initscripts
 %endif
 
+%if 0%{?rhel} >= 6 || 0%{?fedora} >= 15
+BuildRequires:  libcurl-devel
+%else
+BuildRequires:  curl-devel
+%endif
+
+%if 0%{?rhel} < 6 && 0%{?fedora} <= 16
+Requires: rubygem(fastthread) >= 1.0.1
+BuildRequires:  rubygem(fastthread) >= 1.0.1
+%endif
+
+BuildRequires: httpd-devel
+BuildRequires: libev-devel >= 4.0.0
+BuildRequires: ruby
+BuildRequires: ruby-devel
+BuildRequires: rubygems
+BuildRequires: rubygems-devel
+BuildRequires: rubygem(rake) >= 0.8.1
+BuildRequires: rubygem(rack)
+BuildRequires: zlib-devel
+BuildRequires: pcre-devel
+BuildRequires: openssl-devel
+
 %description
 Nginx is a web server and a reverse proxy server for HTTP, SMTP, POP3 and
 IMAP protocols, with a strong focus on high concurrency, performance and low
-memory usage.
+memory usage. Includes Phusion Passenger support.
 
 
 %prep
 %setup -q
 %patch0 -p0
+tar xzf %{SOURCE2}
 
 
 %build
+export EXTRA_CFLAGS="${CFLAGS:-%optflags} -Wno-deprecated"
+export EXTRA_CXXFLAGS="${CXXFLAGS:-%optflags} -Wno-deprecated"
+
+# Reduce optimization level. Passenger has not been tested with -O2.
+export EXTRA_CFLAGS=`echo "$EXTRA_CFLAGS" | sed 's|-O2|-O|g'`
+export EXTRA_CXXFLAGS=`echo "$EXTRA_CXXFLAGS" | sed 's|-O2|-O|g'`
+
+export USE_VENDORED_LIBEV=false
+
+# Speed up ccache (reduce I/O) by lightly compressing things.
+# Always set these variables because pbuilder uses ccache transparently.
+export CCACHE_COMPRESS=1
+export CCACHE_COMPRESS_LEVEL=3
+
+pushd `pwd`/passenger-%{passenger_version}
+if command -v drake; then
+    drake %{?_smp_mflags} nginx
+else
+    rake nginx
+fi
+popd
+
 # nginx does not utilize a standard configure script.  It has its own
 # and the standard configure options cause the nginx configure script
 # to error out.  This is is also the reason for the DESTDIR environment
@@ -137,6 +186,7 @@ export DESTDIR=%{buildroot}
 %if 0%{?with_gperftools}
     --with-google_perftools_module \
 %endif
+    --add-module=`pwd`/passenger-%{passenger_version}/ext/nginx \
     --with-debug \
     --with-cc-opt="%{optflags} $(pcre-config --cflags)" \
     --with-ld-opt="$RPM_LD_FLAGS -Wl,-E" # so the perl module finds its symbols

@@ -8,6 +8,7 @@ if [[ "$1" != "" ]]; then
 fi
 exec docker run -privileged -rm -t -i \
 	-v "$BASE_DIR/scripts:/scripts:ro" \
+	-v "$BASE_DIR/rpm-nginx:/rpm-nginx:ro" \
 	$EXTRA_ARGS \
 	phusion/passenger_rpm_automation \
 	/scripts/_shell

@@ -15,5 +15,6 @@ BASE_DIR=`cd "$BASE_DIR"; pwd`
 exec docker run -privileged -rm \
 	-v "$PROJECT_DIR/container/root:/project" \
 	-v "$BASE_DIR/scripts:/scripts:ro" \
+	-v "$BASE_DIR/rpm-nginx:/rpm-nginx:ro" \
 	phusion/passenger_rpm_automation \
 	sudo -u app -H "/scripts/$COMMAND" "$@"

@@ -1,0 +1,89 @@
+#!/bin/bash
+set -e
+source /scripts/_config
+
+BUILD_PASSENGER=1
+BUILD_NGINX=0
+
+while getopts c:t:pnh opt; do
+	case $opt in
+	c)
+		export GIT_COMMIT=$OPTARG
+		;;
+	t)
+		export GIT_TAG=$OPTARG
+		;;
+	p)
+		BUILD_PASSENGER=1
+		BUILD_NGINX=0
+		;;
+	n)
+		BUILD_PASSENGER=0
+		BUILD_NGINX=1
+		;;
+	h)
+		echo "Usage: ./invoke <PROJECT_DIR> build [options...]"
+		echo
+		echo "Options:"
+		echo "  -c COMMIT    Use this specific git commit"
+		echo "  -t TAG       Use this specific git tag"
+		echo "  -p           Build only Passenger RPMs"
+		echo "  -n           Build only Nginx RPMs"
+		exit
+		;;
+	\?)
+		exit 1
+		;;
+	esac
+done
+
+function reset_stage_log()
+{
+	echo -n > /project/build_stage
+}
+
+function log_stage()
+{
+	local name="$1"
+	echo "`date` -- $name" >> /project/build_stage
+}
+
+function install_doctools()
+{
+	rake test:install_deps DEVDEPS_DEFAULT=false DOCTOOLS=true
+}
+
+set -x
+
+reset_stage_log
+
+log_stage "Checking out git repo"
+/scripts/git_update
+cd /project/git
+passenger_version=`./bin/passenger-config --version`
+nginx_version=`ruby -Ilib -rphusion_passenger -e 'puts PhusionPassenger::PREFERRED_NGINX_VERSION'`
+
+if [[ "$BUILD_PASSENGER" = 1 ]]; then
+	log_stage "Building Passenger RPMs"
+	drake -j$CONCURRENCY rpm:all
+else
+	log_stage "Building Passenger sources"
+	drake -j$CONCURRENCY rpm:sources
+fi
+
+if [[ "$BUILD_NGINX" = 1 ]]; then
+	log_stage "Building Nginx RPMs"
+	cd ~/rpmbuild/SOURCES
+	cp /rpm-nginx/* .
+	/scripts/_preprocess_nginx_specfile /project/git \
+		nginx.spec.template \
+		> nginx.spec
+	wget http://nginx.org/download/nginx-$nginx_version.tar.gz.asc
+	rpmbuild -ba nginx.spec
+fi
+
+log_stage "Saving RPMs"
+rm -rf /project/rpms
+mkdir /project/rpms
+cp ~/rpmbuild/RPMS/*/*.rpm /project/rpms/
+createrepo /project/rpms

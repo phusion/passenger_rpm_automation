@@ -1,10 +1,11 @@
 export CCACHE_DIR=/project/ccache/x86_64
 export CCACHE_COMPRESS=1
 export CCACHE_COMPRESS_LEVEL=3
-export SYSTEM_RUBYGEMS_DIR=`gem env | grep 'INSTALLATION DIRECTORY' | sed 's/.*: //'`
-export PATH=/usr/lib64/ccache:$PATH
+export SYSTEM_RUBYGEMS_DIR=`unset GEM_HOME; unset GEM_PATH; gem env | grep 'INSTALLATION DIRECTORY' | sed 's/.*: //'`
 export GEM_HOME=/project/gems
 export GEM_PATH=$GEM_HOME:$SYSTEM_RUBYGEMS_DIR
+export PATH=/usr/lib64/ccache:$GEM_HOME/bin:$PATH
+export CONCURRENCY=4
 
 mkdir -p $CCACHE_DIR
 mkdir -p $GEM_HOME
