@@ -1,7 +1,11 @@
-%global passenger_version <%= PASSENGER_VERSION %>
+# Based on http://pkgs.fedoraproject.org/cgit/nginx.git/tree/
+
 %global package_name <%= NGINX_RPM_NAME %>
 %global package_version <%= NGINX_RPM_VERSION %>
 %global package_release <%= NGINX_RPM_RELEASE %>
+%global passenger_version <%= PASSENGER_VERSION %>
+%global passenger_package_name <%= PASSENGER_RPM_NAME %>
+%global passenger_tarball_name <%= PASSENGER_TARBALL_NAME %>
 
 %global  _hardened_build     1
 %global  nginx_user          nginx
@@ -36,7 +40,7 @@ URL:               http://nginx.org/
 
 Source0:           http://nginx.org/download/nginx-%{version}.tar.gz
 Source1:           http://nginx.org/download/nginx-%{version}.tar.gz.asc
-Source2:           http://s3.amazonaws.com/phusion-passenger/releases/passenger-%{passenger_version}.tar.gz
+Source2:           http://s3.amazonaws.com/phusion-passenger/releases/%{passenger_tarball_name}-%{passenger_version}.tar.gz
 Source10:          nginx.service
 Source11:          nginx.logrotate
 Source12:          nginx.conf
@@ -72,6 +76,7 @@ Requires:          openssl
 Requires:          pcre
 Requires:          perl(:MODULE_COMPAT_%(eval "`%{__perl} -V:version`"; echo $version))
 Requires(pre):     shadow-utils
+Requires:          %{passenger_package_name}%{?_isa}
 Provides:          webserver
 
 %if 0%{?fedora} >= 16
@@ -133,7 +138,7 @@ export CACHING=false
 export CCACHE_COMPRESS=1
 export CCACHE_COMPRESS_LEVEL=3
 
-pushd `pwd`/passenger-%{passenger_version}
+pushd `pwd`/%{passenger_tarball_name}-%{passenger_version}
 if command -v drake; then
     drake %{?_smp_mflags} nginx
 else
@@ -192,7 +197,7 @@ export DESTDIR=%{buildroot}
 %if 0%{?with_gperftools}
     --with-google_perftools_module \
 %endif
-    --add-module=`pwd`/passenger-%{passenger_version}/ext/nginx \
+    --add-module=`pwd`/%{passenger_tarball_name}-%{passenger_version}/ext/nginx \
     --with-debug \
     --with-cc-opt="%{optflags} $(pcre-config --cflags)" \
     --with-ld-opt="$RPM_LD_FLAGS -Wl,-E" # so the perl module finds its symbols

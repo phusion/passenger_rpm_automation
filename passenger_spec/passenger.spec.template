@@ -1,10 +1,14 @@
+# Based on http://pkgs.fedoraproject.org/cgit/rubygem-passenger.git/tree/
+
 %global package_name <%= PASSENGER_RPM_NAME %>
 %global package_version <%= PASSENGER_RPM_VERSION %>
 %global package_release <%= PASSENGER_RPM_RELEASE %>
 %global tarball_name <%= PASSENGER_TARBALL_NAME %>
+%global apache_module_package_name <%= PASSENGER_APACHE_MODULE_RPM_NAME %>
 %global namespace <%= PhusionPassenger::GLOBAL_NAMESPACE_DIRNAME %>
 %global nginx_version <%= NGINX_RPM_VERSION %>
 %global bundled_boost_version 1.54.0
+%global is_enterprise <%= enterprise? %>
 
 %if 0%{?fc18}
 %global rubyabi 1.9.1
@@ -107,6 +111,13 @@ Obsoletes: rubygem-passenger < 4.0.33
 Obsoletes: rubygem-passenger%{_isa} < 4.0.33
 Obsoletes: rubygem-passenger-native < 4.0.33
 Obsoletes: rubygem-passenger-native%{?_isa} < 4.0.33
+%if %{is_enterprise}
+Obsoletes: passenger
+Conflicts: passenger-devel
+Conflicts: passenger-doc
+Conflicts: passenger-native-libs
+Conflicts: mod_passenger
+%endif
 
 %description
 Phusion Passenger® is a web server and application server, designed to be fast, robust
@@ -114,15 +125,18 @@ and lightweight. It takes a lot of complexity out of deploying web apps, adds po
 enterprise-grade features that are useful in production, and makes administration much
 easier and less complex. It supports Ruby, Python, Node.js and Meteor.
 
-%package -n mod_passenger
+%package -n %{apache_module_package_name}
 Summary: Apache Module for Phusion Passenger
 Group: System Environment/Daemons
 BuildRequires:  httpd-devel
 Requires: httpd-mmn = %{_httpd_mmn}
 Requires: %{package_name} = %{version}-%{release}
+%if %{is_enterprise}
+Obsoletes: mod_passenger
+%endif
 License: Boost and BSD and BSD with advertising and MIT and zlib
 
-%description -n mod_passenger
+%description -n %{apache_module_package_name}
 This package contains the pluggable Apache server module for Phusion Passenger®.
 
 %package devel
@@ -132,6 +146,9 @@ Requires: %{package_name}%{?_isa} = %{version}-%{release}
 Provides: bundled(boost-devel) = %{bundled_boost_version}
 Obsoletes: rubygem-passenger-devel < 4.0.33
 Obsoletes: rubygem-passenger-devel%{?_isa} < 4.0.33
+%if %{is_enterprise}
+Obsoletes: passenger-devel
+%endif
 License: Boost and BSD and BSD with advertising and GPL+ and MIT and zlib
 
 %description devel
@@ -144,6 +161,9 @@ Summary: Phusion Passenger documentation
 Group: System Environment/Daemons
 Requires: %{package_name} = %{version}-%{release}
 Obsoletes: rubygem-passenger-doc < 4.0.33
+%if %{is_enterprise}
+Obsoletes: passenger-doc
+%endif
 BuildArch: noarch
 License: CC-BY-SA and MIT and (MIT or GPL+)
 
@@ -157,6 +177,9 @@ Requires: %{package_name}%{?_isa} = %{version}-%{release}
 Requires: ruby
 Obsoletes: rubygem-passenger-native-libs < 4.0.33
 Obsoletes: rubygem-passenger-native-libs%{?_isa} < 4.0.33
+%if %{is_enterprise}
+Obsoletes: passenger-native-libs
+%endif
 License: Boost and BSD and BSD with advertising and MIT and zlib
 %description native-libs
 This package contains Phusion Passenger® native extensions for Ruby.
@@ -305,7 +328,7 @@ export CCACHE_COMPRESS_LEVEL=3
 %{_datadir}/%{namespace}/include
 %{_libdir}/%{namespace}/common
 
-%files -n mod_passenger
+%files -n %{apache_module_package_name}
 %config(noreplace) %{_httpd_modconfdir}/*.conf
 %if "%{_httpd_modconfdir}" != "%{_httpd_confdir}"
     %config(noreplace) %{_httpd_confdir}/*.conf

@@ -8,12 +8,13 @@ NGINX_VERSION     = detect_nginx_version
 
 PASSENGER_RPM_NAME     = enterprise? ? "passenger-enterprise" : "passenger"
 PASSENGER_RPM_VERSION  = PASSENGER_VERSION
-PASSENGER_RPM_RELEASE  = 1
+PASSENGER_RPM_RELEASE  = enterprise? ? 2 : 1
 PASSENGER_TARBALL_NAME = enterprise? ? "passenger-enterprise-server" : "passenger"
-NGINX_RPM_NAME        = "nginx"
-NGINX_RPM_VERSION     = NGINX_VERSION
-NGINX_RPM_RELEASE     = 1
-SUPPORTED_DISTROS     = {
+PASSENGER_APACHE_MODULE_RPM_NAME = enterprise? ? "mod_passenger-enterprise" : "mod_passenger"
+NGINX_RPM_NAME         = "nginx"
+NGINX_RPM_VERSION      = NGINX_VERSION
+NGINX_RPM_RELEASE      = enterprise? ? 2 : 1
+SUPPORTED_DISTROS      = {
   "el6"    => { :mock_chroot_name => "epel-6", :name => "Enterprise Linux 6" },
   "amazon" => { :mock_chroot_name => "epel-6", :name => "Amazon Linux" }
 }
