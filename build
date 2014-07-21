@@ -9,9 +9,10 @@ PASSENGER_DIR=
 OUTPUT_DIR=
 DISTROS='el6,amazon'
 ARCHS='i386,x86_64'
+LOCAL_BUILD=false
 CONCURRENCY=1
 TASK=rpm:all
-CLEAN=true
+CLEAN=false
 CACHE_DIR=
 
 function usage()
@@ -24,24 +25,25 @@ function usage()
   echo
   echo "  -P PATH         Path to Phusion Passenger source directory"
   echo "  -o PATH         Directory to save build output to"
+  echo "  -c PATH         Directory to store cache files to"
   echo
   echo "Optional options:"
   echo "  -d DISTROS      Distributions to build for (default: $DISTROS)"
   echo "  -a ARCHS        Architectures to build for (default: $ARCHS)"
+  echo "  -L              Build for local distribution and architecture"
   echo "  -j CONCURRENCY  Build concurrency (default: $CONCURRENCY)"
   echo
   echo "  -t TASK         Build using specific Rake task (default: $TASK)"
   echo "  -T              List all Rake tasks (note: list depends on other options)"
   echo
   echo "  -l              Clean output directory before building RPMs"
-  echo "  -c PATH         Directory to store cache files to (default: $CACHE_DIR)"
 }
 
 function parse_options()
 {
   local OPTIND=1
   local opt
-  while getopts "p:P:o:d:a:j:t:Tlc:h" opt; do
+  while getopts "p:P:o:d:a:Lj:t:Tlc:h" opt; do
     case "$opt" in
     p)
       PASSENGER_DIR="$OPTARG/git"
@@ -59,6 +61,9 @@ function parse_options()
       ;;
     a)
       ARCHS="$OPTARG"
+      ;;
+    L)
+      LOCAL_BUILD=true
       ;;
     j)
       CONCURRENCY="$OPTARG"
@@ -114,6 +119,12 @@ trap cleanup EXIT
 parse_options "$@"
 APP_UID=`id -u`
 APP_GID=`id -g`
+
+if $LOCAL_BUILD; then
+  DISTROS=`"$SELFROOT/internal/get_distro_id"`
+  ARCHS=`"$SELFROOT/internal/get_distro_arch"`
+  echo "Building for local system: $DISTROS-$ARCHS"
+fi
 
 mkdir -p "$OUTPUT_DIR/log" "$CACHE_DIR/mock_cache" "$CACHE_DIR/mock_lib"
 rm -rf "$OUTPUT_DIR/log/*"
