@@ -7,4 +7,8 @@ if not os.path.isfile('/etc/mock/default.cfg'):
 
 vars = { 'config_opts': {} }
 execfile("/etc/mock/default.cfg", vars)
-print(vars['config_opts']['dist'])
+arch = vars['config_opts']['target_arch']
+if arch == 'i386' or arch == 'i586' or arch == 'i686':
+  print('i386')
+else:
+  print(arch)
