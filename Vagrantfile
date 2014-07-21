@@ -10,9 +10,19 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   config.vm.box_url = "https://oss-binaries.phusionpassenger.com/vagrant/boxes/ubuntu-12.04.3-amd64-vbox.box"
   config.ssh.forward_agent = true
 
+  passenger_path = File.absolute_path('../passenger', ROOT)
+  if File.directory?(passenger_path)
+    config.vm.synced_folder passenger_path, '/passenger'
+  end
+
+  passenger_enterprise_path = File.absolute_path('../commercial_passenger', ROOT)
+  if File.directory?(passenger_enterprise_path)
+    config.vm.synced_folder passenger_enterprise_path, '/passenger-enterprise'
+  end
+
   config.vm.provider :vmware_fusion do |f, override|
     override.vm.box_url = "https://oss-binaries.phusionpassenger.com/vagrant/boxes/ubuntu-12.04.3-amd64-vmwarefusion.box"
-    f.vmx["displayName"] = "baseimage-docker"
+    f.vmx["displayName"] = "passenger_rpm_automation"
   end
 
   # Add lxc-docker package

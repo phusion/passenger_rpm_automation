@@ -1,4 +1,5 @@
 #!/bin/bash
+# Test RPM packaging for the given git commit
 set -e
 source /scripts/_config
 
@@ -11,7 +12,8 @@ while getopts c:t:h opt; do
 		export GIT_TAG=$OPTARG
 		;;
 	h)
-		echo "Usage: ./invoke <PROJECT_DIR> build [options...]"
+		echo "Usage: ./invoke <PROJECT_DIR> test [options...]"
+		echo "Test RPM packaging."
 		echo
 		echo "Options:"
 		echo "  -c COMMIT    Use this specific git commit"
@@ -34,10 +36,5 @@ Defaults env_keep += "GEM_HOME"
 Defaults env_keep += "GEM_PATH"
 EOF
 sudo chmod 440 /etc/sudoers.d/gem_home
-
-# Test _preprocess_nginx_specfile, which depends on the Passenger sources
-/scripts/_preprocess_nginx_specfile . \
-	/rpm-nginx/nginx.spec.template \
-	> /tmp/nginx.spec
 
 exec ./dev/test_rpm_packaging.sh

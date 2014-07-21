@@ -13,6 +13,7 @@ while getopts c:t:h opt; do
 		;;
 	h)
 		echo "Usage: ./invoke <PROJECT_DIR> git_update [options...]"
+		echo "Clone or update git repo."
 		echo
 		echo "Options:"
 		echo "  -c COMMIT    Use this specific git commit"

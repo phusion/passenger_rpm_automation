@@ -1,4 +1,5 @@
 #!/bin/bash
+# Build RPM packages for the given git commit
 set -e
 source /scripts/_config
 
@@ -23,6 +24,7 @@ while getopts c:t:pnh opt; do
 		;;
 	h)
 		echo "Usage: ./invoke <PROJECT_DIR> build [options...]"
+		echo "Build RPM packages."
 		echo
 		echo "Options:"
 		echo "  -c COMMIT    Use this specific git commit"
@@ -55,13 +57,15 @@ function install_doctools()
 
 set -x
 
+shopt -s dotglob
 reset_stage_log
+rm -rf /project/rpms/*
+rm -rf ~/rpmbuild/RPMS/* ~/rpmbuild/SRPMS/*
 
 log_stage "Checking out git repo"
 /scripts/git_update
 cd /project/git
-passenger_version=`./bin/passenger-config --version`
-nginx_version=`ruby -Ilib -rphusion_passenger -e 'puts PhusionPassenger::PREFERRED_NGINX_VERSION'`
+export PASSENGER_DIR=/project/git
 
 if [[ "$BUILD_PASSENGER" = 1 ]]; then
 	log_stage "Building Passenger RPMs"
@@ -73,17 +77,16 @@ fi
 
 if [[ "$BUILD_NGINX" = 1 ]]; then
 	log_stage "Building Nginx RPMs"
-	cd ~/rpmbuild/SOURCES
-	cp /rpm-nginx/* .
-	/scripts/_preprocess_nginx_specfile /project/git \
-		nginx.spec.template \
-		> nginx.spec
-	wget http://nginx.org/download/nginx-$nginx_version.tar.gz.asc
-	rpmbuild -ba nginx.spec
+	mkdir /tmp/rpms
+	rake -f /scripts/_build_nginx.rake rpm:all
 fi
 
 log_stage "Saving RPMs"
-rm -rf /project/rpms
-mkdir /project/rpms
-cp ~/rpmbuild/RPMS/*/*.rpm /project/rpms/
-createrepo /project/rpms
+for DIR in pkg/*; do
+	if [[ -d "$DIR" ]]; then
+		name=`basename "$DIR"`
+		mkdir /project/rpms/$name
+		cp "$DIR"/*.rpm /project/rpms/$name/
+		createrepo /project/rpms/$name
+	fi
+done

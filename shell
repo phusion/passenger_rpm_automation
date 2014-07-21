@@ -1,14 +1,10 @@
 #!/bin/bash
 set -e
-BASE_DIR=`dirname "$0"`
-BASE_DIR=`cd "$BASE_DIR"; pwd`
-EXTRA_ARGS=""
-if [[ "$1" != "" ]]; then
-	EXTRA_ARGS="$EXTRA_ARGS -v $1/container/root:/project"
-fi
-exec docker run -privileged -rm -t -i \
-	-v "$BASE_DIR/scripts:/scripts:ro" \
-	-v "$BASE_DIR/rpm-nginx:/rpm-nginx:ro" \
-	$EXTRA_ARGS \
+SELFDIR=`dirname "$0"`
+SELFDIR=`cd "$SELFDIR" && pwd`
+exec docker run --rm --privileged -t -i \
+	-v "$SELFDIR:/system:ro" \
+	"$@" \
 	phusion/passenger_rpm_automation \
-	/scripts/_shell
+	/system/internal/my_init --skip-runit --skip-startup-files --quiet -- \
+	/bin/bash

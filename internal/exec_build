@@ -1,0 +1,22 @@
+#!/bin/bash
+set -e
+
+/system/internal/inituidgid
+
+if [[ ! -e /cache ]]; then
+  mkdir /cache
+  chown app: /cache
+fi
+
+rm -rf /var/lib/mock
+ln -s /cache/mock_lib /var/lib/mock
+rm -rf /var/cache/mock
+ln -s /cache/mock_cache /var/cache/mock
+chown root:mock /cache/mock_cache
+chown root:mock /cache/mock_lib
+
+export BUNDLE_GEMFILE=/home/app/Gemfile
+
+exec /system/internal/my_init --skip-runit --skip-startup-files --quiet -- \
+  /system/internal/setuser app \
+  bundle exec drake -j$CONCURRENCY -f /system/internal/build_tasks.rb $TASK --trace

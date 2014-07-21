@@ -1,0 +1,88 @@
+#!/bin/bash
+set -e
+
+SELFROOT=`dirname "$0"`
+SELFROOT=`cd "$SELFROOT" && pwd`
+
+GIT_DIR=
+GIT_URL=
+GIT_REF=origin/master
+
+function usage()
+{
+  echo "Usage: ./git_update [OPTIONS]"
+  echo "Update git sources for a project."
+  echo
+  echo "Required options:"
+  echo "  -p PATH         Path to a project"
+  echo
+  echo "  -P PATH         Path to a Git repo directory"
+  echo "  -u URL          Git URL"
+  echo
+  echo "Optional options:"
+  echo "  -r REF          Use this specific Git commit or tag"
+}
+
+function parse_options()
+{
+  local OPTIND=1
+  local opt
+  while getopts "p:P:u:r:h" opt; do
+    case "$opt" in
+    p)
+      GIT_DIR="$OPTARG/git"
+      GIT_URL=`cat "$OPTARG/git_url"`
+      ;;
+    P)
+      GIT_DIR="$OPTARG"
+      ;;
+    u)
+      GIT_URL="$OPTARG"
+      ;;
+    r)
+      GIT_REF="$OPTARG"
+      ;;
+    h)
+      usage
+      exit
+      ;;
+    *)
+      return 1
+      ;;
+    esac
+  done
+
+  if [[ "$GIT_DIR" = "" ]]; then
+    echo "Please specify a project using -p, or a Git repo using -P."
+    exit 1
+  fi
+  if [[ "$GIT_URL" = "" ]]; then
+    echo "Please specify a project using -p, or Git URL using -u."
+    exit 1
+  fi
+}
+
+function cleanup()
+{
+  local pids=`jobs -p`
+  set +e
+  if [[ "$pids" != "" ]]; then
+    kill $pids >/dev/null 2>/dev/null
+  fi
+}
+
+trap cleanup EXIT
+parse_options "$@"
+APP_UID=`id -u`
+APP_GID=`id -g`
+
+exec docker run --rm \
+  -v "$SELFROOT:/system:ro" \
+  -v "$GIT_DIR:/git" \
+  -e "APP_UID=$APP_UID" \
+  -e "APP_GID=$APP_GID" \
+  -e "GIT_URL=$GIT_URL" \
+  -e "GIT_REF=$GIT_REF" \
+  phusion/passenger_rpm_automation \
+  /system/internal/my_init --skip-runit --skip-startup-files --quiet -- \
+  /system/internal/git_update

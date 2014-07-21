@@ -1,0 +1,128 @@
+#!/bin/bash
+set -e
+
+SELFROOT=`dirname "$0"`
+SELFROOT=`cd "$SELFROOT" && pwd`
+TEMPDIR=
+
+PASSENGER_DIR=
+OUTPUT_DIR=
+DISTROS='el6,amazon'
+ARCHS='i386,x86_64'
+CONCURRENCY=1
+CACHE_DIR=
+TASK=rpm:all
+LIST_TASKS=false
+
+function usage()
+{
+  echo "Usage: ./build [OPTIONS]"
+  echo "Build RPMs for multiple distributions and architectures."
+  echo
+  echo "Required options:"
+  echo "  -p PATH         Path to a project"
+  echo
+  echo "  -P PATH         Path to Phusion Passenger source directory"
+  echo "  -o PATH         Directory to save build output to"
+  echo
+  echo "Optional options:"
+  echo "  -d DISTROS      Distributions to build for (default: $DISTROS)"
+  echo "  -a ARCHS        Architectures to build for (default: $ARCHS)"
+  echo "  -j CONCURRENCY  Build concurrency (default: $CONCURRENCY)"
+  echo
+  echo "  -t TASK         Build using specific Rake task (default: $TASK)"
+  echo "  -T              List all Rake tasks (note: list depends on other options)"
+  echo
+  echo "  -c PATH         Directory to store cache files to (default: $CACHE_DIR)"
+}
+
+function parse_options()
+{
+  local OPTIND=1
+  local opt
+  while getopts "p:P:o:d:a:j:t:TNc:h" opt; do
+    case "$opt" in
+    p)
+      PASSENGER_DIR="$OPTARG/git"
+      CACHE_DIR="$OPTARG/cache"
+      OUTPUT_DIR="$OPTARG/build"
+      ;;
+    P)
+      PASSENGER_DIR="$OPTARG"
+      ;;
+    o)
+      OUTPUT_DIR="$OPTARG"
+      ;;
+    d)
+      DISTROS="$OPTARG"
+      ;;
+    a)
+      ARCHS="$OPTARG"
+      ;;
+    j)
+      CONCURRENCY="$OPTARG"
+      ;;
+    t)
+      TASK="$OPTARG"
+      ;;
+    T)
+      TASK="-T"
+      ;;
+    c)
+      CACHE_DIR="$OPTARG"
+      ;;
+    h)
+      usage
+      exit
+      ;;
+    *)
+      return 1
+      ;;
+    esac
+  done
+
+  if [[ "$PASSENGER_DIR" = "" ]]; then
+    echo "Please specify a project using -p, or a path to the Phusion Passenger source directory using -P."
+    exit 1
+  fi
+  if [[ "$TASK" != "-T" ]]; then
+    if [[ "$OUTPUT_DIR" = "" ]]; then
+      echo "Please specify a project using -p, or an output directory using -o."
+      exit 1
+    fi
+    if [[ "$CACHE_DIR" = "" ]]; then
+      echo "Please specify a project using -p, or a cache directory using -c."
+      exit 1
+    fi
+  fi
+}
+
+function cleanup()
+{
+  local pids=`jobs -p`
+  set +e
+  if [[ "$pids" != "" ]]; then
+    kill $pids >/dev/null 2>/dev/null
+  fi
+}
+
+trap cleanup EXIT
+parse_options "$@"
+APP_UID=`id -u`
+APP_GID=`id -g`
+
+mkdir -p "$OUTPUT_DIR/log" "$CACHE_DIR/mock_cache" "$CACHE_DIR/mock_lib"
+rm -rf "$OUTPUT_DIR/log/*"
+exec docker run --rm --privileged \
+  -v "$SELFROOT:/system:ro" \
+  -v "$PASSENGER_DIR:/passenger" \
+  -v "$OUTPUT_DIR:/output" \
+  -v "$CACHE_DIR:/cache" \
+  -e "APP_UID=$APP_UID" \
+  -e "APP_GID=$APP_GID" \
+  -e "CONCURRENCY=$CONCURRENCY" \
+  -e "DISTROS=$DISTROS" \
+  -e "ARCHS=$ARCHS" \
+  -e "TASK=$TASK" \
+  phusion/passenger_rpm_automation \
+  /system/internal/exec_build

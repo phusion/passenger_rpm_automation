@@ -5,7 +5,15 @@ export SYSTEM_RUBYGEMS_DIR=`unset GEM_HOME; unset GEM_PATH; gem env | grep 'INST
 export GEM_HOME=/project/gems
 export GEM_PATH=$GEM_HOME:$SYSTEM_RUBYGEMS_DIR
 export PATH=/usr/lib64/ccache:$GEM_HOME/bin:$PATH
+export ALL_RPM_DISTROS="el6,epel-6,Enterprise Linux 6":"amazon2013,amazon2013,Amazon Linux"
+export ALL_RPM_ARCHS="i386 x86_64"
 export CONCURRENCY=4
 
 mkdir -p $CCACHE_DIR
 mkdir -p $GEM_HOME
+
+# The `create_project` script cannot initialize the correct owner and group
+# for the mock subdirectories because the host doesn't know the correct UID/GID,
+# so we do it here.
+sudo chown root:mock /var/lib/mock
+sudo chown root:mock /var/cache/mock

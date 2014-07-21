@@ -1,8 +1,0 @@
-#!/usr/bin/env ruby
-PASSENGER_DIR = File.expand_path(ARGV[0])
-$LOAD_PATH.unshift(PASSENGER_DIR)
-$LOAD_PATH.unshift("#{PASSENGER_DIR}/lib")
-def verbose(val); end
-require "build/basics"
-require "build/preprocessor"
-Preprocessor.new.start(ARGV[1], nil)

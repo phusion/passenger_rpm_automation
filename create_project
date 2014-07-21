@@ -15,22 +15,19 @@ if [[ "$fstype" == vmhgfs || "$fstype" == vboxfs ]]; then
 	echo "You cannot put the project dir in a VMWare or VirtualBox shared folder."
 	exit 1
 fi
-if [[ `whoami` != root ]]; then
-	echo "You must run this program as root."
-	exit 1
-fi
 
 set -x
 
-mkdir -p "$PROJECT_DIR"
-chown psg_rpm_automation:psg_rpm_automation_container "$PROJECT_DIR"
+mkdir "$PROJECT_DIR"
+mkdir "$PROJECT_DIR/git"
+mkdir "$PROJECT_DIR/cache"
+mkdir "$PROJECT_DIR/cache/root"
+mkdir "$PROJECT_DIR/cache/mock_lib"
+mkdir "$PROJECT_DIR/cache/mock_cache"
+mkdir "$PROJECT_DIR/repo"
+mkdir "$PROJECT_DIR/build"
+
+echo "$GIT_URL" > "$PROJECT_DIR/git_url"
+(cd "$PROJECT_DIR" && ln -s build/log/state.log state.log)
+
 chmod u=rwx,g=x,o= "$PROJECT_DIR"
-
-mkdir "$PROJECT_DIR/container"
-mkdir "$PROJECT_DIR/container/root"
-echo "$GIT_URL" > "$PROJECT_DIR/container/root/git_url"
-chown -R psg_rpm_automation_container:psg_rpm_automation_container "$PROJECT_DIR/container"
-chmod u=rwx,g=,o= "$PROJECT_DIR/container"
-
-mkdir "$PROJECT_DIR/log"
-chown psg_rpm_automation:psg_rpm_automation "$PROJECT_DIR/log"

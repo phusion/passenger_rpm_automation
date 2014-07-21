@@ -1,0 +1,98 @@
+#!/bin/bash
+set -e
+
+SELFROOT=`dirname "$0"`
+SELFROOT=`cd "$SELFROOT" && pwd`
+TEMPDIR=
+
+PACKAGE_DIR=
+SIGNING_KEY=
+PASSPHRASE_FILE=
+
+function usage()
+{
+  echo "Usage: ./sign [OPTIONS]"
+  echo "Sign RPMs."
+  echo
+  echo "Required options:"
+  echo "  -o PATH        Directory to RPMs"
+  echo "  -s KEY         Signing key to use"
+  echo "  -p PATH        File containing signing key passphrase"
+}
+
+function parse_options()
+{
+  local OPTIND=1
+  local opt
+  while getopts "o:s:p:h" opt; do
+    case "$opt" in
+    o)
+      PACKAGE_DIR="$OPTARG"
+      ;;
+    s)
+      SIGNING_KEY="$OPTARG"
+      ;;
+    p)
+      PASSPHRASE_FILE="$OPTARG"
+      ;;
+    h)
+      usage
+      exit
+      ;;
+    *)
+      return 1
+      ;;
+    esac
+  done
+
+  if [[ "$PACKAGE_DIR" = "" ]]; then
+    echo "Please specify a package directory using -o."
+    exit 1
+  fi
+  if [[ "$SIGNING_KEY" = "" ]]; then
+    echo "Please specify a signing key using -s."
+    exit 1
+  fi
+  if [[ "$PASSPHRASE_FILE" = "" ]]; then
+    echo "Please specify a passphrase file using -p."
+    exit 1
+  fi
+}
+
+function cleanup()
+{
+  local pids=`jobs -p`
+  set +e
+  if [[ "$pids" != "" ]]; then
+    kill $pids
+  fi
+  if [[ "$TEMPDIR" != "" ]]; then
+    rm -rf "$TEMPDIR"
+  fi
+}
+
+trap cleanup EXIT
+parse_options "$@"
+
+if ! gpg --list-keys "$SIGNING_KEY" >/dev/null 2>/dev/null; then
+  echo "ERROR: signing key $SIGNING_KEY not found."
+  exit 1
+fi
+
+APP_UID=`id -u`
+APP_GID=`id -g`
+TEMPDIR=`mktemp -d /tmp/passenger-rpm.XXXXXXXX`
+gpg --armor --export-secret-keys "$SIGNING_KEY" > "$TEMPDIR/signing_key"
+cat "$PASSPHRASE_FILE" > "$TEMPDIR/signing_passphrase"
+chmod 600 "$TEMPDIR"/*
+
+docker run --rm \
+  -v "$SELFROOT:/system:ro" \
+  -v "$TEMPDIR:/params:ro" \
+  -v "$PACKAGE_DIR:/packages" \
+  -e "APP_UID=$APP_UID" \
+  -e "APP_GID=$APP_GID" \
+  -e "SIGNING_KEY=$SIGNING_KEY" \
+  phusion/passenger_rpm_automation \
+  /system/internal/my_init --skip-runit --skip-startup-files --quiet -- \
+  /system/internal/sign_packages

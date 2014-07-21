@@ -1,3 +1,8 @@
+%global passenger_version <%= PASSENGER_VERSION %>
+%global package_name <%= NGINX_RPM_NAME %>
+%global package_version <%= NGINX_RPM_VERSION %>
+%global package_release <%= NGINX_RPM_RELEASE %>
+
 %global  _hardened_build     1
 %global  nginx_user          nginx
 %global  nginx_group         %{nginx_user}
@@ -8,17 +13,19 @@
 %global  nginx_logdir        %{_localstatedir}/log/nginx
 %global  nginx_webroot       %{nginx_datadir}/html
 
-%global  passenger_version   <%= VERSION_STRING %>
+%{!?ruby_sitelibdir: %global ruby_sitelibdir %(ruby -rrbconfig -e 'puts RbConfig::CONFIG["sitelibdir"]')}
+%global passenger_ruby_libdir %{ruby_sitelibdir}
+%global locations_ini %{passenger_ruby_libdir}/phusion_passenger/locations.ini
 
 # gperftools exist only on selected arches
 %ifarch %{ix86} x86_64 ppc ppc64 %{arm}
 %global  with_gperftools     1
 %endif
 
-Name:              nginx
+Name:              %{package_name}
 Epoch:             1
-Version:           <%= PREFERRED_NGINX_VERSION %>
-Release:           1%{?dist}
+Version:           %{package_version}
+Release:           %{package_release}%{?dist}
 
 Summary:           A high performance web server and reverse proxy server
 Group:             System Environment/Daemons
@@ -37,6 +44,7 @@ Source13:          nginx-upgrade
 Source14:          nginx-upgrade.8
 Source15:          nginx.init
 Source16:          nginx.sysconfig
+Source19:          passenger.conf
 Source100:         index.html
 Source101:         poweredby.png
 Source102:         nginx-logo.png
@@ -96,9 +104,6 @@ BuildRequires: rubygems
 BuildRequires: rubygems-devel
 BuildRequires: rubygem(rake) >= 0.8.1
 BuildRequires: rubygem(rack)
-BuildRequires: zlib-devel
-BuildRequires: pcre-devel
-BuildRequires: openssl-devel
 
 %description
 Nginx is a web server and a reverse proxy server for HTTP, SMTP, POP3 and
@@ -121,6 +126,7 @@ export EXTRA_CFLAGS=`echo "$EXTRA_CFLAGS" | sed 's|-O2|-O|g'`
 export EXTRA_CXXFLAGS=`echo "$EXTRA_CXXFLAGS" | sed 's|-O2|-O|g'`
 
 export USE_VENDORED_LIBEV=false
+export CACHING=false
 
 # Speed up ccache (reduce I/O) by lightly compressing things.
 # Always set these variables because pbuilder uses ccache transparently.
@@ -222,12 +228,16 @@ install -p -d -m 0755 %{buildroot}%{nginx_webroot}
 
 install -p -m 0644 %{SOURCE12} \
     %{buildroot}%{nginx_confdir}
+install -p -m 0644 %{SOURCE19} \
+    %{buildroot}%{nginx_confdir}/conf.d
 install -p -m 0644 %{SOURCE100} \
     %{buildroot}%{nginx_webroot}
 install -p -m 0644 %{SOURCE101} %{SOURCE102} \
     %{buildroot}%{nginx_webroot}
 install -p -m 0644 %{SOURCE103} %{SOURCE104} \
     %{buildroot}%{nginx_webroot}
+
+sed -i "s|PASSENGER_ROOT|%{locations_ini}|" %{buildroot}%{nginx_confdir}/conf.d/passenger.conf
 
 install -p -D -m 0644 %{_builddir}/nginx-%{version}/man/nginx.8 \
     %{buildroot}%{_mandir}/man8/nginx.8
@@ -293,6 +303,7 @@ fi
 %endif
 %dir %{nginx_confdir}
 %dir %{nginx_confdir}/conf.d
+%config(noreplace) %{nginx_confdir}/conf.d/passenger.conf
 %config(noreplace) %{nginx_confdir}/fastcgi.conf
 %config(noreplace) %{nginx_confdir}/fastcgi.conf.default
 %config(noreplace) %{nginx_confdir}/fastcgi_params

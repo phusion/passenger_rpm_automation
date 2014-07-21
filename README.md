@@ -1,6 +1,6 @@
 # Phusion Passenger RPM packaging automation
 
-This repository contains tools for automating the building of RPM packages for Phusion Passenger. These tools require Ubuntu 12.04 x86_64 and Docker. The main build environment is a CentOS 6.4 Docker container.
+This repository contains tools for automating the building of RPM packages for Phusion Passenger. These tools require Ubuntu 12.04 x86_64 and Docker. The main build environment is a CentOS 6 Docker container.
 
 ## Installation
 
@@ -28,36 +28,14 @@ Run this to login to the build environment container. This allows you to inspect
 
     ./shell
 
-You can also mount a specific project under the /project directory inside a container. Pass the project directory to `./shell`, like this:
-
-    ./shell /srv/passenger_rpm_automation/passenger
-
-### Testing the latest git commit
-
-Run this to fetch the latest git commit and to test its RPM packaging:
-
-    ./invoke /srv/passenger_rpm_automation/passenger test
+Any arguments you pass are passed to `docker run`.
 
 ### Building RPMs
 
-    ./invoke /srv/passenger_rpm_automation/passenger build
+To build RPMs for all supported distributions and all supported architectures, run:
 
-### Webhook
+    ./build -p PROJECT_DIR
 
-The webhook allows the RPM packaging to be tested every time a developer pushes to Github. To setup the webhook, deploy the web app in the `webhook` directory, and make it run under the user `psg_rpm_automation`.
+The RPMs will be saved to `PROJECT_DIR/build`.
 
-    server {
-        listen 80;
-        server_name webhook.somewhere.com;
-        root /srv/passenger_rpm_automation/webhook;
-        passenger_enabled on;
-        passenger_spawn_method direct;
-        passenger_min_instances 0;
-        passenger_user psg_rpm_automation;
-    }
-
-The webhook uses `at` to invoke the tests, so make sure `at` is installed. If the test fails then `at` will send an email to the `psg_rpm_automation` user, so make sure such emails are redirected to the email address you want. For example, you can put this in /etc/aliases:
-
-    psg_rpm_automation: your-email-address@server.com
-
-After editing the file, run `sudo newaliases`.
+You can also build RPMs for just a single distribution/architecture. Use the `-d` and `-a` parameters to do that. Pass `-h` for help.
