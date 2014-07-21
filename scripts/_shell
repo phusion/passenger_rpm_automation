@@ -1,9 +1,0 @@
-#!/bin/sh
-set -e
-if [[ ! -e /project ]]; then
-	mkdir /project
-	chown app:app /project
-	echo https://github.com/phusion/passenger.git > /project/git_url
-fi
-source /scripts/_config
-exec sudo -E -u app -H /bin/bash -l
