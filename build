@@ -10,9 +10,9 @@ OUTPUT_DIR=
 DISTROS='el6,amazon'
 ARCHS='i386,x86_64'
 CONCURRENCY=1
-CACHE_DIR=
 TASK=rpm:all
-LIST_TASKS=false
+CLEAN=true
+CACHE_DIR=
 
 function usage()
 {
@@ -33,6 +33,7 @@ function usage()
   echo "  -t TASK         Build using specific Rake task (default: $TASK)"
   echo "  -T              List all Rake tasks (note: list depends on other options)"
   echo
+  echo "  -l              Clean output directory before building RPMs"
   echo "  -c PATH         Directory to store cache files to (default: $CACHE_DIR)"
 }
 
@@ -40,7 +41,7 @@ function parse_options()
 {
   local OPTIND=1
   local opt
-  while getopts "p:P:o:d:a:j:t:TNc:h" opt; do
+  while getopts "p:P:o:d:a:j:t:Tlc:h" opt; do
     case "$opt" in
     p)
       PASSENGER_DIR="$OPTARG/git"
@@ -67,6 +68,9 @@ function parse_options()
       ;;
     T)
       TASK="-T"
+      ;;
+    l)
+      CLEAN=true
       ;;
     c)
       CACHE_DIR="$OPTARG"
@@ -113,6 +117,10 @@ APP_GID=`id -g`
 
 mkdir -p "$OUTPUT_DIR/log" "$CACHE_DIR/mock_cache" "$CACHE_DIR/mock_lib"
 rm -rf "$OUTPUT_DIR/log/*"
+if $CLEAN; then
+  rm -rf "$OUTPUT_DIR"/*-*
+fi
+
 exec docker run --rm --privileged \
   -v "$SELFROOT:/system:ro" \
   -v "$PASSENGER_DIR:/passenger" \
