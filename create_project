@@ -30,4 +30,4 @@ mkdir "$PROJECT_DIR/build"
 echo "$GIT_URL" > "$PROJECT_DIR/git_url"
 (cd "$PROJECT_DIR" && ln -s build/log/state.log state.log)
 
-chmod u=rwx,g=x,o= "$PROJECT_DIR"
+chmod u=rwx,g=x,o= "$PROJECT_DIR" "$PROJECT_DIR/cache"
