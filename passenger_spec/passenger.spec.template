@@ -8,7 +8,7 @@
 %global namespace <%= PhusionPassenger::GLOBAL_NAMESPACE_DIRNAME %>
 %global nginx_version <%= NGINX_RPM_VERSION %>
 %global bundled_boost_version 1.54.0
-%global is_enterprise <%= enterprise? %>
+%global is_enterprise <%= enterprise? ? 1 : 0 %>
 
 %if 0%{?fc18}
 %global rubyabi 1.9.1
