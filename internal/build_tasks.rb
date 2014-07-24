@@ -28,6 +28,7 @@ MOCK_FLAGS      = ""
 check_distros_supported!
 check_archs_supported!
 clean_bundler_env!
+TrackingDatabase.instance   # Initialize singleton.
 STDOUT.sync = STDERR.sync = true
 ENV['CACHING'] = 'false'
 
@@ -218,4 +219,13 @@ namespace :rpm do
       end
     end
   end
+end
+
+
+##### Misc #####
+
+task :finish do
+  puts
+  puts "Finished"
+  dump_tracking_database
 end

@@ -11,10 +11,12 @@ class TrackingDatabase
   include Singleton
 
   attr_accessor :category_list
+  attr_reader :start_time
 
   def initialize
     @category_list = []
     @categories = {}
+    @start_time = Time.now
   end
 
   def register_category(name, description)
@@ -31,6 +33,10 @@ class TrackingDatabase
     @category_list.each do |category|
       yield category
     end
+  end
+
+  def duration_description
+    distance_of_time_in_hours_and_minutes(@start_time, Time.now)
   end
 end
 
@@ -270,7 +276,9 @@ end
 
 def dump_tracking_database
   io = StringIO.new
-  io.puts format_time(Time.now)
+  io.puts "Current time: #{format_time(Time.now)}"
+  io.puts "Start time  : #{format_time(TrackingDatabase.instance.start_time)}"
+  io.puts "Duration    : #{TrackingDatabase.instance.duration_description}"
   io.puts
   TrackingDatabase.instance.each_category do |category|
     io.puts "#{category.description}:"

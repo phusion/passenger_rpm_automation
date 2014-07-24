@@ -299,10 +299,6 @@ export CCACHE_COMPRESS_LEVEL=3
 # rake test:cxx || true
 
 %files
-%doc "%{_docdir}/%{namespace}/Users guide.html"
-%doc "%{_docdir}/%{namespace}/Users guide Nginx.html"
-%doc "%{_docdir}/%{namespace}/Users guide Apache.html"
-%doc "%{_docdir}/%{namespace}/Users guide Standalone.html"
 %{_bindir}
 %{_sbindir}
 %{_libdir}/%{namespace}/PassengerWebHelper
@@ -320,7 +316,7 @@ export CCACHE_COMPRESS_LEVEL=3
 %{passenger_ruby_libdir}
 
 %files doc
-%doc %{_docdir}/%{namespace}
+%{_docdir}/%{namespace}
 
 %files devel
 %{_datadir}/%{namespace}/ngx_http_passenger_module
@@ -333,7 +329,6 @@ export CCACHE_COMPRESS_LEVEL=3
 %if "%{_httpd_modconfdir}" != "%{_httpd_confdir}"
     %config(noreplace) %{_httpd_confdir}/*.conf
 %endif
-%doc "%{_docdir}/%{namespace}/Users guide Apache.html"
 %{_httpd_moddir}/mod_passenger.so
 
 %files native-libs
