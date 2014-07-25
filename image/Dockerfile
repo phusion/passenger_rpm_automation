@@ -12,6 +12,7 @@ RUN rpm -Uvh http://mirror.overthewire.com.au/pub/epel/6/i386/epel-release-6-8.n
 	yum install -y --skip-broken --enablerepo centosplus libev-devel pcre-devel rubygem-rack source-highlight && \
 	yum install -y --skip-broken --enablerepo centosplus apr-devel apr-util-devel which GeoIP-devel && \
 	yum install -y --skip-broken --enablerepo centosplus gd-devel gperftools-devel perl-devel perl-ExtUtils-Embed && \
+	yum install -y --skip-broken --enablerepo centosplus nodejs010-nodejs nodejs010-npm && \
 	gem install nokogiri --no-rdoc --no-ri -v 1.5.9 && \
 	gem install bundler mizuho bluecloth drake --no-rdoc --no-ri && \
 	git clone https://github.com/phusion/phusion-server-tools.git /tools && \
@@ -23,7 +24,8 @@ RUN rpm -Uvh http://mirror.overthewire.com.au/pub/epel/6/i386/epel-release-6-8.n
 	chmod 440 /etc/sudoers.d/app && \
 	sudo -u app -H rpmdev-setuptree && \
 	yum clean all && \
-	mkdir -p /etc/container_environment /etc/workaround-docker-2267
+	mkdir -p /etc/container_environment /etc/workaround-docker-2267 && \
+	ln -s /etc/workaround-docker-2267 /cte
 ADD amazon2013-i386.cfg /etc/mock/amazon2013-i386.cfg
 ADD amazon2013-x86_64.cfg /etc/mock/amazon2013-x86_64.cfg
 ADD site-defaults.cfg /etc/mock/site-defaults.cfg
