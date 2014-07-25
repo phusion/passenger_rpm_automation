@@ -24,6 +24,16 @@ function create_group()
 
 set -x
 
+wget -q -O - http://pkg.jenkins-ci.org/debian/jenkins-ci.org.key | sudo apt-key add -
+echo deb http://pkg.jenkins-ci.org/debian binary/ | sudo tee /etc/apt/sources.list.d/jenkins
+sudo apt-get update
+sudo apt-get install -y jenkins acl
+sudo usermod -a -G passenger_ci,docker jenkins
+if [[ -e /vagrant ]]; then
+  sudo service jenkins stop
+  sudo ln -s /vagrant /srv/passenger_rpm_automation
+fi
+
 create_user psg_rpm_automation "Passenger RPM automation" 2466
 
 create_group passenger_ci 2450
@@ -33,3 +43,11 @@ sudo touch /var/cache/passenger_ci/lock
 sudo chown -R root:passenger_ci /var/cache/passenger_ci
 sudo chmod 770 /var/cache/passenger_ci
 sudo chmod 660 /var/cache/passenger_ci/lock
+
+sudo mkdir -p /etc/passenger_rpm_automation
+sudo touch /etc/passenger_rpm_automation/signing_passphrase
+sudo chown jenkins: /etc/passenger_rpm_automation/signing_passphrase
+sudo chmod 600 /etc/passenger_rpm_automation/signing_passphrase
+if [[ ! -e signing_passphrase ]]; then
+  sudo ln -s /etc/passenger_rpm_automation/signing_passphrase signing_passphrase
+fi

@@ -1,0 +1,47 @@
+#!/bin/bash
+set -e
+
+function run()
+{
+  echo "$ $@"
+  "$@"
+}
+
+function cleanup()
+{
+  set +e
+  local pids=`jobs -p`
+  if [[ "$pids" != "" ]]; then
+    kill $pids >/dev/null 2>/dev/null
+  fi
+}
+
+if [[ "$PASSENGER_ROOT" = "" ]]; then
+  echo "Please set PASSENGER_ROOT."
+  exit 1
+fi
+if [[ "$PROJECT_NAME" = "" ]]; then
+  echo "Please set PROJECT_NAME."
+  exit 1
+fi
+if [[ `whoami` != jenkins ]]; then
+  echo "This script may only be run from Jenkins."
+  exit 1
+fi
+
+SELFROOT=`dirname "$0"`
+SELFROOT=`cd "$SELFROOT" && pwd`
+CONCURRENCY=${CONCURRENCY:-1}
+
+echo "$ cd $SELFROOT"
+cd "$SELFROOT"
+
+run ./build \
+  -p "/srv/passenger_rpm_automation/$PROJECT_NAME" \
+  -P "$PASSENGER_ROOT" \
+  -j "$CONCURRENCY" \
+  -l
+run ./repo_update \
+  -p "/srv/passenger_rpm_automation/$PROJECT_NAME" \
+  -s auto-software-signing@phusion.nl \
+  -x /etc/passenger_rpm_automation/signing_passphrase

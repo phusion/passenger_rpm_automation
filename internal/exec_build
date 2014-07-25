@@ -1,30 +1,38 @@
 #!/bin/bash
 set -e
 
-/system/internal/inituidgid
+function verbose_run()
+{
+  if $VERBOSE; then
+    echo "$ $@"
+  fi
+  "$@"
+}
+
+verbose_run /system/internal/inituidgid
 
 if [[ ! -e /cache ]]; then
-  mkdir /cache
-  chown app: /cache
+  verbose_run mkdir /cache
+  verbose_run chown app: /cache
 fi
 
-/system/internal/setuser app \
+verbose_run /system/internal/setuser app \
   mkdir -p "/output/log" "/cache/mock_cache" "/cache/mock_lib"
-/system/internal/setuser app rm -rf /output/log/*
+verbose_run /system/internal/setuser app rm -rf /output/log/*
 if $CLEAN; then
-  /system/internal/setuser app rm -rf /output/*-*
+  verbose_run /system/internal/setuser app rm -rf /output/*-*
 fi
 
-rm -rf /var/lib/mock
-ln -s /cache/mock_lib /var/lib/mock
-rm -rf /var/cache/mock
-ln -s /cache/mock_cache /var/cache/mock
-chown root:mock /cache/mock_cache
-chown root:mock /cache/mock_lib
+verbose_run rm -rf /var/lib/mock
+verbose_run ln -s /cache/mock_lib /var/lib/mock
+verbose_run rm -rf /var/cache/mock
+verbose_run ln -s /cache/mock_cache /var/cache/mock
+verbose_run chown root:mock /cache/mock_cache
+verbose_run chown root:mock /cache/mock_lib
 
 export BUNDLE_GEMFILE=/home/app/Gemfile
 
-exec /system/internal/my_init --skip-runit --skip-startup-files --quiet -- \
+verbose_run exec /system/internal/my_init --skip-runit --skip-startup-files --quiet -- \
   /system/internal/setuser app \
   bundle exec drake -j$CONCURRENCY -f /system/internal/build_tasks.rb \
   $TASK finish --trace

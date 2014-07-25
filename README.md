@@ -1,6 +1,6 @@
 # Phusion Passenger RPM packaging automation
 
-This repository contains tools for automating the building of RPM packages for Phusion Passenger. These tools require Ubuntu 12.04 x86_64 and Docker. The main build environment is a CentOS 6 Docker container.
+This repository contains tools for automating the building of RPM packages for Phusion Passenger. These tools require Ubuntu 12.04 x86_64, Docker and Jenkins. The main build environment is a CentOS 6 Docker container.
 
 ## Installation
 

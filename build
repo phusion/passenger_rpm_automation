@@ -15,6 +15,7 @@ CONCURRENCY=1
 TASK=rpm:all
 CLEAN=false
 CACHE_DIR=
+VERBOSE=false
 
 function usage()
 {
@@ -38,15 +39,15 @@ function usage()
   echo "  -T              List all Rake tasks (note: list depends on other options)"
   echo
   echo "  -l              Clean output directory before building RPMs"
-  echo
   echo "  -S              Directory to passenger_rpm_automation on the Docker host"
+  echo "  -V              Verbose output"
 }
 
 function parse_options()
 {
   local OPTIND=1
   local opt
-  while getopts "p:P:o:d:a:Lj:t:Tlc:S:h" opt; do
+  while getopts "p:P:o:d:a:Lj:t:Tlc:S:Vh" opt; do
     case "$opt" in
     p)
       PASSENGER_DIR="$OPTARG/git"
@@ -86,6 +87,9 @@ function parse_options()
     S)
       SELFROOT_ON_DOCKER_HOST="$OPTARG"
       ;;
+    V)
+      VERBOSE=true
+      ;;
     h)
       usage
       exit
@@ -112,6 +116,14 @@ function parse_options()
   fi
 }
 
+function verbose_run()
+{
+  if $VERBOSE; then
+    echo "$ $@"
+  fi
+  "$@"
+}
+
 function cleanup()
 {
   local pids=`jobs -p`
@@ -133,10 +145,10 @@ if $LOCAL_BUILD; then
 fi
 
 if [[ "$SELFROOT_ON_DOCKER_HOST" = "$SELFROOT" ]]; then
-  mkdir -p "$OUTPUT_DIR"
+  verbose_run mkdir -p "$OUTPUT_DIR"
 fi
 
-exec docker run --rm --privileged \
+verbose_run exec docker run --rm --privileged \
   -v "$SELFROOT_ON_DOCKER_HOST:/system:ro" \
   -v "$PASSENGER_DIR:/passenger" \
   -v "$OUTPUT_DIR:/output" \
@@ -148,5 +160,6 @@ exec docker run --rm --privileged \
   -e "ARCHS=$ARCHS" \
   -e "TASK=$TASK" \
   -e "CLEAN=$CLEAN" \
+  -e "VERBOSE=$VERBOSE" \
   phusion/passenger_rpm_automation \
   /system/internal/exec_build
