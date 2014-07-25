@@ -3,6 +3,7 @@ set -e
 
 SELFROOT=`dirname "$0"`
 SELFROOT=`cd "$SELFROOT" && pwd`
+SELFROOT_ON_DOCKER_HOST="$SELFROOT"
 TEMPDIR=
 
 PASSENGER_DIR=
@@ -37,13 +38,15 @@ function usage()
   echo "  -T              List all Rake tasks (note: list depends on other options)"
   echo
   echo "  -l              Clean output directory before building RPMs"
+  echo
+  echo "  -S              Directory to passenger_rpm_automation on the Docker host"
 }
 
 function parse_options()
 {
   local OPTIND=1
   local opt
-  while getopts "p:P:o:d:a:Lj:t:Tlc:h" opt; do
+  while getopts "p:P:o:d:a:Lj:t:Tlc:S:h" opt; do
     case "$opt" in
     p)
       PASSENGER_DIR="$OPTARG/git"
@@ -79,6 +82,9 @@ function parse_options()
       ;;
     c)
       CACHE_DIR="$OPTARG"
+      ;;
+    S)
+      SELFROOT_ON_DOCKER_HOST="$OPTARG"
       ;;
     h)
       usage
@@ -127,7 +133,7 @@ if $LOCAL_BUILD; then
 fi
 
 exec docker run --rm --privileged \
-  -v "$SELFROOT:/system:ro" \
+  -v "$SELFROOT_ON_DOCKER_HOST:/system:ro" \
   -v "$PASSENGER_DIR:/passenger" \
   -v "$OUTPUT_DIR:/output" \
   -v "$CACHE_DIR:/cache" \
