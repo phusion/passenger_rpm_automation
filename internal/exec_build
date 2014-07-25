@@ -8,6 +8,13 @@ if [[ ! -e /cache ]]; then
   chown app: /cache
 fi
 
+/system/internal/setuser app \
+  mkdir -p "/output/log" "/cache/mock_cache" "/cache/mock_lib"
+/system/internal/setuser app rm -rf /output/log/*
+if $CLEAN; then
+  /system/internal/setuser app rm -rf /output/*-*
+fi
+
 rm -rf /var/lib/mock
 ln -s /cache/mock_lib /var/lib/mock
 rm -rf /var/cache/mock

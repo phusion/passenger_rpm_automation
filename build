@@ -126,12 +126,6 @@ if $LOCAL_BUILD; then
   echo "Building for local system: $DISTROS-$ARCHS"
 fi
 
-mkdir -p "$OUTPUT_DIR/log" "$CACHE_DIR/mock_cache" "$CACHE_DIR/mock_lib"
-rm -rf "$OUTPUT_DIR/log/*"
-if $CLEAN; then
-  rm -rf "$OUTPUT_DIR"/*-*
-fi
-
 exec docker run --rm --privileged \
   -v "$SELFROOT:/system:ro" \
   -v "$PASSENGER_DIR:/passenger" \
@@ -143,5 +137,6 @@ exec docker run --rm --privileged \
   -e "DISTROS=$DISTROS" \
   -e "ARCHS=$ARCHS" \
   -e "TASK=$TASK" \
+  -e "CLEAN=$CLEAN" \
   phusion/passenger_rpm_automation \
   /system/internal/exec_build
