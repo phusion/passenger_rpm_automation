@@ -31,6 +31,7 @@ sudo apt-get install -y jenkins acl git ca-certificates ruby
 sudo usermod -a -G passenger_ci,docker jenkins
 if [[ -e /vagrant ]]; then
   sudo service jenkins stop
+  sudo update-rc.d -f jenkins disable
   if [[ ! -e /srv/passenger_rpm_automation ]]; then
     sudo ln -s /vagrant /srv/passenger_rpm_automation
   fi
