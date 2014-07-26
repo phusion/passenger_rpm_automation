@@ -37,5 +37,5 @@ echo "$GIT_URL" > "$PROJECT_DIR/git_url"
 
 chown -R jenkins: "$PROJECT_DIR"
 chmod u=rwx,g=x,o= "$PROJECT_DIR" "$PROJECT_DIR/cache"
-setfacl -m u:www-data:x "$PROJECT_DIR" "$PROJECT_DIR/repo"
-setfacl -d -m u:www-data:x "$PROJECT_DIR/repo"
+setfacl -m u:www-data:rx "$PROJECT_DIR" "$PROJECT_DIR/repo"
+setfacl -d -m u:www-data:rx "$PROJECT_DIR/repo"
