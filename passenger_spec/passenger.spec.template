@@ -14,9 +14,11 @@
 # Fedora <= 18 and RHEL <= 6 used the rubyabi requirement.
 # This is gone in later versions.
 %if 0%{?fc18}
+%global uses_rubyabi 1
 %global rubyabi 1.9.1
 %endif
 %if 0%{?el6}
+%global uses_rubyabi 1
 %global rubyabi 1.8
 %endif
 
@@ -77,7 +79,7 @@ Requires: rubygems
 Requires: rubygem(daemon_controller) >= 1.1.0
 Requires: rubygem(rack)
 Requires: rubygem(rake)
-%if 0%{?rubyabi}
+%if 0%{?uses_rubyabi}
 Requires: ruby(abi) = %{rubyabi}
 %else
 Requires: ruby(release)
