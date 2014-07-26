@@ -10,6 +10,7 @@ SUPPORTED_ARCHS = ['i386', 'x86_64']
 class TrackingDatabase
   include Singleton
 
+  attr_accessor :thread
   attr_accessor :category_list
   attr_reader :start_time
 
@@ -17,6 +18,7 @@ class TrackingDatabase
     @category_list = []
     @categories = {}
     @start_time = Time.now
+    @finished = false
   end
 
   def register_category(name, description)
@@ -34,6 +36,27 @@ class TrackingDatabase
       yield category
     end
   end
+
+  def set_finished!
+    @finished = false
+  end
+
+  def finished?
+    @finished
+  end
+
+  def has_errors?
+    each_category do |category|
+      category.each_task do |task|
+        if task.state == :error
+          return true
+        end
+      end
+    end
+    false
+  end
+
+  #### Thread-safe methods ####
 
   def duration_description
     distance_of_time_in_hours_and_minutes(@start_time, Time.now)
@@ -216,6 +239,19 @@ def enterprise?
     PhusionPassenger::PASSENGER_IS_ENTERPRISE
 end
 
+def initialize_tracking_database!
+  TrackingDatabase.instance
+  TrackingDatabase.instance.thread = Thread.new do
+    Thread.current.abort_on_exception = true
+    while true
+      sleep 5
+      MUTEX.synchronize do
+        dump_tracking_database(false)
+      end
+    end
+  end
+end
+
 def check_distros_supported!
   DISTROS.each do |distro_id|
     if !SUPPORTED_DISTROS[distro_id]
@@ -274,11 +310,18 @@ def track_task(category_name, task_name)
   end
 end
 
-def dump_tracking_database
+def dump_tracking_database(print_to_stdout = true)
   io = StringIO.new
   io.puts "Current time: #{format_time(Time.now)}"
   io.puts "Start time  : #{format_time(TrackingDatabase.instance.start_time)}"
   io.puts "Duration    : #{TrackingDatabase.instance.duration_description}"
+  if TrackingDatabase.instance.finished?
+    io.puts "*** FINISHED ***"
+  end
+  if TrackingDatabase.instance.has_errors?
+    io.puts "*** THERE WERE ERRORS ***"
+  end
+
   io.puts
   TrackingDatabase.instance.each_category do |category|
     io.puts "#{category.description}:"
@@ -296,9 +339,12 @@ def dump_tracking_database
     io.puts
   end
 
-  puts "---------------------------------------------"
-  puts io.string
-  puts "---------------------------------------------"
+  if print_to_stdout
+    puts "---------------------------------------------"
+    puts io.string
+    puts "---------------------------------------------"
+  end
+
   File.open("/output/log/state.log", "w") do |f|
     f.write(io.string)
   end

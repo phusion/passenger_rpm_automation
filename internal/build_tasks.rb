@@ -27,6 +27,7 @@ RPM_SPECS_DIR   = "#{RPMBUILD_ROOT}/SPECS"
 RPM_SRPMS_DIR   = "#{RPMBUILD_ROOT}/SRPMS"
 MOCK_FLAGS      = ""
 
+initialize_tracking_database!
 check_distros_supported!
 check_archs_supported!
 clean_bundler_env!
@@ -231,5 +232,8 @@ end
 task :finish do
   puts
   puts "Finished"
-  dump_tracking_database
+  MUTEX.synchronize do
+    TrackingDatabase.instance.set_finished!
+    dump_tracking_database
+  end
 end
