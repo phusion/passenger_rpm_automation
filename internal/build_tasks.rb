@@ -16,7 +16,8 @@ NGINX_RPM_VERSION      = NGINX_VERSION
 NGINX_RPM_RELEASE      = enterprise? ? "2.p#{PASSENGER_VERSION}" : "1.p#{PASSENGER_VERSION}"
 SUPPORTED_DISTROS      = {
   "el6"    => { :mock_chroot_name => "epel-6", :name => "Enterprise Linux 6" },
-  "el7"    => { :mock_chroot_name => "epel-7", :name => "Enterprise Linux 7" },
+  # We don't support RHEL 7 yet because EPEL 7 hasn't yet packaged rubygem-rack.
+  #"el7"    => { :mock_chroot_name => "epel-7", :name => "Enterprise Linux 7" },
   "amazon" => { :mock_chroot_name => "epel-6", :name => "Amazon Linux" }
 }
 
