@@ -9,6 +9,7 @@
 %global nginx_version <%= NGINX_RPM_VERSION %>
 %global bundled_boost_version 1.54.0
 %global is_enterprise <%= enterprise? ? 1 : 0 %>
+%global release_dist .<%= @distribution %>
 
 %if 0%{?fc18}
 %global rubyabi 1.9.1
@@ -24,10 +25,10 @@
 %{!?gem_extdir: %global gem_extdir %{gem_instdir}/extdir}
 
 %{!?_httpd_mmn: %{expand: %%global _httpd_mmn %%(cat %{_includedir}/httpd/.mmn 2>/dev/null || echo missing-httpd-devel)}}
-%{!?_httpd_confdir:    %{expand: %%global _httpd_confdir    %%{_sysconfdir}/httpd/conf.d}}
+%{!?_httpd_confdir:     %{expand: %%global _httpd_confdir     %%{_sysconfdir}/httpd/conf.d}}
 # /etc/httpd/conf.d with httpd < 2.4 and defined as /etc/httpd/conf.modules.d with httpd >= 2.4
-%{!?_httpd_modconfdir: %{expand: %%global _httpd_modconfdir %%{_sysconfdir}/httpd/conf.d}}
-%{!?_httpd_moddir:    %{expand: %%global _httpd_moddir    %%{_libdir}/httpd/modules}}
+%{!?_httpd_modconfdir:  %{expand: %%global _httpd_modconfdir  %%{_sysconfdir}/httpd/conf.d}}
+%{!?_httpd_moddir:      %{expand: %%global _httpd_moddir      %%{_libdir}/httpd/modules}}
 
 %global ruby_dir_version %(ruby -rrbconfig -e 'puts RbConfig::CONFIG["ruby_version"]')
 %global ruby_arch_name %(ruby -rrbconfig -e 'puts RbConfig::CONFIG["arch"]')
@@ -40,7 +41,7 @@
 Summary: Phusion Passenger application server
 Name: %{package_name}
 Version: %{package_version}
-Release: %{package_release}%{?dist}
+Release: %{package_release}%{?release_dist}
 Group: System Environment/Daemons
 # Passenger code uses MIT license.
 # Bundled(Boost) uses Boost Software License

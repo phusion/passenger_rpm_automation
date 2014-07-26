@@ -10,7 +10,7 @@ PASSENGER_RPM_NAME     = enterprise? ? "passenger-enterprise" : "passenger"
 PASSENGER_RPM_VERSION  = PASSENGER_VERSION
 PASSENGER_RPM_RELEASE  = enterprise? ? 2 : 1
 PASSENGER_TARBALL_NAME = enterprise? ? "passenger-enterprise-server" : "passenger"
-PASSENGER_APACHE_MODULE_RPM_NAME = enterprise? ? "mod_passenger-enterprise" : "mod_passenger"
+PASSENGER_APACHE_MODULE_RPM_NAME = enterprise? ? "mod_passenger_enterprise" : "mod_passenger"
 NGINX_RPM_NAME         = "nginx"
 NGINX_RPM_VERSION      = NGINX_VERSION
 NGINX_RPM_RELEASE      = enterprise? ? 2 : 1
@@ -105,7 +105,8 @@ namespace :srpm do
         task.log "Preprocessing specfile"
         begin
           Preprocessor.new.start("/system/passenger_spec/passenger.spec.template",
-            spec_target_file)
+            spec_target_file,
+            :distribution => distro_id)
         rescue Exception => e
           task.log "Specfile preprocessing failed"
           raise e
@@ -141,7 +142,8 @@ namespace :srpm do
         task.log "Preprocessing specfile"
         begin
           Preprocessor.new.start("/system/nginx_spec/nginx.spec.template",
-            spec_target_file)
+            spec_target_file,
+            :distribution => distro_id)
         rescue Exception => e
           task.log "Specfile preprocessing failed"
           raise e
