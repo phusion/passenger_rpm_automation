@@ -135,6 +135,11 @@ function cleanup()
 
 trap cleanup EXIT
 parse_options "$@"
+if [[ `whoami` != jenkins ]]; then
+  echo "This script may only be run from Jenkins."
+  exit 1
+fi
+
 APP_UID=`id -u`
 APP_GID=`id -g`
 
