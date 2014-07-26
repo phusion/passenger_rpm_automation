@@ -120,16 +120,16 @@ class TrackingTask
   end
 
   def elapsed
-    if @start_time && @end_time
-      @end_time - @start_time
+    if @start_time
+      (@end_time || Time.now) - @start_time
     else
       nil
     end
   end
 
   def duration_description
-    if @start_time && @end_time
-      distance_of_time_in_hours_and_minutes(@start_time, @end_time)
+    if @start_time
+      distance_of_time_in_hours_and_minutes(@start_time, @end_time || Time.now)
     else
       nil
     end
