@@ -11,10 +11,11 @@
 %global is_enterprise <%= enterprise? ? 1 : 0 %>
 %global release_dist .<%= @distribution %>
 
+# Fedora <= 18 and RHEL <= 6 used the rubyabi requirement.
+# This is gone in later versions.
 %if 0%{?fc18}
 %global rubyabi 1.9.1
 %endif
-
 %if 0%{?el6}
 %global rubyabi 1.8
 %endif
@@ -76,21 +77,21 @@ Requires: rubygems
 Requires: rubygem(daemon_controller) >= 1.1.0
 Requires: rubygem(rack)
 Requires: rubygem(rake)
-%if 0%{?fedora} >= 19
-Requires: ruby(release)
-%else
+%if 0%{?rubyabi}
 Requires: ruby(abi) = %{rubyabi}
+%else
+Requires: ruby(release)
 %endif
 
 %if 0%{?rhel} >= 6 || 0%{?fedora} >= 15
-BuildRequires:  libcurl-devel
+BuildRequires: libcurl-devel
 %else
-BuildRequires:  curl-devel
+BuildRequires: curl-devel
 %endif
 
 %if 0%{?rhel} < 6 && 0%{?fedora} <= 16
 Requires: rubygem(fastthread) >= 1.0.1
-BuildRequires:  rubygem(fastthread) >= 1.0.1
+BuildRequires: rubygem(fastthread) >= 1.0.1
 %endif
 
 BuildRequires: httpd-devel
