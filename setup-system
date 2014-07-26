@@ -25,13 +25,15 @@ function create_group()
 set -x
 
 wget -q -O - http://pkg.jenkins-ci.org/debian/jenkins-ci.org.key | sudo apt-key add -
-echo deb http://pkg.jenkins-ci.org/debian binary/ | sudo tee /etc/apt/sources.list.d/jenkins
+echo deb http://pkg.jenkins-ci.org/debian binary/ | sudo tee /etc/apt/sources.list.d/jenkins.list
 sudo apt-get update
-sudo apt-get install -y jenkins acl
+sudo apt-get install -y jenkins acl git ca-certificates ruby
 sudo usermod -a -G passenger_ci,docker jenkins
 if [[ -e /vagrant ]]; then
   sudo service jenkins stop
-  sudo ln -s /vagrant /srv/passenger_rpm_automation
+  if [[ ! -e /srv/passenger_rpm_automation ]]; then
+    sudo ln -s /vagrant /srv/passenger_rpm_automation
+  fi
 fi
 
 create_user psg_rpm_automation "Passenger RPM automation" 2466
@@ -50,4 +52,8 @@ sudo chown jenkins: /etc/passenger_rpm_automation/signing_passphrase
 sudo chmod 600 /etc/passenger_rpm_automation/signing_passphrase
 if [[ ! -e signing_passphrase ]]; then
   sudo ln -s /etc/passenger_rpm_automation/signing_passphrase signing_passphrase
+fi
+
+if [[ ! -e /tools ]]; then
+  sudo git clone https://github.com/phusion/phusion-server-tools.git /tools
 fi
