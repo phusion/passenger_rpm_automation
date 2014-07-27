@@ -1,7 +1,7 @@
 FROM centos:centos6
 MAINTAINER Phusion <info@phusion.nl>
 
-RUN rpm -Uvh http://mirror.overthewire.com.au/pub/epel/6/i386/epel-release-6-8.noarch.rpm && \
+RUN rpm -Uvh http://mirror.overthewire.com.au/pub/epel/6/x86_64/epel-release-6-8.noarch.rpm && \
 	yum update -y && \
 	yum install -y --skip-broken --enablerepo centosplus centos-release-SCL createrepo && \
 	yum install -y --skip-broken --enablerepo centosplus @development-tools fedora-packager git sudo gcc gcc-c++ ccache && \
