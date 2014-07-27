@@ -39,6 +39,7 @@ function usage()
   echo "  -T              List all Rake tasks (note: list depends on other options)"
   echo
   echo "  -l              Clean output directory before building RPMs"
+  echo "  -k VERSION      Pretend as if the Passenger version number is the specified one"
   echo "  -S              Directory to passenger_rpm_automation on the Docker host"
   echo "  -V              Verbose output"
 }
@@ -47,7 +48,7 @@ function parse_options()
 {
   local OPTIND=1
   local opt
-  while getopts "p:P:o:d:a:Lj:t:Tlc:S:Vh" opt; do
+  while getopts "p:P:o:d:a:Lj:t:Tlk:c:S:Vh" opt; do
     case "$opt" in
     p)
       PASSENGER_DIR="$OPTARG/git"
@@ -80,6 +81,9 @@ function parse_options()
       ;;
     l)
       CLEAN=true
+      ;;
+    k)
+      FORCE_PASSENGER_VERSION="$OPTARG"
       ;;
     c)
       CACHE_DIR="$OPTARG"
@@ -160,6 +164,7 @@ verbose_run exec docker run --rm --privileged \
   -e "ARCHS=$ARCHS" \
   -e "TASK=$TASK" \
   -e "CLEAN=$CLEAN" \
+  -e "FORCE_PASSENGER_VERSION=$FORCE_PASSENGER_VERSION" \
   -e "VERBOSE=$VERBOSE" \
   phusion/passenger_rpm_automation \
   /system/internal/exec_build

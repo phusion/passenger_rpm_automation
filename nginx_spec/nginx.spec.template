@@ -5,6 +5,7 @@
 %global package_release <%= NGINX_RPM_RELEASE %>
 %global passenger_version <%= PASSENGER_VERSION %>
 %global passenger_package_name <%= PASSENGER_RPM_NAME %>
+%global passenger_package_version <%= PASSENGER_RPM_VERSION %>
 %global passenger_tarball_name <%= PASSENGER_TARBALL_NAME %>
 %global release_dist .<%= @distribution %>
 
@@ -77,7 +78,7 @@ Requires:          openssl
 Requires:          pcre
 Requires:          perl(:MODULE_COMPAT_%(eval "`%{__perl} -V:version`"; echo $version))
 Requires(pre):     shadow-utils
-Requires:          %{passenger_package_name}%{?_isa} = %{passenger_version}
+Requires:          %{passenger_package_name}%{?_isa} = %{passenger_package_version}
 Provides:          webserver
 
 %if 0%{?fedora} >= 16

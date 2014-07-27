@@ -4,6 +4,7 @@
 %global package_version <%= PASSENGER_RPM_VERSION %>
 %global package_release <%= PASSENGER_RPM_RELEASE %>
 %global tarball_name <%= PASSENGER_TARBALL_NAME %>
+%global tarball_version <%= PASSENGER_VERSION %>
 %global apache_module_package_name <%= PASSENGER_APACHE_MODULE_RPM_NAME %>
 %global namespace <%= PhusionPassenger::GLOBAL_NAMESPACE_DIRNAME %>
 %global nginx_version <%= NGINX_RPM_VERSION %>
@@ -55,7 +56,7 @@ License: Boost and BSD and BSD with advertising and MIT and zlib
 URL: https://www.phusionpassenger.com
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
-Source: http://s3.amazonaws.com/phusion-passenger/releases/%{tarball_name}-%{version}.tar.gz
+Source: http://s3.amazonaws.com/phusion-passenger/releases/%{tarball_name}-%{tarball_version}.tar.gz
 Source1: http://nginx.org/download/nginx-%{nginx_version}.tar.gz
 Source10: passenger.logrotate
 Source11: apache-passenger.conf.in
@@ -192,7 +193,7 @@ necessitates rebuilding this package.
 
 
 %prep
-%setup -q -n %{tarball_name}-%{version}
+%setup -q -n %{tarball_name}-%{tarball_version}
 tar xzf %{SOURCE1}
 
 %patch2   -p1 -b .include-sys-types

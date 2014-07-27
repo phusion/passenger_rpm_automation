@@ -7,13 +7,13 @@ PASSENGER_VERSION = detect_passenger_version
 NGINX_VERSION     = detect_nginx_version
 
 PASSENGER_RPM_NAME     = enterprise? ? "passenger-enterprise" : "passenger"
-PASSENGER_RPM_VERSION  = PASSENGER_VERSION
+PASSENGER_RPM_VERSION  = string_option("FORCE_PASSENGER_VERSION", PASSENGER_VERSION)
 PASSENGER_RPM_RELEASE  = enterprise? ? 2 : 1
 PASSENGER_TARBALL_NAME = enterprise? ? "passenger-enterprise-server" : "passenger"
 PASSENGER_APACHE_MODULE_RPM_NAME = enterprise? ? "mod_passenger_enterprise" : "mod_passenger"
 NGINX_RPM_NAME         = "nginx"
 NGINX_RPM_VERSION      = NGINX_VERSION
-NGINX_RPM_RELEASE      = enterprise? ? "2.p#{PASSENGER_VERSION}" : "1.p#{PASSENGER_VERSION}"
+NGINX_RPM_RELEASE      = enterprise? ? "2.p#{PASSENGER_RPM_VERSION}" : "1.p#{PASSENGER_RPM_VERSION}"
 SUPPORTED_DISTROS      = {
   "el6"    => { :mock_chroot_name => "epel-6", :name => "Enterprise Linux 6" },
   # We don't support RHEL 7 yet because EPEL 7 hasn't yet packaged rubygem-rack.
