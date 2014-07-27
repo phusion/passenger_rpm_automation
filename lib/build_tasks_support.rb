@@ -38,7 +38,7 @@ class TrackingDatabase
   end
 
   def set_finished!
-    @finished = false
+    @finished = true
   end
 
   def finished?
