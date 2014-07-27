@@ -94,6 +94,6 @@ fi
 
 run ./build "${BUILD_ARGS[@]}"
 run ./repo_update \
-  -p "/srv/passenger_rpm_automation/$PROJECT_NAME" \
+  -p "$PROJECT_DIR" \
   -s auto-software-signing@phusion.nl \
   -x /etc/passenger_rpm_automation/signing_passphrase
