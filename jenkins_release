@@ -83,7 +83,7 @@ echo "$ cd $SELFROOT"
 cd "$SELFROOT"
 
 BUILD_ARGS=(
-  -p "/srv/passenger_rpm_automation/$PROJECT_NAME"
+  -p "$PROJECT_DIR"
   -j "$CONCURRENCY"
   -l
   $EXTRA_ARGS
