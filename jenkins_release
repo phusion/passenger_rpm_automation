@@ -45,7 +45,7 @@ function parse_options()
   while getopts "p:P:j:O:h" opt; do
     case "$opt" in
     p)
-      PROJECT_DIR="$OPTARG/git"
+      PROJECT_DIR="$OPTARG"
       ;;
     P)
       PASSENGER_DIR="$OPTARG"
