@@ -304,8 +304,8 @@ export CCACHE_COMPRESS_LEVEL=3
 # rake test:cxx || true
 
 %files
-%{_bindir}
-%{_sbindir}
+%{_bindir}/*
+%{_sbindir}/*
 %{_libdir}/%{namespace}/PassengerWebHelper
 %{_libdir}/%{namespace}/agents
 %{_datadir}/%{namespace}/helper-scripts
@@ -317,11 +317,11 @@ export CCACHE_COMPRESS_LEVEL=3
 %{_datadir}/%{namespace}/*.txt
 %dir %{_localstatedir}/log/passenger-analytics
 %{_sysconfdir}/logrotate.d/passenger
-%{_mandir}
-%{passenger_ruby_libdir}
+%{_mandir}/*/*
+%{passenger_ruby_libdir}/*
 
 %files doc
-%{_docdir}/%{namespace}
+%{_docdir}/%{namespace}/*
 
 %files devel
 %{_datadir}/%{namespace}/ngx_http_passenger_module
