@@ -78,10 +78,11 @@ Requires:          openssl
 Requires:          pcre
 Requires:          perl(:MODULE_COMPAT_%(eval "`%{__perl} -V:version`"; echo $version))
 Requires(pre):     shadow-utils
-Requires:          %{passenger_package_name}%{?_isa} = %{passenger_package_version}
+Conflicts:         %{passenger_package_name}%{?_isa} < %{passenger_package_version}
+Conflicts:         %{passenger_package_name}%{?_isa} > %{passenger_package_version}
 Provides:          webserver
 
-%if 0%{?fedora} >= 16
+%if 0%{?rhel} >= 7 || 0%{?fedora} >= 16
 BuildRequires:     systemd
 Requires(post):    systemd
 Requires(preun):   systemd
@@ -164,7 +165,7 @@ export DESTDIR=%{buildroot}
     --http-fastcgi-temp-path=%{nginx_home_tmp}/fastcgi \
     --http-uwsgi-temp-path=%{nginx_home_tmp}/uwsgi \
     --http-scgi-temp-path=%{nginx_home_tmp}/scgi \
-%if 0%{?fedora} >= 16
+%if 0%{?rhel} >= 7 || 0%{?fedora} >= 16
     --pid-path=/run/nginx.pid \
     --lock-path=/run/lock/subsys/nginx \
 %else
@@ -214,7 +215,7 @@ find %{buildroot} -type f -name .packlist -exec rm -f '{}' \;
 find %{buildroot} -type f -name perllocal.pod -exec rm -f '{}' \;
 find %{buildroot} -type f -empty -exec rm -f '{}' \;
 find %{buildroot} -type f -iname '*.so' -exec chmod 0755 '{}' \;
-%if 0%{?fedora} >= 16
+%if 0%{?rhel} >= 7 || 0%{?fedora} >= 16
 install -p -D -m 0644 %{SOURCE10} \
     %{buildroot}%{_unitdir}/nginx.service
 %else
@@ -249,8 +250,15 @@ sed -i "s|PASSENGER_ROOT|%{locations_ini}|" %{buildroot}%{nginx_confdir}/conf.d/
 install -p -D -m 0644 %{_builddir}/nginx-%{version}/man/nginx.8 \
     %{buildroot}%{_mandir}/man8/nginx.8
 
+%if 0%{?rhel} >= 7 || 0%{?fedora} >= 16
 install -p -D -m 0755 %{SOURCE13} %{buildroot}%{_bindir}/nginx-upgrade
 install -p -D -m 0644 %{SOURCE14} %{buildroot}%{_mandir}/man8/nginx-upgrade.8
+
+sed -i 's|/var/run|/run|g' \
+    %{buildroot}%{nginx_confdir}/nginx.conf \
+    %{buildroot}%{_initrddir}/nginx \
+    %{buildroot}%{_sysconfdir}/logrotate.d/nginx
+%endif
 
 
 %pre
@@ -261,7 +269,7 @@ getent passwd %{nginx_user} > /dev/null || \
 exit 0
 
 %post
-%if 0%{?fedora} >= 16
+%if 0%{?rhel} >= 7 || 0%{?fedora} >= 16
 %systemd_post nginx.service
 %else
 if [ $1 -eq 1 ]; then
@@ -276,7 +284,7 @@ if [ $1 -eq 2 ]; then
 fi
 
 %preun
-%if 0%{?fedora} >= 16
+%if 0%{?rhel} >= 7 || 0%{?fedora} >= 16
 %systemd_preun nginx.service
 %else
 if [ $1 -eq 0 ]; then
@@ -286,7 +294,7 @@ fi
 %endif
 
 %postun
-%if 0%{?fedora} >= 16
+%if 0%{?rhel} >= 7 || 0%{?fedora} >= 16
 %systemd_postun nginx.service
 %else
 if [ $1 -eq 2 ]; then
@@ -297,12 +305,12 @@ fi
 %files
 %doc LICENSE CHANGES README
 %{nginx_datadir}/
-%{_bindir}/nginx-upgrade
 %{_sbindir}/nginx
 %{_mandir}/man3/nginx.3pm*
 %{_mandir}/man8/nginx.8*
+%if 0%{?rhel} >= 7 || 0%{?fedora} >= 16
+%{_bindir}/nginx-upgrade
 %{_mandir}/man8/nginx-upgrade.8*
-%if 0%{?fedora} >= 16
 %{_unitdir}/nginx.service
 %else
 %{_initrddir}/nginx
