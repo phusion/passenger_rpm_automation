@@ -62,9 +62,6 @@ Source10: passenger.logrotate
 Source11: apache-passenger.conf.in
 Source12: config.json
 
-# Include sys/types.h for GCC 4.7
-Patch2:         rubygem-passenger-4.0.18-gcc47-include-sys_types.patch
-
 # Make example config for tests ready for linux by default
 Patch4:         passenger_tests_default_config_example.patch
 
@@ -196,7 +193,6 @@ necessitates rebuilding this package.
 %setup -q -n %{tarball_name}-%{tarball_version}
 tar xzf %{SOURCE1}
 
-%patch2   -p1 -b .include-sys-types
 %patch4   -p1 -b .lindefault
 %patch102 -p1 -b .threadtest
 
