@@ -303,7 +303,7 @@ export CCACHE_COMPRESS_LEVEL=3
 %{_bindir}/*
 %{_sbindir}/*
 %{_libdir}/%{namespace}/PassengerWebHelper
-%{_libdir}/%{namespace}/agents
+%{_libdir}/%{namespace}/support-binaries
 %{_datadir}/%{namespace}/helper-scripts
 %{_datadir}/%{namespace}/templates
 %{_datadir}/%{namespace}/standalone_default_root
