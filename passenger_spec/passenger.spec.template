@@ -245,7 +245,7 @@ popd
 %{__rm} -rf %{buildroot}
 %{__mkdir} %{buildroot}
 %{__cp} -a pkg/fakeroot/* %{buildroot}/
-%{__cp} nginx-%{nginx_version}/objs/nginx %{buildroot}%{_libdir}/%{namespace}/PassengerWebHelper
+%{__cp} nginx-%{nginx_version}/objs/nginx %{buildroot}%{_libdir}/%{namespace}/support-binaries/nginx-%{nginx_version}
 
 # Install bootstrapping code into the executables and the Nginx config script.
 ./dev/install_scripts_bootstrap_code.rb --ruby %{passenger_ruby_libdir} %{buildroot}%{_bindir}/* %{buildroot}%{_sbindir}/*
@@ -302,7 +302,6 @@ export CCACHE_COMPRESS_LEVEL=3
 %files
 %{_bindir}/*
 %{_sbindir}/*
-%{_libdir}/%{namespace}/PassengerWebHelper
 %{_libdir}/%{namespace}/support-binaries
 %{_datadir}/%{namespace}/helper-scripts
 %{_datadir}/%{namespace}/templates
