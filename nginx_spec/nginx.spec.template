@@ -129,9 +129,10 @@ tar xzf %{SOURCE2}
 export EXTRA_CFLAGS="${CFLAGS:-%optflags} -Wno-deprecated"
 export EXTRA_CXXFLAGS="${CXXFLAGS:-%optflags} -Wno-deprecated"
 
-# Reduce optimization level. Passenger has not been tested with -O2.
-export EXTRA_CFLAGS=`echo "$EXTRA_CFLAGS" | sed 's|-O2|-O|g'`
-export EXTRA_CXXFLAGS=`echo "$EXTRA_CXXFLAGS" | sed 's|-O2|-O|g'`
+# Remove default optimization flags and use Phusion Passenger's recommended optimization flags.
+export EXTRA_CFLAGS=`echo "$EXTRA_CFLAGS" | sed 's|-O2||g'`
+export EXTRA_CXXFLAGS=`echo "$EXTRA_CXXFLAGS" | sed 's|-O2||g'`
+export OPTIMIZE=yes
 
 export USE_VENDORED_LIBEV=false
 export CACHING=false
