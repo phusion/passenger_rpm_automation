@@ -74,7 +74,6 @@ Patch107:       rubygem-passenger-4.0.18-GLIBC_HAVE_LONG_LONG.patch
 
 Requires: rubygems
 # XXX: Needed to run passenger standalone
-Requires: rubygem(daemon_controller) >= 1.1.0
 Requires: rubygem(rack)
 Requires: rubygem(rake)
 %if 0%{?uses_rubyabi}
