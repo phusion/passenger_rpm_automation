@@ -192,7 +192,7 @@ necessitates rebuilding this package.
 %setup -q -n %{tarball_name}-%{tarball_version}
 tar xzf %{SOURCE1}
 
-%patch4   -p1 -b .lindefault
+%patch4   -p0 -b .lindefault
 %patch102 -p1 -b .threadtest
 
 # fix passenger boost for glibc >= 2.18
