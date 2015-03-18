@@ -60,10 +60,6 @@ Source: http://s3.amazonaws.com/phusion-passenger/releases/%{tarball_name}-%{tar
 Source1: http://nginx.org/download/nginx-%{nginx_version}.tar.gz
 Source10: passenger.logrotate
 Source11: apache-passenger.conf.in
-Source12: config.json
-
-# Make example config for tests ready for linux by default
-Patch4:         passenger_tests_default_config_example.patch
 
 # Test tries to spawn 1000 threads with 256kb stacks. Default Linux settings
 # deny allocating so much, causing test to fail. Let's use 8kb stacks instead.
@@ -192,7 +188,6 @@ necessitates rebuilding this package.
 %setup -q -n %{tarball_name}-%{tarball_version}
 tar xzf %{SOURCE1}
 
-%patch4   -p0 -b .lindefault
 %patch102 -p1 -b .threadtest
 
 # fix passenger boost for glibc >= 2.18
@@ -286,18 +281,6 @@ export EXTRA_CXXFLAGS=`echo "$EXTRA_CXXFLAGS" | sed 's|-O2||g'`
 export USE_VENDORED_LIBEV=false
 export CCACHE_COMPRESS=1
 export CCACHE_COMPRESS_LEVEL=3
-
-# Running the full test suite is not only slow, but also impossible
-# because not all requirements are packaged by Fedora. It's also not
-# too useful because Phusion Passenger is automatically tested by a CI
-# server on every commit. The C++ tests are the most likely to catch
-# any platform-specific bugs (e.g. bugs caused by wrong compiler options)
-# so we only run those. Note that the C++ tests are highly timing
-# sensitive, so sometimes they may fail even though nothing is really
-# wrong. We therefore do not make failures fatal, although the result
-# should still be checked.
-%{__cp} %{SOURCE12} test/config.json
-# rake test:cxx || true
 
 %files
 %{_bindir}/*
