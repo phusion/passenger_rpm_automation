@@ -61,10 +61,6 @@ Source1: http://nginx.org/download/nginx-%{nginx_version}.tar.gz
 Source10: passenger.logrotate
 Source11: apache-passenger.conf.in
 
-# Test tries to spawn 1000 threads with 256kb stacks. Default Linux settings
-# deny allocating so much, causing test to fail. Let's use 8kb stacks instead.
-Patch102:       passenger_dynamic_thread_group.patch
-
 # https://bugzilla.redhat.com/show_bug.cgi?id=985634
 Patch107:       rubygem-passenger-4.0.18-GLIBC_HAVE_LONG_LONG.patch
 
@@ -187,8 +183,6 @@ necessitates rebuilding this package.
 %prep
 %setup -q -n %{tarball_name}-%{tarball_version}
 tar xzf %{SOURCE1}
-
-%patch102 -p1 -b .threadtest
 
 # fix passenger boost for glibc >= 2.18
 %if 0%{?fedora} >= 20
