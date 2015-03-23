@@ -86,7 +86,6 @@ BuildRequires: rubygem(fastthread) >= 1.0.1
 %endif
 
 BuildRequires: httpd-devel
-BuildRequires: libev-devel >= 4.0.0
 BuildRequires: ruby
 BuildRequires: ruby-devel
 BuildRequires: rubygems
@@ -189,9 +188,6 @@ tar xzf %{SOURCE1}
     %patch107 -p1 -b .glibc-long
 %endif
 
-# Don't use bundled libev
-%{__rm} -rf ext/libev
-
 %build
 export EXTRA_CFLAGS="${CFLAGS:-%optflags} -Wno-deprecated"
 export EXTRA_CXXFLAGS="${CXXFLAGS:-%optflags} -Wno-deprecated"
@@ -201,7 +197,6 @@ export EXTRA_CFLAGS=`echo "$EXTRA_CFLAGS" | sed 's|-O2||g'`
 export EXTRA_CXXFLAGS=`echo "$EXTRA_CXXFLAGS" | sed 's|-O2||g'`
 export OPTIMIZE=yes
 
-export USE_VENDORED_LIBEV=false
 export CACHING=false
 
 # Speed up ccache (reduce I/O) by lightly compressing things.
@@ -272,7 +267,6 @@ export EXTRA_CFLAGS="${CFLAGS:-%optflags} -Wno-deprecated"
 export EXTRA_CXXFLAGS="${CXXFLAGS:-%optflags} -Wno-deprecated"
 export EXTRA_CFLAGS=`echo "$EXTRA_CFLAGS" | sed 's|-O2||g'`
 export EXTRA_CXXFLAGS=`echo "$EXTRA_CXXFLAGS" | sed 's|-O2||g'`
-export USE_VENDORED_LIBEV=false
 export CCACHE_COMPRESS=1
 export CCACHE_COMPRESS_LEVEL=3
 
