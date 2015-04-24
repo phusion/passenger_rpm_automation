@@ -1,38 +1,30 @@
-# -*- mode: ruby -*-
-# vi: set ft=ruby :
-ROOT = File.dirname(File.expand_path(__FILE__))
+ROOT = File.expand_path(File.dirname(__FILE__) + "/..")
 
 # Vagrantfile API/syntax version. Don't touch unless you know what you're doing!
 VAGRANTFILE_API_VERSION = "2"
 
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
-  config.vm.box = "phusion-open-ubuntu-12.04-amd64"
-  config.vm.box_url = "https://oss-binaries.phusionpassenger.com/vagrant/boxes/ubuntu-12.04.3-amd64-vbox.box"
-  config.ssh.forward_agent = true
+  config.vm.box = "chef/centos-7.0"
+  config.vm.hostname = "centos6"
 
-  passenger_path = File.absolute_path('../passenger', ROOT)
-  if File.directory?(passenger_path)
-    config.vm.synced_folder passenger_path, '/passenger'
+  if File.exist?("../../bin/passenger")
+    passenger_path = File.absolute_path("../../bin/passenger")
+  elsif File.directory?("../passenger")
+    passenger_path = File.absolute_path("../passenger")
+  end
+  if passenger_path
+    config.vm.synced_folder passenger_path, "/passenger"
   end
 
-  passenger_enterprise_path = File.absolute_path('../commercial_passenger', ROOT)
-  if File.directory?(passenger_enterprise_path)
-    config.vm.synced_folder passenger_enterprise_path, '/passenger-enterprise'
+  config.vm.provider :virtualbox do |vb, override|
+    vb.cpus   = 2
+    vb.memory = 1536
   end
 
-  config.vm.provider :vmware_fusion do |f, override|
-    override.vm.box_url = "https://oss-binaries.phusionpassenger.com/vagrant/boxes/ubuntu-12.04.3-amd64-vmwarefusion.box"
-    f.vmx["displayName"] = "passenger_rpm_automation"
+  config.vm.provider :vmware_fusion do |vf, override|
+    vf.vmx["numvcpus"] = 2
+    vf.vmx["memsize"]  = 1536
   end
 
-  # Add lxc-docker package
-  pkg_cmd = "if [[ -e /usr/bin/docker ]]; then exit; fi; " \
-    "wget -q -O - https://get.docker.io/gpg | apt-key add -;" \
-    "echo deb http://get.docker.io/ubuntu docker main > /etc/apt/sources.list.d/docker.list;" \
-    "apt-get update -qq; apt-get install -q -y --force-yes lxc-docker git; "
-  # Add vagrant user to the docker group
-  pkg_cmd << "usermod -a -G docker vagrant; "
-  pkg_cmd << "/vagrant/setup-system; "
-  pkg_cmd << "git clone https://github.com/phusion/phusion-server-tools.git /tools"
-  config.vm.provision :shell, :inline => pkg_cmd
+  config.vm.provision :shell, :path => "internal/scripts/setup-vagrant.sh"
 end

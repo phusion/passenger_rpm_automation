@@ -1,0 +1,8 @@
+source 'https://rubygems.org'
+
+gem 'drake'
+gem 'rake'
+gem 'bluecloth'
+gem 'mizuho'
+gem 'paint'
+gem 'package_cloud'

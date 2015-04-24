@@ -1,0 +1,7 @@
+#!/bin/bash
+set -e
+SELFDIR=`dirname "$0"`
+SELFDIR=`cd "$SELFDIR" && pwd`
+set -x
+cd "$SELFDIR/testbox-centos-6"
+exec docker build --force-rm -t phusion/passenger_rpm_automation_testbox_centos_6 .

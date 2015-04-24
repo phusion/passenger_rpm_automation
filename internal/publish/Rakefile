@@ -1,0 +1,60 @@
+require_relative 'rakefile_support'
+require_relative '../lib/tracking'
+
+initialize_rakefile!
+initialize_tracking_database!(SHOW_OVERVIEW_PERIODICALLY)
+
+
+desc "Publish all packages"
+task "publish:all"
+
+register_tracking_category(:publish, "Packages")
+
+task :init_package_cloud do
+  path  = File.expand_path("~/.packagecloud")
+  token = File.read("/package_cloud_token.txt").strip
+  File.open(path, "w") do |f|
+    f.puts %Q({"url":"https://packagecloud.io", "token": "#{token}"})
+    f.chmod(0600)
+  end
+  initialize_tracking_database_logs!
+end
+
+DISTROS.each do |distro_dir, distro_version|
+  desc "Publish el#{distro_version} packages"
+  task "publish:el#{distro_version}"
+
+  Dir["/output/#{distro_dir}/*.{deb,dsc}"].each do |path|
+    basename = File.basename(path)
+
+    task "publish:all" => "publish:el#{distro_version}:#{basename}"
+    task "publish:el#{distro_version}" => "publish:el#{distro_version}:#{basename}"
+
+    register_tracking_task(:publish, "el#{distro_version} #{basename}")
+    task "publish:el#{distro_version}:#{basename}" => [:init_package_cloud] do
+      track_task(:publish, "el#{distro_version} #{basename}", false) do |task|
+        if YANK
+          retry_at_most(task, 3) do
+            task.sh "package_cloud yank phusion/#{REPOSITORY}/el/#{distro_version} #{basename} || true"
+          end
+        end
+        retry_at_most(task, 3) do
+          task.sh "package_cloud push phusion/#{REPOSITORY}/el/#{distro_version} #{path}"
+        end
+      end
+    end
+  end
+end
+
+
+task :start do
+  initialize_tracking_database_logs!
+end
+
+task :finish do
+  puts
+  TRACKING_DB.monitor.synchronize do
+    TRACKING_DB.set_finished!
+    dump_tracking_database
+  end
+end

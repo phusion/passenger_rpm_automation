@@ -1,170 +1,198 @@
 #!/bin/bash
 set -e
 
-SELFROOT=`dirname "$0"`
-SELFROOT=`cd "$SELFROOT" && pwd`
-SELFROOT_ON_DOCKER_HOST="$SELFROOT"
-TEMPDIR=
+SELFDIR=`dirname "$0"`
+SELFDIR=`cd "$SELFDIR" && pwd`
+source "$SELFDIR/internal/lib/library.sh"
 
 PASSENGER_DIR=
-OUTPUT_DIR=
-DISTROS='el6'
-ARCHS='i386,x86_64'
-LOCAL_BUILD=false
-CONCURRENCY=1
-TASK=rpm:all
-CLEAN=false
+WORK_DIR=
 CACHE_DIR=
-VERBOSE=false
+OUTPUT_DIR=
+CONCURRENCY=1
+DISTRIBUTIONS="el6 el7"
+ARCHITECTURES="i686 x86_64"
+FETCH_PASSENGER_TARBALL_FROM_CACHE=true
+CLEAR_WORK_DIR=true
+SHOW_OVERVIEW_PERIODICALLY=false
+SHOW_BACKTRACES=false
+SHOW_TASKS=false
+ARGV=
 
 function usage()
 {
-  echo "Usage: ./build [OPTIONS]"
-  echo "Build RPMs for multiple distributions and architectures."
-  echo
-  echo "Required options:"
-  echo "  -p PATH         Path to a project"
-  echo
-  echo "  -P PATH         Path to Phusion Passenger source directory"
-  echo "  -o PATH         Directory to save build output to"
-  echo "  -c PATH         Directory to store cache files to"
-  echo
-  echo "Optional options:"
-  echo "  -d DISTROS      Distributions to build for (default: $DISTROS)"
-  echo "  -a ARCHS        Architectures to build for (default: $ARCHS)"
-  echo "  -L              Build for local distribution and architecture"
-  echo "  -j CONCURRENCY  Build concurrency (default: $CONCURRENCY)"
-  echo
-  echo "  -t TASK         Build using specific Rake task (default: $TASK)"
-  echo "  -T              List all Rake tasks (note: list depends on other options)"
-  echo
-  echo "  -l              Clean output directory before building RPMs"
-  echo "  -k VERSION      Pretend as if the Passenger version number is the specified one"
-  echo "  -S              Directory to passenger_rpm_automation on the Docker host"
-  echo "  -V              Verbose output"
+	echo "Usage: ./build [OPTIONS]"
+	echo "Build RPM packages."
+	echo
+	echo "Required options:"
+	echo "  -p DIR     Path to Passenger source directory"
+	echo "  -w DIR     Path to work directory (for temporary files)"
+	echo "  -c DIR     Path to cache directory"
+	echo "  -o DIR     Path in which to store build products"
+	echo
+	echo "Optional options:"
+	echo "  -j NUM     Set build concurrency. Default: 1"
+	echo "  -d NAMES   Build only for given distributions. This is a space-separated list"
+	echo "             of distribution names."
+	echo "             Default: $DISTRIBUTIONS"
+	echo "  -a NAMES   Build only for given architectures. This is a space-separated list"
+	echo "             of architecture names."
+	echo "             Default: $ARCHITECTURES"
+	echo "  -R         Do not fetch Passenger tarball from cache"
+	echo "  -N         Do not clear work directory on startup"
+	echo "  -O         Periodically show progress overview"
+	echo "  -t         Show backtraces on error"
+	echo
+	echo "  -T         Show all tasks"
+	echo "  -h         Show usage"
 }
 
 function parse_options()
 {
-  local OPTIND=1
-  local opt
-  while getopts "p:P:o:d:a:Lj:t:Tlk:c:S:Vh" opt; do
-    case "$opt" in
-    p)
-      PASSENGER_DIR="$OPTARG/git"
-      CACHE_DIR="$OPTARG/cache"
-      OUTPUT_DIR="$OPTARG/build"
-      ;;
-    P)
-      PASSENGER_DIR="$OPTARG"
-      ;;
-    o)
-      OUTPUT_DIR="$OPTARG"
-      ;;
-    d)
-      DISTROS="$OPTARG"
-      ;;
-    a)
-      ARCHS="$OPTARG"
-      ;;
-    L)
-      LOCAL_BUILD=true
-      ;;
-    j)
-      CONCURRENCY="$OPTARG"
-      ;;
-    t)
-      TASK="$OPTARG"
-      ;;
-    T)
-      TASK="-T"
-      ;;
-    l)
-      CLEAN=true
-      ;;
-    k)
-      FORCE_PASSENGER_VERSION="$OPTARG"
-      ;;
-    c)
-      CACHE_DIR="$OPTARG"
-      ;;
-    S)
-      SELFROOT_ON_DOCKER_HOST="$OPTARG"
-      ;;
-    V)
-      VERBOSE=true
-      ;;
-    h)
-      usage
-      exit
-      ;;
-    *)
-      return 1
-      ;;
-    esac
-  done
+	local OPTIND=1
+	local ORIG_ARGV
+	local opt
+	while getopts "p:w:c:o:j:d:a:tNROTh" opt; do
+		case "$opt" in
+		p)
+			PASSENGER_DIR="$OPTARG"
+			;;
+		w)
+			WORK_DIR="$OPTARG"
+			;;
+		c)
+			CACHE_DIR="$OPTARG"
+			;;
+		o)
+			OUTPUT_DIR="$OPTARG"
+			;;
+		j)
+			CONCURRENCY=$OPTARG
+			;;
+		d)
+			DISTRIBUTIONS="$OPTARG"
+			;;
+		a)
+			ARCHITECTURES="$OPTARG"
+			;;
+		t)
+			SHOW_BACKTRACES=true
+			;;
+		N)
+			CLEAR_WORK_DIR=false
+			;;
+		R)
+			FETCH_PASSENGER_TARBALL_FROM_CACHE=false
+			;;
+		O)
+			SHOW_OVERVIEW_PERIODICALLY=true
+			;;
+		T)
+			SHOW_TASKS=true
+			;;
+		h)
+			usage
+			exit
+			;;
+		*)
+			return 1
+			;;
+		esac
+	done
 
-  if [[ "$PASSENGER_DIR" = "" ]]; then
-    echo "Please specify a project using -p, or a path to the Phusion Passenger source directory using -P."
-    exit 1
-  fi
-  if [[ "$TASK" != "-T" ]]; then
-    if [[ "$OUTPUT_DIR" = "" ]]; then
-      echo "Please specify a project using -p, or an output directory using -o."
-      exit 1
-    fi
-    if [[ "$CACHE_DIR" = "" ]]; then
-      echo "Please specify a project using -p, or a cache directory using -c."
-      exit 1
-    fi
-  fi
+	(( OPTIND -= 1 )) || true
+	shift $OPTIND || true
+	ORIG_ARGV=("$@")
+
+	if [[ ${#ORIG_ARGV[@]} = 0 ]]; then
+		SHOW_TASKS=true
+	else
+		ARGV=()
+		if $CLEAR_WORK_DIR; then
+			ARGV+=(clear_work_dir)
+		fi
+		ARGV+=(start "${ORIG_ARGV[@]}" finish)
+		if $SHOW_BACKTRACES; then
+			ARGV+=(--trace)
+		fi
+	fi
+
+	if ! $SHOW_TASKS; then
+		if [[ "$PASSENGER_DIR" = "" ]]; then
+			echo "ERROR: please specify a Passenger source directory with -p."
+			exit 1
+		fi
+		if [[ ! -e "$PASSENGER_DIR" ]]; then
+			echo "ERROR: $PASSENGER_DIR does not exist."
+			exit 1
+		fi
+		if [[ "$WORK_DIR" = "" ]]; then
+			echo "ERROR: please specify a work directory with -w."
+			exit 1
+		fi
+		if [[ "$CACHE_DIR" = "" ]]; then
+			echo "ERROR: please specify a cache directory with -c."
+			exit 1
+		fi
+		if [[ "$OUTPUT_DIR" = "" ]]; then
+			echo "ERROR: please specify an output directory with -o."
+			exit 1
+		fi
+	fi
 }
 
-function verbose_run()
-{
-  if $VERBOSE; then
-    echo "$ $@"
-  fi
-  "$@"
-}
-
-function cleanup()
-{
-  local pids=`jobs -p`
-  set +e
-  if [[ "$pids" != "" ]]; then
-    kill $pids >/dev/null 2>/dev/null
-  fi
-}
-
-trap cleanup EXIT
 parse_options "$@"
-APP_UID=`id -u`
-APP_GID=`id -g`
 
-if $LOCAL_BUILD; then
-  DISTROS=`"$SELFROOT/internal/get_distro_id"`
-  ARCHS=`"$SELFROOT/internal/get_distro_arch"`
-  echo "Building for local system: $DISTROS-$ARCHS"
+if tty -s; then
+	TTY_ARGS="-t -i"
+else
+	TTY_ARGS=
 fi
 
-if [[ "$SELFROOT_ON_DOCKER_HOST" = "$SELFROOT" ]]; then
-  verbose_run mkdir -p "$OUTPUT_DIR"
-fi
+if $SHOW_TASKS; then
+	exec docker run \
+		--rm $TTY_ARGS \
+		-v "$SELFDIR:/system:ro" \
+		-e "DISTRIBUTIONS=$DISTRIBUTIONS" \
+		-e "ARCHITECTURES=$ARCHITECTURES" \
+		-e "SHOW_TASKS=true" \
+		-e "LC_CTYPE=en_US.UTF-8" \
+		phusion/passenger_rpm_automation_buildbox \
+		/system/internal/scripts/my_init --quiet --skip-runit --skip-startup-files -- \
+		/system/internal/build/resetpaths.sh \
+		drake -f /system/internal/build/Rakefile -T --trace
+else
+	PASSENGER_DIR="`absolute_path \"$PASSENGER_DIR\"`"
+	WORK_DIR="`absolute_path \"$WORK_DIR\"`"
+	CACHE_DIR="`absolute_path \"$CACHE_DIR\"`"
+	OUTPUT_DIR="`absolute_path \"$OUTPUT_DIR\"`"
 
-verbose_run exec docker run --rm --privileged \
-  -v "$SELFROOT_ON_DOCKER_HOST:/system:ro" \
-  -v "$PASSENGER_DIR:/passenger" \
-  -v "$OUTPUT_DIR:/output" \
-  -v "$CACHE_DIR:/cache" \
-  -e "APP_UID=$APP_UID" \
-  -e "APP_GID=$APP_GID" \
-  -e "CONCURRENCY=$CONCURRENCY" \
-  -e "DISTROS=$DISTROS" \
-  -e "ARCHS=$ARCHS" \
-  -e "TASK=$TASK" \
-  -e "CLEAN=$CLEAN" \
-  -e "FORCE_PASSENGER_VERSION=$FORCE_PASSENGER_VERSION" \
-  -e "VERBOSE=$VERBOSE" \
-  phusion/passenger_rpm_automation \
-  /system/internal/exec_build
+	run mkdir -p "$WORK_DIR"
+	run mkdir -p "$CACHE_DIR"
+	run mkdir -p "$OUTPUT_DIR"
+
+	echo "-------- Entering Docker container --------"
+	exec docker run \
+		--rm $TTY_ARGS \
+		--privileged \
+		-v "$SELFDIR:/system:ro" \
+		-v "$PASSENGER_DIR:/passenger:ro" \
+		-v "$WORK_DIR:/work" \
+		-v "$CACHE_DIR:/cache" \
+		-v "$OUTPUT_DIR:/output" \
+		-v "$CACHE_DIR/pbuilder:/var/cache/pbuilder" \
+		-e "DISTRIBUTIONS=$DISTRIBUTIONS" \
+		-e "ARCHITECTURES=$ARCHITECTURES" \
+		-e "SHOW_OVERVIEW_PERIODICALLY=$SHOW_OVERVIEW_PERIODICALLY" \
+		-e "FETCH_PASSENGER_TARBALL_FROM_CACHE=$FETCH_PASSENGER_TARBALL_FROM_CACHE" \
+		-e "APP_UID=`/usr/bin/id -u`" \
+		-e "APP_GID=`/usr/bin/id -g`" \
+		-e "LC_CTYPE=en_US.UTF-8" \
+		phusion/passenger_rpm_automation_buildbox \
+		/system/internal/scripts/my_init --quiet --skip-runit --skip-startup-files -- \
+		/system/internal/scripts/inituidgid.sh \
+		/system/internal/build/preinit.sh \
+		/system/internal/scripts/setuser app \
+		/system/internal/build/resetpaths.sh \
+		drake -f /system/internal/build/Rakefile -j $CONCURRENCY "${ARGV[@]}"
+fi

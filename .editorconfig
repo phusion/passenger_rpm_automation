@@ -9,7 +9,18 @@ indent_style = space
 indent_size = 2
 trim_trailing_whitespace = true
 
-[{build,buildall}]
-indent_style = space
-indent_size = 2
+[*.sh]
+indent_style = tab
+trim_trailing_whitespace = true
+
+[build]
+indent_style = tab
+trim_trailing_whitespace = true
+
+[test]
+indent_style = tab
+trim_trailing_whitespace = true
+
+[publish]
+indent_style = tab
 trim_trailing_whitespace = true
