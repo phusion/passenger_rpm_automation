@@ -256,7 +256,6 @@ install -p -D -m 0644 %{SOURCE14} %{buildroot}%{_mandir}/man8/nginx-upgrade.8
 
 sed -i 's|/var/run|/run|g' \
     %{buildroot}%{nginx_confdir}/nginx.conf \
-    %{buildroot}%{_initrddir}/nginx \
     %{buildroot}%{_sysconfdir}/logrotate.d/nginx
 %endif
 
