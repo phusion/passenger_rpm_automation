@@ -24,7 +24,7 @@ DISTROS.each do |distro_dir, distro_version|
   desc "Publish el#{distro_version} packages"
   task "publish:el#{distro_version}"
 
-  Dir["/output/#{distro_dir}/*.{deb,dsc}"].each do |path|
+  Dir["/output/#{distro_dir}/*.rpm"].each do |path|
     basename = File.basename(path)
 
     task "publish:all" => "publish:el#{distro_version}:#{basename}"

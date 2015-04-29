@@ -227,8 +227,10 @@ task :finish do
   puts "Commiting build products to output directory..."
   sh "rm -rf /output/*"
   DISTROS.each do |distro_id|
+    sh "mkdir -p /output/#{distro_id}"
     ARCHITECTURES.each do |arch|
-      sh "cp -dpR /work/#{distro_id}-#{arch} /output/#{distro_id}-#{arch}"
+      next if !distro_architecture_allowed?(distro_id, arch)
+      sh "cp /work/#{distro_id}-#{arch}/*.rpm /output/#{distro_id}/"
     end
   end
 end

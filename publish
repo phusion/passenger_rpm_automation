@@ -135,10 +135,10 @@ if $SHOW_TASKS; then
 		-e "SHOW_TASKS=true" \
 		-e "LC_CTYPE=en_US.UTF-8" \
 		phusion/passenger_rpm_automation_buildbox \
-		/sbin/my_init --quiet --skip-runit --skip-startup-files -- \
+		/system/internal/scripts/my_init --quiet --skip-runit --skip-startup-files -- \
 		/system/internal/scripts/inituidgid.sh \
 		/system/internal/publish/preinit.sh \
-		/sbin/setuser app \
+		/system/internal/scripts/setuser app \
 		drake -f /system/internal/publish/Rakefile -T --trace
 else
 	echo "-------- Entering Docker container --------"
@@ -155,9 +155,9 @@ else
 		-e "APP_GID=`/usr/bin/id -g`" \
 		-e "LC_CTYPE=en_US.UTF-8" \
 		phusion/passenger_rpm_automation_buildbox \
-		/sbin/my_init --quiet --skip-runit --skip-startup-files -- \
+		/system/internal/scripts/my_init --quiet --skip-runit --skip-startup-files -- \
 		/system/internal/scripts/inituidgid.sh \
 		/system/internal/publish/preinit.sh \
-		/sbin/setuser app \
+		/system/internal/scripts/setuser app \
 		drake -f /system/internal/publish/Rakefile -j $CONCURRENCY "${ARGV[@]}"
 fi

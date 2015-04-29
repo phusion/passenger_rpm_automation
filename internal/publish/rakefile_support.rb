@@ -16,7 +16,7 @@ def infer_distros_info
   result = []
   Dir["/output/*"].each do |path|
     dir = File.basename(path)
-    dir =~ /^el(.+?)-/
+    dir =~ /^el(.+)/
     distro_version = $1
     result << [dir, distro_version]
   end
