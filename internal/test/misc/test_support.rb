@@ -59,3 +59,10 @@ def eventually(deadline_duration = 10, check_interval = 0.05)
   end
   raise "Time limit exceeded"
 end
+
+def clear_bundler_env!
+  orig_env = Bundler.with_clean_env do
+    ENV.to_hash
+  end
+  ENV.replace(orig_env)
+end

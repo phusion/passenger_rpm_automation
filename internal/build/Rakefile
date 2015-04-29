@@ -89,7 +89,7 @@ namespace :srpm do
           raise e
         end
 
-        task.sh "rpmbuild -bs --root ~/rpmbuild/root_passenger #{spec_target_file}"
+        task.sh "rpmbuild -bs --root ~/rpmbuild/root-passenger-#{distro_id} #{spec_target_file}"
         ARCHITECTURES.each do |arch|
           task.sh "mkdir -p /work/#{distro_id}-#{arch}"
           task.sh "cp #{RPM_SRPMS_DIR}/#{passenger_srpm_name(distro_id)} /work/#{distro_id}-#{arch}/"
@@ -126,7 +126,7 @@ namespace :srpm do
           raise e
         end
 
-        task.sh "rpmbuild -bs --root ~/rpmbuild/root_nginx #{spec_target_file}"
+        task.sh "rpmbuild -bs --root ~/rpmbuild/root-nginx-#{distro_id} #{spec_target_file}"
         ARCHITECTURES.each do |arch|
           task.sh "mkdir -p /work/#{distro_id}-#{arch}"
           task.sh "cp #{RPM_SRPMS_DIR}/#{nginx_srpm_name(distro_id)} /work/#{distro_id}-#{arch}/"

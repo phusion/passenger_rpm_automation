@@ -1,9 +1,9 @@
 {
   "normal_user_1": "games",
   "normal_user_2": "daemon",
-  "default_user": "gopher",
+  "default_user": "operator",
   "normal_group_1": "daemon",
-  "normal_group_2": "gopher",
+  "normal_group_2": "operator",
   "default_group": "games",
 
   "nonexistant_user": "xxxxxxxxxxxxxxxxxxx",

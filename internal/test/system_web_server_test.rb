@@ -4,6 +4,8 @@ require File.expand_path(File.dirname(__FILE__) + '/misc/test_support')
 
 include FileUtils
 
+clear_bundler_env!
+
 def create_app_dir(source, startup_file, dir_name)
   app_root = "/home/app/#{dir_name}"
   rm_rf(app_root)
@@ -23,11 +25,34 @@ def create_app_dirs
   app_dirs
 end
 
+def redhat_major_release
+  File.read("/etc/redhat-release") =~ /release ([0-9]+)/
+  $1.to_i
+end
+
 def start_stop_service(name, action)
-  if File.exist?("/sbin/service")
-    sh("service #{name} #{action}")
+  if redhat_major_release >= 7
+    if name == "httpd"
+      if action == "start"
+        sh(". /etc/sysconfig/httpd && /usr/sbin/httpd $OPTIONS")
+      elsif action == "stop"
+        sh("kill `cat /run/httpd/httpd.pid`")
+      else
+        raise "Don't know how to #{action} #{name}"
+      end
+    elsif name == "nginx"
+      if action == "start"
+        sh("/usr/sbin/nginx")
+      elsif action == "stop"
+        sh("kill -s QUIT `cat /run/nginx.pid`")
+      else
+        raise "Don't know how to #{action} #{name}"
+      end
+    else
+      raise "Don't know how to #{action} #{name}"
+    end
   else
-    sh("systemctl #{action} #{name}.service")
+    sh("service #{name} #{action}")
   end
 end
 

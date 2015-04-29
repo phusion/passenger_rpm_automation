@@ -55,8 +55,10 @@ else
 	run chmod 644 /etc/httpd/conf.d/apache-pre-24.conf
 fi
 run setuser app chmod 755 /home/app
-run setuser app mkdir -p /cache/test/bundle
-run setuser app rake test:install_deps DOCTOOLS=no DEPS_TARGET=/cache/test/bundle BUNDLE_ARGS="-j 4"
+run setuser app mkdir -p /cache/test-$DISTRIBUTION/bundle
+run setuser app mkdir -p /cache/test-$DISTRIBUTION/node_modules
+run setuser app ln -s /cache/test-$DISTRIBUTION/node_modules node_modules
+run setuser app rake test:install_deps DOCTOOLS=no DEPS_TARGET=/cache/test-$DISTRIBUTION/bundle BUNDLE_ARGS="-j 4"
 run setuser app cp /system/internal/test/misc/config.json test/config.json
 find /var/{log,lib}/nginx -type d | xargs --no-run-if-empty chmod o+rwx
 find /var/{log,lib}/nginx -type f | xargs --no-run-if-empty chmod o+rw
