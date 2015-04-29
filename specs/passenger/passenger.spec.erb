@@ -38,6 +38,8 @@
 %{!?ruby_vendorarchdir: %global ruby_vendorarchdir %(ruby -rrbconfig -e 'puts RbConfig::CONFIG["vendorarchdir"]')}
 %global passenger_ruby_libdir %{ruby_vendorlibdir}
 %global locations_ini %{passenger_ruby_libdir}/phusion_passenger/locations.ini
+%global selinux_types %(%{__awk} '/^#[[:space:]]*SELINUXTYPE=/,/^[^#]/ { if ($3 == "-") printf "%s ", $2 }' /etc/selinux/config 2>/dev/null)
+%global selinux_variants %([ -z "%{selinux_types}" ] && echo mls targeted || echo %{selinux_types})
 
 
 Summary: Phusion Passenger application server
@@ -55,6 +57,9 @@ URL: https://www.phusionpassenger.com
 
 Source: http://s3.amazonaws.com/phusion-passenger/releases/%{tarball_name}-%{tarball_version}.tar.gz
 Source1: http://nginx.org/download/nginx-%{nginx_version}.tar.gz
+Source2: passenger.fc
+Source3: passenger.if
+Source4: passenger.te
 Source10: passenger.logrotate
 Source100: apache-passenger.conf.in
 
@@ -70,6 +75,13 @@ Requires: ruby(abi) = %{rubyabi}
 %else
 Requires: ruby(release)
 %endif
+
+%{!?_selinux_policy_version: %global _selinux_policy_version %(sed -e 's,.*selinux-policy-\\([^/]*\\)/.*,\\1,' /usr/share/selinux/devel/policyhelp 2>/dev/null)}
+%if "%{_selinux_policy_version}" != ""
+Requires: selinux-policy >= %{_selinux_policy_version}
+%endif
+Requires(post):   /usr/sbin/semodule, /sbin/restorecon, /sbin/fixfiles
+Requires(postun): /usr/sbin/semodule, /sbin/restorecon, /sbin/fixfiles
 
 %if 0%{?rhel} >= 6 || 0%{?fedora} >= 15
 BuildRequires: libcurl-devel
@@ -87,6 +99,7 @@ BuildRequires: rubygem(rack)
 BuildRequires: zlib-devel
 BuildRequires: pcre-devel
 BuildRequires: openssl-devel
+BuildRequires: checkpolicy, selinux-policy-devel, /usr/share/selinux/devel/policyhelp
 
 Provides: %{package_name} = %{version}-%{release}
 Provides: bundled(boost)  = %{bundled_boost_version}
@@ -208,6 +221,15 @@ pushd nginx-%{nginx_version}
 make
 popd
 
+# Build SELinux policy modules.
+%{__cp} %{SOURCE2} %{SOURCE3} %{SOURCE4} .
+%{__sed} -i "s|%%SUPPORT_BINARIES_DIR%%|%{_libdir}/%{namespace}/support-binaries|g" passenger.fc
+for selinuxvariant in %{selinux_variants}; do
+    %{__make} -f %{_datadir}/selinux/devel/Makefile NAME=passenger
+    %{__mv} passenger.pp passenger.pp.${selinuxvariant}
+    %{__make} -f %{_datadir}/selinux/devel/Makefile NAME=passenger clean
+done
+
 
 %install
 export LANG=en_US.UTF-8
@@ -252,6 +274,32 @@ install -pm 0644 %{SOURCE10} %{buildroot}%{_sysconfdir}/logrotate.d/passenger
 # Fix Python scripts with shebang which are not executable
 %{__chmod} +x %{buildroot}%{_datadir}/passenger/helper-scripts/wsgi-loader.py
 
+# Install SELinux policy module.
+for selinuxvariant in %{selinux_variants}; do
+    %{__install} -d %{buildroot}%{_datadir}/selinux/${selinuxvariant}
+    %{__install} -p -m 644 passenger.pp.${selinuxvariant} \
+        %{buildroot}%{_datadir}/selinux/${selinuxvariant}/passenger.pp
+done
+
+
+%post
+for selinuxvariant in %{selinux_variants}; do
+    /usr/sbin/semodule -s ${selinuxvariant} -i \
+      %{_datadir}/selinux/${selinuxvariant}/passenger.pp &> /dev/null || :
+done
+/sbin/fixfiles -R passenger restore || :
+/sbin/restorecon -R %{_libdir}/%{namespace}/support-binaries || :
+
+%postun
+if [ $1 -eq 0 ] ; then
+    for selinuxvariant in %{selinux_variants}; do
+        /usr/sbin/semodule -s ${selinuxvariant} -r passeneger &> /dev/null || :
+    done
+    /sbin/fixfiles -R passenger restore || :
+    [ -d %{_libdir}/%{namespace}/support-binaries ] && \
+        /sbin/restorecon -R %{_libdir}/%{namespace}/support-binaries &> /dev/null || :
+fi
+
 
 %files
 %{_bindir}/*
@@ -264,6 +312,7 @@ install -pm 0644 %{SOURCE10} %{buildroot}%{_sysconfdir}/logrotate.d/passenger
 %{_datadir}/%{namespace}/*.types
 %{_datadir}/%{namespace}/*.crt
 %{_datadir}/%{namespace}/*.txt
+%{_datadir}/selinux/*/passenger.pp
 %dir %{_localstatedir}/log/passenger-analytics
 %{_sysconfdir}/logrotate.d/passenger
 %{_mandir}/*/*

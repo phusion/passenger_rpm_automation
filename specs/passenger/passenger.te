@@ -1,0 +1,42 @@
+# This policy module allows the Passenger agent to be executed
+# under the `unconfined_t` domain when executed from Apache.
+# The process works as follows:
+# 
+# Apache security labels:
+#   system_u:system_r:httpd_t:s0
+# 
+# The PassengerAgent file has labels:
+#   system_u:object_r:passenger_exec_t:s0
+# 
+# Via passenger_exec_t, PassengerAgent transitions to
+# system_u:unconfined_r:unconfined_t:s0.
+
+policy_module(passenger, 1.0)
+
+require {
+	type httpd_t, unconfined_t, user_tmp_t;
+	role unconfined_r, system_r;
+	attribute can_change_process_role, process_user_target;
+};
+
+type passenger_exec_t;
+
+# Allow role transition through passenger_exec_t
+role_transition system_r passenger_exec_t unconfined_r;
+allow system_r unconfined_r;
+
+# Conform to system constraint
+typeattribute httpd_t can_change_process_role;
+typeattribute unconfined_t process_user_target;
+
+# Allow type transition through passenger_exec_t
+domain_entry_file(unconfined_t, passenger_exec_t)
+domtrans_pattern(httpd_t, passenger_exec_t, unconfined_t)
+
+# Allow Apache to create Passenger instance dir -> config_files.txt
+allow httpd_t user_tmp_t:file { create open write setattr unlink };
+# Allow Apache to connect to the PassengerAgent socket
+allow httpd_t unconfined_t:unix_stream_socket { connectto };
+allow httpd_t user_tmp_t:sock_file { read write };
+
+user system_u roles { unconfined_r } level s0 range s0;
