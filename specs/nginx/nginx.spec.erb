@@ -19,8 +19,8 @@
 %global  nginx_logdir        %{_localstatedir}/log/nginx
 %global  nginx_webroot       %{nginx_datadir}/html
 
-%{!?ruby_sitelibdir: %global ruby_sitelibdir %(ruby -rrbconfig -e 'puts RbConfig::CONFIG["sitelibdir"]')}
-%global passenger_ruby_libdir %{ruby_sitelibdir}
+%{!?ruby_vendorlibdir: %global ruby_vendorlibdir %(ruby -rrbconfig -e 'puts RbConfig::CONFIG["vendorlibdir"]')}
+%global passenger_ruby_libdir %{ruby_vendorlibdir}
 %global locations_ini %{passenger_ruby_libdir}/phusion_passenger/locations.ini
 
 # gperftools exist only on selected arches

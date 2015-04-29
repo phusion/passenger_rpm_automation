@@ -20,7 +20,7 @@ LoadModule passenger_module modules/mod_passenger.so
 #       <Directory /somewhere/public>
 #          # Relax Apache security settings
 #          AllowOverride all  
-#          # <-- MultiViews must be turned off
+#          # MultiViews must be turned off
 #          Options -MultiViews
 #       </Directory>
 #    </VirtualHost>
