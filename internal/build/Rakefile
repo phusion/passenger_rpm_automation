@@ -154,6 +154,8 @@ namespace :rpm do
     distro = DISTRO_BUILD_PARAMS[distro_id]
 
     ARCHITECTURES.each do |arch|
+      next if !distro_architecture_allowed?(distro_id, arch)
+
       task "all" => "^rpm:passenger:#{distro_id}:#{arch}"
       task "passenger:all" => "^rpm:passenger:#{distro_id}:#{arch}"
       register_tracking_task(:rpm, "passenger:#{distro_id}:#{arch}")
@@ -181,6 +183,8 @@ namespace :rpm do
     distro = DISTRO_BUILD_PARAMS[distro_id]
 
     ARCHITECTURES.each do |arch|
+      next if !distro_architecture_allowed?(distro_id, arch)
+
       task "all" => "^rpm:nginx:#{distro_id}:#{arch}"
       task "nginx:all" => "^rpm:nginx:#{distro_id}:#{arch}"
       register_tracking_task(:rpm, "nginx:#{distro_id}:#{arch}")
