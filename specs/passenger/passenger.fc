@@ -1,1 +1,1 @@
-%%SUPPORT_BINARIES_DIR%%/PassengerAgent         --      gen_context(system_u:object_r:passenger_exec_t,s0)
+SUPPORT_BINARIES_DIR/PassengerAgent         --      gen_context(system_u:object_r:passenger_exec_t,s0)

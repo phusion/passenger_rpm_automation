@@ -223,7 +223,7 @@ popd
 
 # Build SELinux policy modules.
 %{__cp} %{SOURCE2} %{SOURCE3} %{SOURCE4} .
-%{__sed} -i "s|%%SUPPORT_BINARIES_DIR%%|%{_libdir}/%{namespace}/support-binaries|g" passenger.fc
+%{__sed} -i "s|SUPPORT_BINARIES_DIR|%{_libdir}/%{namespace}/support-binaries|g" passenger.fc
 for selinuxvariant in %{selinux_variants}; do
     %{__make} -f %{_datadir}/selinux/devel/Makefile NAME=passenger
     %{__mv} passenger.pp passenger.pp.${selinuxvariant}
@@ -285,7 +285,7 @@ done
 %post
 for selinuxvariant in %{selinux_variants}; do
     /usr/sbin/semodule -s ${selinuxvariant} -i \
-      %{_datadir}/selinux/${selinuxvariant}/passenger.pp &> /dev/null || :
+        %{_datadir}/selinux/${selinuxvariant}/passenger.pp &> /dev/null || :
 done
 /sbin/fixfiles -R passenger restore || :
 /sbin/restorecon -R %{_libdir}/%{namespace}/support-binaries || :

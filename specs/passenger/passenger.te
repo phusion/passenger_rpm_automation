@@ -35,8 +35,11 @@ domtrans_pattern(httpd_t, passenger_exec_t, unconfined_t)
 
 # Allow Apache to create Passenger instance dir -> config_files.txt
 allow httpd_t user_tmp_t:file { create open write setattr unlink };
+allow httpd_t user_tmp_t:dir { search write add_name };
 # Allow Apache to connect to the PassengerAgent socket
 allow httpd_t unconfined_t:unix_stream_socket { connectto };
 allow httpd_t user_tmp_t:sock_file { read write };
+# Allow PassengerAgent to inherit rlimits from Apache
+allow httpd_t unconfined_t:process { rlimitinh };
 
 user system_u roles { unconfined_r } level s0 range s0;
