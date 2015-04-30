@@ -18,7 +18,7 @@ header "Installing packages..."
 # Allows installing passenger-doc
 echo '%_excludedocs 0' > /etc/rpm/macros.imgcreate
 run sed -i 's/nodocs//' /etc/yum.conf
-run yum install -y /output/*.rpm
+run yum install -y /output/*.x86_64.rpm /output/*.noarch.rpm
 
 echo
 header "Preparing Passenger source code..."
@@ -44,6 +44,11 @@ cd /tmp/passenger
 
 echo
 header "Preparing system..."
+export PATH=/usr/lib64/ccache:$PATH
+export CCACHE_DIR=/cache/test-$DISTRIBUTION/ccache
+export CCACHE_COMPRESS=1
+export CCACHE_COMPRESS_LEVEL=3
+run setuser app mkdir -p $CCACHE_DIR
 echo "+ Updating /etc/hosts"
 cat /system/internal/test/misc/hosts.conf >> /etc/hosts
 APACHE_VERSION=`rpm -qi httpd | grep Version | awk '{ print $3 }'`

@@ -24,7 +24,7 @@ run yum install -y --enablerepo centosplus epel-release centos-release-SCL
 run yum group install -y "Development Tools"
 run yum install -y --enablerepo centosplus \
 	ruby ruby-devel rubygems rubygem-rack rubygem-rake nodejs npm \
-	perl git tar which \
+	ccache perl git tar which \
 	httpd httpd-devel httpd-tools zlib-devel sqlite-devel curl-devel \
 	GeoIP gd libxslt
 run gem install bundler -v 1.9.2 --no-rdoc --no-ri

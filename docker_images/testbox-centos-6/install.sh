@@ -23,7 +23,7 @@ header "Installing dependencies"
 run rpm -Uvh http://mirror.overthewire.com.au/pub/epel/6/x86_64/epel-release-6-8.noarch.rpm
 run yum install -y --enablerepo centosplus centos-release-SCL
 run yum install -y --enablerepo centosplus \
-	@development-tools \
+	@development-tools ccache \
 	python27-python nodejs010-nodejs nodejs010-npm \
 	ruby ruby-devel rubygems rubygem-rack rubygem-rake perl git tar which \
 	httpd httpd-devel httpd-tools zlib-devel sqlite-devel curl-devel \
