@@ -1,6 +1,3 @@
-### Begin automatically installed Phusion Passenger load snippet ###
-LoadModule passenger_module modules/mod_passenger.so
-### End automatically installed Phusion Passenger load snippet ###
 ### Begin automatically installed Phusion Passenger config snippet ###
 <IfModule mod_passenger.c>
    PassengerRoot @PASSENGERROOT@
@@ -19,7 +16,8 @@ LoadModule passenger_module modules/mod_passenger.so
 #       DocumentRoot /somewhere/public
 #       <Directory /somewhere/public>
 #          # Relax Apache security settings
-#          AllowOverride all  
+#          AllowOverride all
+#          Require all granted
 #          # MultiViews must be turned off
 #          Options -MultiViews
 #       </Directory>
