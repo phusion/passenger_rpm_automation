@@ -15,5 +15,5 @@ testbox-centos-7:
 
 upload:
 	docker push phusion/passenger_rpm_automation_buildbox
-	docker push phusion/passenger_rpm_automation_testbox_centos6
-	docker push phusion/passenger_rpm_automation_testbox_centos7
+	docker push phusion/passenger_rpm_automation_testbox_centos_6
+	docker push phusion/passenger_rpm_automation_testbox_centos_7
