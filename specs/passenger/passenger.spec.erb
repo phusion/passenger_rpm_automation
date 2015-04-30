@@ -278,7 +278,7 @@ export LC_ALL=en_US.UTF-8
 %{__cp} man/*.8 %{buildroot}%{_mandir}/man8
 
 # Fix Python scripts with shebang which are not executable
-%{__chmod} +x %{buildroot}%{_datadir}/passenger/helper-scripts/wsgi-loader.py
+%{__chmod} +x %{buildroot}%{_datadir}/%{namespace}/helper-scripts/wsgi-loader.py
 
 # Install SELinux policy module.
 for selinuxvariant in %{selinux_variants}; do
