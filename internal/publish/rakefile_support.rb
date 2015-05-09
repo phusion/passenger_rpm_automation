@@ -45,24 +45,30 @@ def retry_at_most(task, max)
 end
 
 def initialize_packagecloud!
-  Kernel.const_set(:PACKAGECLOUD_TOKEN, File.read("/package_cloud_token.txt").strip)
-  path = File.expand_path("~/.packagecloud")
-  File.open(path, "w") do |f|
-    f.puts %Q({"url":"https://packagecloud.io", "token": "#{PACKAGECLOUD_TOKEN}"})
-    f.chmod(0600)
-  end
-
-  Kernel.const_set(:PACKAGECLOUD_HTTP, make_packagecloud_http)
-
-  if YANK_ALL
-    names, urls = get_packagecloud_rpm_urls
-    Kernel.const_set(:PACKAGECLOUD_YANK_ALL_TASKS, generate_yank_all_task_names(names))
-    Kernel.const_set(:PACKAGECLOUD_RPM_NAMES, names)
-    Kernel.const_set(:PACKAGECLOUD_RPM_URLS, urls)
-  else
+  if SHOW_TASKS
     Kernel.const_set(:PACKAGECLOUD_YANK_ALL_TASKS, [])
     Kernel.const_set(:PACKAGECLOUD_RPM_NAMES, [])
     Kernel.const_set(:PACKAGECLOUD_RPM_URLS, [])
+  else
+    Kernel.const_set(:PACKAGECLOUD_TOKEN, File.read("/package_cloud_token.txt").strip)
+    path = File.expand_path("~/.packagecloud")
+    File.open(path, "w") do |f|
+      f.puts %Q({"url":"https://packagecloud.io", "token": "#{PACKAGECLOUD_TOKEN}"})
+      f.chmod(0600)
+    end
+
+    Kernel.const_set(:PACKAGECLOUD_HTTP, make_packagecloud_http)
+
+    if YANK_ALL
+      names, urls = get_packagecloud_rpm_urls
+      Kernel.const_set(:PACKAGECLOUD_YANK_ALL_TASKS, generate_yank_all_task_names(names))
+      Kernel.const_set(:PACKAGECLOUD_RPM_NAMES, names)
+      Kernel.const_set(:PACKAGECLOUD_RPM_URLS, urls)
+    else
+      Kernel.const_set(:PACKAGECLOUD_YANK_ALL_TASKS, [])
+      Kernel.const_set(:PACKAGECLOUD_RPM_NAMES, [])
+      Kernel.const_set(:PACKAGECLOUD_RPM_URLS, [])
+    end
   end
 end
 
