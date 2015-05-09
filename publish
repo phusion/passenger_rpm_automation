@@ -116,6 +116,9 @@ function parse_options()
 
 parse_options "$@"
 OUTPUT_DIR="`absolute_path \"$OUTPUT_DIR\"`"
+if [[ "$PACKAGE_CLOUD_TOKEN_FILE" = "" ]]; then
+	PACKAGE_CLOUD_TOKEN_FILE="`absolute_path \"$PACKAGE_CLOUD_TOKEN_FILE\"`"
+fi
 
 EXTRA_MOUNTS=()
 if [[ "$LOG_DIR" != "" ]]; then
