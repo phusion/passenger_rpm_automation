@@ -1,4 +1,4 @@
-policy_module(passenger, 1.0)
+policy_module(passenger, 101.0)
 
 require {
 	type httpd_t, unconfined_t;
