@@ -101,6 +101,7 @@ BuildRequires: zlib-devel
 BuildRequires: pcre-devel
 BuildRequires: openssl-devel
 BuildRequires: checkpolicy, selinux-policy-devel, /usr/share/selinux/devel/policyhelp
+BuildRequires: libselinux-devel
 
 Provides: %{package_name} = %{version}-%{release}
 Provides: bundled(boost)  = %{bundled_boost_version}
@@ -190,6 +191,7 @@ export EXTRA_CXXFLAGS="${CXXFLAGS:-%optflags} -Wno-deprecated"
 export EXTRA_CFLAGS=`echo "$EXTRA_CFLAGS" | sed 's|-O2||g'`
 export EXTRA_CXXFLAGS=`echo "$EXTRA_CXXFLAGS" | sed 's|-O2||g'`
 export OPTIMIZE=yes
+export USE_SELINUX=yes
 
 export CACHING=false
 
@@ -223,8 +225,11 @@ make
 popd
 
 # Build SELinux policy modules.
-%{__cp} %{SOURCE2} %{SOURCE3} %{SOURCE4} .
-%{__sed} -i "s|SUPPORT_BINARIES_DIR|%{_libdir}/%{namespace}/support-binaries|g" passenger.fc
+%{__cp} %{SOURCE3} %{SOURCE4} .
+%{__cp} %{SOURCE2} passenger.fc.tmp
+%{__sed} -i "s|SUPPORT_BINARIES_DIR_MAIN|%{_libdir}/%{namespace}/support-binaries|g" passenger.fc.tmp
+%{__sed} -i "s|SUPPORT_BINARIES_DIR_ALT|%{_prefix}/lib/%{namespace}/support-binaries|g" passenger.fc.tmp
+uniq passenger.fc.tmp > passenger.fc
 for selinuxvariant in %{selinux_variants}; do
     %{__make} -f %{_datadir}/selinux/devel/Makefile NAME=passenger
     %{__mv} passenger.pp passenger.pp.${selinuxvariant}

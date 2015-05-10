@@ -1,23 +1,25 @@
-# This policy module allows the Passenger agent to be executed
-# under the `unconfined_t` domain when executed from Apache.
-# The process works as follows:
-# 
-# Apache security labels:
-#   system_u:system_r:httpd_t:s0
-# 
-# The PassengerAgent file has labels:
-#   system_u:object_r:passenger_exec_t:s0
-# 
-# Via passenger_exec_t, PassengerAgent transitions to
-# system_u:unconfined_r:unconfined_t:s0.
-
 policy_module(passenger, 1.0)
 
 require {
-	type httpd_t, unconfined_t, user_tmp_t;
+	type httpd_t, unconfined_t;
 	role unconfined_r, system_r;
-	attribute can_change_process_role, process_user_target;
+	attribute can_change_process_role, process_user_target, tmpfile;
 };
+
+
+###### Domain transition rules ######
+
+# Allows the Passenger agent to be executed under the `unconfined_t`
+# domain when executed from a web server. The process works as follows:
+#
+# Web server security labels:
+#   system_u:system_r:httpd_t:s0
+#
+# The PassengerAgent file has labels:
+#   system_u:object_r:passenger_exec_t:s0
+#
+# Via passenger_exec_t, PassengerAgent transitions to
+# system_u:unconfined_r:unconfined_t:s0.
 
 type passenger_exec_t;
 
@@ -33,13 +35,67 @@ typeattribute unconfined_t process_user_target;
 domain_entry_file(unconfined_t, passenger_exec_t)
 domtrans_pattern(httpd_t, passenger_exec_t, unconfined_t)
 
-# Allow Apache to create Passenger instance dir -> config_files.txt
-allow httpd_t user_tmp_t:file { create open write setattr unlink };
-allow httpd_t user_tmp_t:dir { search write add_name };
-# Allow Apache to connect to the PassengerAgent socket
-allow httpd_t unconfined_t:unix_stream_socket { connectto };
-allow httpd_t user_tmp_t:sock_file { read write };
-# Allow PassengerAgent to inherit rlimits from Apache
-allow httpd_t unconfined_t:process { rlimitinh };
+
+###### Passenger instance registry dir rules ######
+
+type passenger_instance_registry_t;      # /var/run/passenger-instreg
+type passenger_instance_dir_t;           # passenger-instreg/instance_dir
+type passenger_instance_content_t;       # instance_dir/*
+type passenger_instance_httpd_file_t;    # instance_dir/config_files.txt,
+                                         # instance_dir/control_process.pid,
+                                         # instance_dir/web_server.txt
+type passenger_instance_httpd_socket_t;  # instance_dir/agents.s/server
+
+files_type(passenger_instance_registry_t)
+files_type(passenger_instance_dir_t)
+files_type(passenger_instance_content_t)
+files_type(passenger_instance_httpd_file_t)
+files_type(passenger_instance_httpd_socket_t)
+typeattribute passenger_instance_registry_t tmpfile;
+typeattribute passenger_instance_dir_t tmpfile;
+typeattribute passenger_instance_content_t tmpfile;
+typeattribute passenger_instance_httpd_file_t tmpfile;
+typeattribute passenger_instance_httpd_socket_t tmpfile;
+
+# When a directory is created in an instance registry dir,
+# automatically give it the passenger_instance_dir label.
+filetrans_pattern(unconfined_t, passenger_instance_registry_t, passenger_instance_dir_t, { dir })
+
+# When something is created in an instance dir,
+# automatically give it the passenger_instance_content_t label.
+filetrans_pattern(unconfined_t, passenger_instance_dir_t, passenger_instance_content_t, { dir file lnk_file sock_file fifo_file })
+
+# When config_files.txt, control_process.pid or web_server.txt is created in an instance dir,
+# automatically give it the passenger_instance_httpd_file_t label.
+filetrans_pattern(unconfined_t, passenger_instance_dir_t, passenger_instance_httpd_file_t, { file }, "config_files.txt")
+filetrans_pattern(httpd_t, passenger_instance_dir_t, passenger_instance_httpd_file_t, { file }, "config_files.txt")
+filetrans_pattern(unconfined_t, passenger_instance_dir_t, passenger_instance_httpd_file_t, { file }, "control_process.pid")
+filetrans_pattern(httpd_t, passenger_instance_dir_t, passenger_instance_httpd_file_t, { file }, "control_process.pid")
+filetrans_pattern(unconfined_t, passenger_instance_dir_t, passenger_instance_httpd_file_t, { file }, "web_server.txt")
+filetrans_pattern(httpd_t, passenger_instance_dir_t, passenger_instance_httpd_file_t, { file }, "web_server.txt")
+
+# When a socket named 'server' is created in an instance dir,
+# automatically give it the passenger_instance_httpd_socket_t label.
+filetrans_pattern(unconfined_t, passenger_instance_content_t, passenger_instance_httpd_socket_t, { sock_file }, "server")
+
+
+###### Web server <-> instance registry dir access rules ######
+
+# Allow web server to create config_files.txt and various other files
+# inside a Passenger instance dir.
+allow httpd_t passenger_instance_dir_t:dir { write add_name remove_name };
+allow httpd_t passenger_instance_httpd_file_t:file { create open write append setattr unlink };
+
+# Allow PassengerAgent server to create a Unix domain socket with
+# the passenger_instance_httpd_socket_t type.
+allow unconfined_t passenger_instance_httpd_socket_t:unix_stream_socket { create bind listen connectto setopt accept read write shutdown };
+
+# Allow web server Apache to connect to the PassengerAgent unix
+# domain socket.
+allow httpd_t passenger_instance_httpd_socket_t:sock_file { open read write };
+allow httpd_t passenger_instance_httpd_socket_t:unix_stream_socket { connectto setopt read write shutdown };
+
+
+###### Misc ######
 
 user system_u roles { unconfined_r } level s0 range s0;
