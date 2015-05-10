@@ -271,6 +271,7 @@ export LC_ALL=en_US.UTF-8
 
 # Make our ghost log and run directories...
 %{__mkdir_p} %{buildroot}%{_localstatedir}/log/passenger-analytics
+%{__mkdir_p} %{buildroot}%{_localstatedir}/run/passenger-instreg
 
 # logrotate
 %{__mkdir_p} %{buildroot}%{_sysconfdir}/logrotate.d
@@ -325,6 +326,7 @@ fi
 %{_datadir}/%{namespace}/*.txt
 %{_datadir}/selinux/*/passenger.pp
 %dir %{_localstatedir}/log/passenger-analytics
+%dir %attr(711, root, root) %{_localstatedir}/run/passenger-instreg
 %{_sysconfdir}/logrotate.d/passenger
 %{_mandir}/*/*
 %{passenger_ruby_libdir}/*

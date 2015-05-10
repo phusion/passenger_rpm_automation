@@ -2,6 +2,7 @@
 <IfModule mod_passenger.c>
    PassengerRoot @PASSENGERROOT@
    PassengerRuby /usr/bin/ruby
+   PassengerInstanceRegistryDir /var/run/passenger-instreg
 </IfModule>
 ### End automatically installed Phusion Passenger config snippet ###
 
