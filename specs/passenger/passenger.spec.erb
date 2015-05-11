@@ -294,6 +294,20 @@ for selinuxvariant in %{selinux_variants}; do
 done
 
 
+%pre
+policy_version=`/usr/sbin/sestatus | %{__grep} 'Policy version' | %{__sed} 's/.*: *//'`
+if test "$policy_version" -lt 25; then
+    kernel_version=`/bin/uname -r`
+    echo
+    echo "   !!!! PASSENGER CANNOT BE INSTALLED: KERNEL TOO OLD !!!!"
+    echo
+    echo "   You are currently running kernel $kernel_version, with SELinux policy" >&2
+    echo "   version $policy_version. However, Passenger requires kernel >= 2.6.39, with support for" >&2
+    echo "   SELinux policy version >= 25. Please upgrade your kernel." >&2
+    echo
+    exit 1
+fi
+
 %post
 for selinuxvariant in %{selinux_variants}; do
     /usr/sbin/semodule -s ${selinuxvariant} -i \
