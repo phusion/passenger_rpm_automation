@@ -14,6 +14,8 @@ function run()
 }
 
 export HOME=/root
+export LANG=en_US.UTF-8
+export LC_CTYPE=en_US.UTF-8
 
 header "Creating users"
 run groupadd --gid 2467 app
@@ -31,10 +33,15 @@ run yum install -y --enablerepo centosplus --skip-broken createrepo \
 	libev-devel pcre-devel rubygem-rack source-highlight \
 	apr-devel apr-util-devel which GeoIP-devel \
 	gd-devel gperftools-devel perl-devel perl-ExtUtils-Embed \
-	nodejs010-nodejs nodejs010-npm ruby193-ruby ruby193-ruby-devel
-source /opt/rh/ruby193/enable
-export PATH=/opt/rh/ruby193/root/usr/local/bin:$PATH
-run gem update --system --no-rdoc --no-ri
+	nodejs010-nodejs nodejs010-npm
+
+run gpg --keyserver hkp://keys.gnupg.net --recv-keys 409B6B1796C275462A1703113804BB82D39DC0E3
+run curl --fail -sSLo /tmp/rvm.sh https://get.rvm.io
+run bash /tmp/rvm.sh stable
+source /usr/local/rvm/scripts/rvm
+run rvm install ruby-2.2.2
+rvm use ruby-2.2.2
+rvm --default ruby-2.2.2
 run gem install bundler --no-rdoc --no-ri -v 1.9.2
 run env BUNDLE_GEMFILE=/pra_build/Gemfile bundle install -j 4
 
