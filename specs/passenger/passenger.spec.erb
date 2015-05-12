@@ -63,6 +63,7 @@ Source4: passenger.te
 Source10: passenger.logrotate
 Source100: apache-passenger.conf.in
 Source101: apache-passenger-module.conf
+Source102: passenger.tmpfiles
 
 # https://bugzilla.redhat.com/show_bug.cgi?id=985634
 Patch107:       rubygem-passenger-4.0.18-GLIBC_HAVE_LONG_LONG.patch
@@ -272,6 +273,11 @@ export LC_ALL=en_US.UTF-8
 # Make our ghost log and run directories...
 %{__mkdir_p} %{buildroot}%{_localstatedir}/log/passenger-analytics
 %{__mkdir_p} %{buildroot}%{_localstatedir}/run/passenger-instreg
+%{__mkdir_p} %{buildroot}%{_prefix}/lib/tmpfiles.d 
+%if 0%{?rhel} >= 7 || 0%{?fedora} >= 16
+    %{__install} -m 644 -p %{SOURCE102} \
+        %{buildroot}%{_prefix}/lib/tmpfiles.d/passenger.conf
+%endif
 
 # logrotate
 %{__mkdir_p} %{buildroot}%{_sysconfdir}/logrotate.d
@@ -342,6 +348,9 @@ fi
 %{_bindir}/*
 %{_sbindir}/*
 %{_libdir}/%{namespace}/support-binaries
+%if 0%{?rhel} >= 7 || 0%{?fedora} >= 16
+    %{_prefix}/lib/tmpfiles.d/passenger.conf
+%endif
 %{_datadir}/%{namespace}/helper-scripts
 %{_datadir}/%{namespace}/templates
 %{_datadir}/%{namespace}/standalone_default_root
