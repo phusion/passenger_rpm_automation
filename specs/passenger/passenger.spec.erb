@@ -296,15 +296,26 @@ done
 
 %pre
 policy_version=`/usr/sbin/sestatus | %{__grep} 'Policy version' | %{__sed} 's/.*: *//'`
-if test "$policy_version" -lt 25; then
+if test "$policy_version" != "" && test "$policy_version" -lt 25; then
     kernel_version=`/bin/uname -r`
-    echo
-    echo "   !!!! PASSENGER CANNOT BE INSTALLED: KERNEL TOO OLD !!!!"
-    echo
+    echo >&2
+    echo "   !!!! PASSENGER CANNOT BE INSTALLED: KERNEL TOO OLD !!!!" >&2
+    echo >&2
     echo "   You are currently running kernel $kernel_version, with SELinux policy" >&2
-    echo "   version $policy_version. However, Passenger requires kernel >= 2.6.39, with support for" >&2
-    echo "   SELinux policy version >= 25. Please upgrade your kernel." >&2
-    echo
+    echo "   version $policy_version. However, Passenger's SELinux policy requires kernel >= 2.6.39," >&2
+    echo "   with support for policy version >= 25." >&2
+    echo >&2
+    echo "   There are two ways to solve this problem:" >&2
+    echo >&2
+    echo "   Alternative 1: upgrade your kernel to at least 2.6.39, then reinstall" >&2
+    echo "   Passenger." >&2
+    echo >&2
+    echo "   -OR-" >&2
+    echo >&2
+    echo "   Alternative 2: disable SELinux." >&2
+    echo "   Edit /etc/selinux/config, set SELINUX=disabled, reboot, then" >&2
+    echo "   reinstall Passenger." >&2
+    echo >&2
     exit 1
 fi
 
