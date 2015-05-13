@@ -242,22 +242,35 @@ You will now be dropped in an SSH session inside the VM. Any futher steps must b
 
 Use the `./build` script to build RPMs. You must tell the build script which distribution and architecture it should build for. Run:
 
-    ./build -p /passenger -w ~/work -c ~/cache -o output -a <ARCHITECTURE> -d <DISTRIBUTION> rpm:all
+    ./build -p <PATH TO PASSENGER> -w ~/work -c ~/cache -o output -a <ARCHITECTURE> -d <DISTRIBUTION> rpm:all
+
+Replace `<PATH TO PASSENGER>` with one of these:
+
+ * If you are on a Linux system, it should be `../..`.
+ * If you are on a non-Linux system (and using Vagrant), it should be `/passenger`.
 
 Replace `<ARCHITECTURE>` with either `i386` or `x86_64`. Replace `<DISTRIBUTION>` with either `el6` or `el7`.
 
  * `el6` is for Red Hat Enterprise Linux 6.x and CentOS 6.x.
  * `el7` is for Red Hat Enterprise Linux 7.x and CentOS 7.x.
 
+Here is an example invocation for building packages for Red Hat 7, x86_64:
+
+```bash
+# If you are on a Linux system:
+./build -p ../.. -w ~/work -c ~/cache -o output -a x86_64 -d el7 rpm:all
+
+# If you are on a non-Linux system (and using Vagrant):
+./build -p /passenger -w ~/work -c ~/cache -o output -a x86_64 -d el7 rpm:all
+```
+
+### Step 4: get packages, clean up
+
 When the build is finished, you can find the RPMs in the `output` directory.
 
 If you are on a non-Linux OS (and thus using Vagrant), you should know that this `output` directory is accessible from your host OS too. It is a subdirectory inside `<PASSENGER REPO>/packaging/rpm`.
 
-### Step 4 (non-Linux): spin down Vagrant VM
-
-If you are on a Linux system, then you can skip this section.
-
-If you are not on a Linux system, then you must spin down the Vagrant VM. Run this on your host OS, inside the `packaging/rpm` subdirectory:
+If you are not on a Linux system, then you should spin down the Vagrant VM. Run this on your host OS, inside the `packaging/rpm` subdirectory:
 
     vagrant halt
 
