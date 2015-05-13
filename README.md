@@ -2,9 +2,12 @@
 
 This repository contains RPM package definitions for [Phusion Passenger](https://www.phusionpassenger.com/), as well as tools for automatically building Passenger packages for multiple distributions and architectures.
 
-The goal is project is to allow Phusion to release RPM packages for multiple distributions and architectures, immediately after a Passenger source release, in a completely automated manner.
+The goal of this project is twofold:
 
-This project utilizes Docker for isolation. Because of the usage of Docker, these tools can be run on any 64-bit Linux system, including non-Red Hat-based systems. Though in practice, we've only tested on CentOS 6.
+ 1. To allow Phusion to release RPM packages for multiple distributions and architectures, immediately after a Passenger source release, in a completely automated manner.
+ 2. To allow users to build their own RPM packages for Passenger, without having to wait for Phusion to do so.
+
+> Are you a user who wants to build your own RPMs for a Passenger version that hasn't been released yet? Read [Tutorial: building your own packages](#tutorial-building-your-own-packages).
 
 **Table of Contents**
 
@@ -20,6 +23,7 @@ This project utilizes Docker for isolation. Because of the usage of Docker, thes
    - [Updating SSL certificates](#updating-ssl-certificates)
  * [Jenkins integration](#jenkins-integration)
    - [Debugging a packaging test failure](#debugging-a-packaging-test-failure)
+ * [Tutorial: building your own packages](#tutorial-building-your-own-packages)
  * [Related projects](#related-projects)
 
 ## Overview
@@ -38,6 +42,8 @@ RPM package definitions are located in the `specs` directory:
 Other noteworthy tools:
 
  * `jenkins` -- Scripts to be run by our Jenkins continuous integration jobs, either after every commit or during release time.
+
+This project utilizes Docker for isolation. Because of the usage of Docker, these tools can be run on any 64-bit Linux system, including non-Red Hat-based systems. Though in practice, we've only tested on CentOS 6.
 
 ## Development
 
@@ -187,6 +193,73 @@ If a packaging test job fails, here's what you should do.
 If the test fails now, a shell will be opened inside the test container, in which you can do anything you want. Please note that this is a root shell, but the tests are run as the `app` user, so be sure to prefix test commands with `setuser app`. You can see in internal/test/test.sh which commands are invoked inside the container in order to run the tests.
 
 Inside the test container, you will be dropped into the directory /tmp/passenger, which is a *copy* of the Passenger source directory. The original Passenger source directory is mounted under /passenger.
+
+## Tutorial: building your own packages
+
+Are you a user who wants to build RPMs for a Passenger version that hasn't been released yet? Maybe because you want to gain access to a bug fix that isn't part of a release yet? Then this tutorial is for you.
+
+You can follow this tutorial on any OS you want. You do not necessarily have to follow this tutorial on the OS you wish to build packages for. For example, it is possible to build packages for Red Hat 7 while following this tutorial on OS X.
+
+### Prerequisites
+
+If you are following this tutorial on a Linux system, then you must [install Docker](https://www.docker.com/).
+
+If you are following this tutorial on any other OS, then you must install [Vagrant](https://www.vagrantup.com/) and [VirtualBox](https://www.virtualbox.org/).
+
+NOTE: If you are on OS X, installing boot2docker is NOT enough. You MUST use Vagrant+VirtualBox.
+
+### Step 1: Checkout out the desired source code
+
+First, clone the Passenger git repository and its submodules:
+
+    git clone git://github.com/phusion/passenger.git
+    cd passenger
+    git submodule update --init --recursive
+
+Checkout the branch you want. At the time of writing (2015 May 13), you will most likely be interested in the `stable-5.0` branch because that's the branch that is slated to become the next release version.
+
+    git checkout stable-5.0
+
+Then go to the directory `packaging/rpm`:
+
+    cd packaging/rpm
+
+### Step 2 (non-Linux): spin up Vagrant VM
+
+If you are on a Linux system, then you can skip to step 3.
+
+If you are not on a Linux system, then you must spin up the Vagrant VM. Type:
+
+    vagrant up
+
+Wait until the VM has booted, then run:
+
+    vagrant ssh
+
+You will now be dropped in an SSH session inside the VM. Any futher steps must be followed inside this SSH session.
+
+### Step 3: build packages
+
+Use the `./build` script to build RPMs. You must tell the build script which distribution and architecture it should build for. Run:
+
+    ./build -p /passenger -w ~/work -c ~/cache -o output -a <ARCHITECTURE> -d <DISTRIBUTION> rpm:all
+
+Replace `<ARCHITECTURE>` with either `i386` or `x86_64`. Replace `<DISTRIBUTION>` with either `el6` or `el7`.
+
+ * `el6` is for Red Hat Enterprise Linux 6.x and CentOS 6.x.
+ * `el7` is for Red Hat Enterprise Linux 7.x and CentOS 7.x.
+
+When the build is finished, you can find the RPMs in the `output` directory.
+
+If you are on a non-Linux OS (and thus using Vagrant), you should know that this `output` directory is accessible from your host OS too. It is a subdirectory inside `<PASSENGER REPO>/packaging/rpm`.
+
+### Step 4 (non-Linux): spin down Vagrant VM
+
+If you are on a Linux system, then you can skip this section.
+
+If you are not on a Linux system, then you must spin down the Vagrant VM. Type:
+
+    vagrant halt
 
 ## Related projects
 
