@@ -5,8 +5,10 @@ if [[ ! -e /work ]]; then
 	chown app: /work
 fi
 
-export PATH=/opt/rh/ruby193/root/usr/bin:/opt/rh/ruby193/root/usr/local/bin:$PATH
-# Intentionally removes python27 from LD_LIBRARY_PATH. python27 was only used for my_init.
-export LD_LIBRARY_PATH=/opt/rh/ruby193/root/usr/lib64:/opt/rh/ruby193/root/usr/lib
+source /usr/local/rvm/scripts/rvm
+rvm use 2.2.2
+
+# Remove python27 from LD_LIBRARY_PATH. python27 was only used for my_init.
+unset LD_LIBRARY_PATH
 
 exec "$@"
