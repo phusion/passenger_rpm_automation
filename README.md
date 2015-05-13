@@ -257,7 +257,7 @@ If you are on a non-Linux OS (and thus using Vagrant), you should know that this
 
 If you are on a Linux system, then you can skip this section.
 
-If you are not on a Linux system, then you must spin down the Vagrant VM. Type:
+If you are not on a Linux system, then you must spin down the Vagrant VM. Run this on your host OS, inside the `packaging/rpm` subdirectory:
 
     vagrant halt
 
