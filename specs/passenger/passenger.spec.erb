@@ -330,7 +330,7 @@ for selinuxvariant in %{selinux_variants}; do
     /usr/sbin/semodule -s ${selinuxvariant} -i \
         %{_datadir}/selinux/${selinuxvariant}/passenger.pp &> /dev/null || :
 done
-/sbin/fixfiles -R passenger restore || :
+/sbin/fixfiles -R %{package_name} restore || :
 /sbin/restorecon -R %{_libdir}/%{namespace}/support-binaries || :
 
 %postun
@@ -338,7 +338,7 @@ if [ $1 -eq 0 ] ; then
     for selinuxvariant in %{selinux_variants}; do
         /usr/sbin/semodule -s ${selinuxvariant} -r passeneger &> /dev/null || :
     done
-    /sbin/fixfiles -R passenger restore || :
+    /sbin/fixfiles -R %{package_name} restore || :
     [ -d %{_libdir}/%{namespace}/support-binaries ] && \
         /sbin/restorecon -R %{_libdir}/%{namespace}/support-binaries &> /dev/null || :
 fi
