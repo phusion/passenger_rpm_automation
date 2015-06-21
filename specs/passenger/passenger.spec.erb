@@ -360,7 +360,7 @@ fi
 %{_datadir}/%{namespace}/*.txt
 %{_datadir}/selinux/*/passenger.pp
 %dir %{_localstatedir}/log/passenger-analytics
-%dir %attr(711, root, root) %{_localstatedir}/run/passenger-instreg
+%dir %attr(755, root, root) %{_localstatedir}/run/passenger-instreg
 %{_sysconfdir}/logrotate.d/passenger
 %{_mandir}/*/*
 %{passenger_ruby_libdir}/*
