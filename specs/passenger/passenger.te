@@ -86,7 +86,7 @@ filetrans_pattern(unconfined_t, passenger_instance_content_t, passenger_instance
 allow httpd_t passenger_instance_dir_t:dir { write add_name remove_name };
 allow httpd_t passenger_instance_httpd_file_t:file { create open write append setattr unlink };
 
-# Allow PassengerAgent server to create a Unix domain socket with
+# Allow PassengerAgent core to create a Unix domain socket with
 # the passenger_instance_httpd_socket_t type.
 allow unconfined_t passenger_instance_httpd_socket_t:unix_stream_socket { create bind listen connectto setopt accept read write shutdown };
 
