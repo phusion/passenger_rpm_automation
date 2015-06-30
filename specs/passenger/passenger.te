@@ -1,4 +1,4 @@
-policy_module(passenger, 102.0)
+policy_module(passenger, 103.0)
 
 require {
 	type httpd_t, unconfined_t;
@@ -41,8 +41,8 @@ domtrans_pattern(httpd_t, passenger_exec_t, unconfined_t)
 type passenger_instance_registry_t;      # /var/run/passenger-instreg
 type passenger_instance_dir_t;           # passenger-instreg/instance_dir
 type passenger_instance_content_t;       # instance_dir/*
-type passenger_instance_httpd_file_t;    # instance_dir/control_process.pid
-type passenger_instance_httpd_socket_t;  # instance_dir/agents.s/server
+type passenger_instance_httpd_file_t;    # instance_dir/web_server_control_process.pid
+type passenger_instance_httpd_socket_t;  # instance_dir/agents.s/core
 
 files_type(passenger_instance_registry_t)
 files_type(passenger_instance_dir_t)
@@ -63,19 +63,19 @@ filetrans_pattern(unconfined_t, passenger_instance_registry_t, passenger_instanc
 # automatically give it the passenger_instance_content_t label.
 filetrans_pattern(unconfined_t, passenger_instance_dir_t, passenger_instance_content_t, { dir file lnk_file sock_file fifo_file })
 
-# When control_process.pid is created in an instance dir,
+# When web_server_control_process.pid is created in an instance dir,
 # automatically give it the passenger_instance_httpd_file_t label.
-filetrans_pattern(unconfined_t, passenger_instance_dir_t, passenger_instance_httpd_file_t, { file }, "control_process.pid")
-filetrans_pattern(httpd_t, passenger_instance_dir_t, passenger_instance_httpd_file_t, { file }, "control_process.pid")
+filetrans_pattern(unconfined_t, passenger_instance_dir_t, passenger_instance_httpd_file_t, { file }, "web_server_control_process.pid")
+filetrans_pattern(httpd_t, passenger_instance_dir_t, passenger_instance_httpd_file_t, { file }, "web_server_control_process.pid")
 
-# When a socket named 'server' is created in an instance dir,
+# When a socket named 'core' is created in an instance dir,
 # automatically give it the passenger_instance_httpd_socket_t label.
-filetrans_pattern(unconfined_t, passenger_instance_content_t, passenger_instance_httpd_socket_t, { sock_file }, "server")
+filetrans_pattern(unconfined_t, passenger_instance_content_t, passenger_instance_httpd_socket_t, { sock_file }, "core")
 
 
 ###### Web server <-> instance registry dir access rules ######
 
-# Allow web server to create control_process.pid and various other files
+# Allow web server to create web_server_control_process.pid and various other files
 # inside a Passenger instance dir.
 allow httpd_t passenger_instance_dir_t:dir { write add_name remove_name };
 allow httpd_t passenger_instance_httpd_file_t:file { create open write append setattr unlink };
