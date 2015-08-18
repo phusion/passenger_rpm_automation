@@ -217,7 +217,7 @@ end
 
 def load_passenger
   if !defined?(PhusionPassenger)
-    require "/passenger/lib/phusion_passenger"
+    require "/passenger/src/ruby_supportlib/phusion_passenger"
     PhusionPassenger.locate_directories
     PhusionPassenger.require_passenger_lib "constants"
   end
