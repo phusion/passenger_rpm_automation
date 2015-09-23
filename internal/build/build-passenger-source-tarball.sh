@@ -27,17 +27,17 @@ header "Creating Passenger official tarball"
 # which is writable.
 run rm -rf /tmp/passenger
 if [[ -e /passenger/.git ]]; then
-  run mkdir /tmp/passenger
-  echo "+ cd /passenger"
-  cd /passenger
-  echo "+ Git copying to /tmp/passenger"
-  (
-    set -o pipefail
-    git archive --format=tar HEAD | tar -C /tmp/passenger -x
-  )
-  [[ $? = 0 ]]
+	run mkdir /tmp/passenger
+	echo "+ cd /passenger"
+	cd /passenger
+	echo "+ Git copying to /tmp/passenger"
+	(
+		set -o pipefail
+		git archive --format=tar HEAD | tar -C /tmp/passenger -x
+	)
+	[[ $? = 0 ]]
 else
-  run cp -dpR /passenger /tmp/passenger
+	run cp -dpR /passenger /tmp/passenger
 fi
 echo "+ cd /tmp/passenger"
 cd /tmp/passenger
