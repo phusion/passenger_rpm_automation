@@ -132,17 +132,51 @@ Once packages have been built, you can publish them to PackageCloud. The `publis
 
 ### Adding support for a new distribution
 
-There are three things you want to add support for a new distribution.
+In these instructions, we assume that the new distribution is Red Hat 7. Update the actual parameters accordingly.
 
- 1. Add a definition for this new distribution to `internal/lib/distro_info.rb` and `internal/lib/distro_info.sh`.
- 2. Add the distribution's codename to the `DISTRIBUTIONS` variable's default value inside the `build` script.
- 3. Update the package definitions in `specs/`.
- 4. Build and publish packages for this distribution only. You can do that by running the build script with the `-d` option.
+ 1. Rebuild the build box so that it has the latest distribution information:
 
-    For example, if the new distribution is Red Hat 7, then run:
+        ./docker_images/setup-buildbox-docker-image
+
+ 2. Add a definition for this new distribution to `internal/lib/distro_info.rb` and `internal/lib/distro_info.sh`.
+ 3. Add the distribution's codename to the `DISTRIBUTIONS` variable's default value inside the `build` script.
+ 4. Update the package definitions in `specs/`.
+ 5. Build and publish packages for this distribution only. You can do that by running the build script with the `-d` option.
 
         ./build -p /passenger -w work -c cache -o output -d el7 rpm:all
         ./publish -d output -c ~/.packagecloud_token -r passenger-testing publish:all
+
+ 6. Create a test box for this new distribution.
+
+     1. Create `docker_images/setup-testbox-docker-image-centos-7`
+     2. Create `docker_images/testbox-centos-7/`
+     3. Edit `docker_images/Makefile` and add entries for this new testbox.
+     4. Run `./docker_images/setup-testbox-docker-image-centos-7`
+
+    When done, test Passenger under the new testbox:
+
+        ./test -p /passenger -x el7 -d output/el7 -c cache
+
+ 7. Commit and push all changes, then publish the new packages and the updated Docker images by running:
+
+        git add docker_images
+        git commit -a -m "Add support for Red Hat 7"
+        git push
+        cd docker_images
+        make upload
+
+ 8. On the Phusion CI server, pull the latest buildbox:
+
+        docker pull phusion/passenger_rpm_automation_buildbox
+
+ 9. Inside the [passenger](https://github.com/phusion/passenger) repository, update the `packaging/rpm` submodule (which refers to the `passenger_rpm_automation` repository) to the latest commit, then commit the result. Assuming you want the submodule to update to the latest `master` branch commit:
+
+        cd packaging/rpm
+        git checkout master
+        git pull
+        cd ../..
+        git commit -a -m "Add packaging support for Red Hat 7"
+        git push
 
 ### Building Nginx packages only
 
