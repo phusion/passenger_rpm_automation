@@ -136,7 +136,7 @@ In these instructions, we assume that the new distribution is Red Hat 7. Update 
 
  1. Rebuild the build box so that it has the latest distribution information:
 
-        ./docker_images/setup-buildbox-docker-image
+        ./docker-images/setup-buildbox-docker-image
 
  2. Add a definition for this new distribution to `internal/lib/distro_info.rb` and `internal/lib/distro_info.sh`.
  3. Add the distribution's codename to the `DISTRIBUTIONS` variable's default value inside the `build` script.
@@ -148,10 +148,10 @@ In these instructions, we assume that the new distribution is Red Hat 7. Update 
 
  6. Create a test box for this new distribution.
 
-     1. Create `docker_images/setup-testbox-docker-image-centos-7`
-     2. Create `docker_images/testbox-centos-7/`
-     3. Edit `docker_images/Makefile` and add entries for this new testbox.
-     4. Run `./docker_images/setup-testbox-docker-image-centos-7`
+     1. Create `docker-images/setup-testbox-docker-image-centos-7`
+     2. Create `docker-images/testbox-centos-7/`
+     3. Edit `docker-images/Makefile` and add entries for this new testbox.
+     4. Run `./docker-images/setup-testbox-docker-image-centos-7`
 
     When done, test Passenger under the new testbox:
 
@@ -159,10 +159,10 @@ In these instructions, we assume that the new distribution is Red Hat 7. Update 
 
  7. Commit and push all changes, then publish the new packages and the updated Docker images by running:
 
-        git add docker_images
+        git add docker-images
         git commit -a -m "Add support for Red Hat 7"
         git push
-        cd docker_images
+        cd docker-images
         make upload
 
  8. On the Phusion CI server, pull the latest buildbox:
