@@ -21,6 +21,7 @@ The goal of this project is twofold:
    - [Adding support for a new distribution](#adding-support-for-a-new-distribution)
    - [Building Nginx packages only](#building-nginx-packages-only)
    - [Updating SSL certificates](#updating-ssl-certificates)
+   - [Dealing with broken packages: enabling/disabling CR](#dealing-with-broken-packages-enablingdisabling-cr)
  * [Jenkins integration](#jenkins-integration)
    - [Debugging a packaging test failure](#debugging-a-packaging-test-failure)
  * [Tutorial: building your own packages](#tutorial-building-your-own-packages)
@@ -193,6 +194,32 @@ After the build script finishes, you can publish these Nginx packages:
 The Jenkins publishing script posts to some HTTPS servers. For security reasons, we pin the certificates, but these certificates expire after a while. You can update them by running:
 
     ./internal/scripts/pin_certificates
+
+### Dealing with broken packages: enabling/disabling CR
+
+Once in a while, while building or while testing, YUM will abort with an error like this:
+
+    --> Running transaction check
+    ---> Package gperftools-libs.x86_64 0:2.4-5.el7 will be installed
+    --> Processing Dependency: libunwind.so.8()(64bit) for package: gperftools-libs-2.4-5.el7.x86_64
+    --> Finished Dependency Resolution
+    Error: Package: gperftools-libs-2.4-5.el7.x86_64 (epel)
+               Requires: libunwind.so.8()(64bit)
+     You could try using --skip-broken to work around the problem
+     You could try running: rpm -Va --nofiles --nodigest
+
+This tends to happen after a new RHEL minor release. The problem is that the Passenger packages depend on EPEL. EPEL builds against the latest RHEL release. But CentOS lags behind RHEL, so right after a new RHEL minor release there will be packages in EPEL which do not work on the latest CentOS minor release.
+
+To fix this problem, you need to enable the [CentOS Continuous Release](https://wiki.centos.org/AdditionalResources/Repositories/CR) (CR) repository in the build box and the test box. The CR repository contains prerelease packages for the next CentOS release. Note that if you enable CR, any RPMs you produce will end up depending on the package versions in CR. This means that those RPMs will work on RHEL (which has already released those versions of the dependency packages), but not on CentOS systems without CR. You must therefore instruct CentOS users to enable CR until the next CentOS minor release is published.
+
+To enable or disable CR:
+
+ * Edit `docker-images/buildbox/epel-7-x86_64.cfg`. Under the `[cr]` section, modify the `enabled` flag. Then run `make -C docker-images buildbox`
+ * Edit `docker-images/testbox-7/install.sh`. Either comment or uncomment the lines responsible for enabling CR. Then run `make -C docker-images testbox-centos-7`
+
+When done, push these images and pull from them the CI server.
+
+You should disable CR in the buildbox and the testbox as soon as the next CentOS minor release is published.
 
 ## Jenkins integration
 

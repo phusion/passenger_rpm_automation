@@ -56,6 +56,7 @@ run sudo -u app -H rpmdev-setuptree
 run mkdir -p /etc/container_environment
 run cp /pra_build/my_init_python /sbin/my_init_python
 run cp /pra_build/site-defaults.cfg /etc/mock/site-defaults.cfg
+run cp /pra_build/epel-7-x86_64.cfg /etc/mock/epel-7-x86_64.cfg
 
 header "Cleaning up"
 run yum clean all
