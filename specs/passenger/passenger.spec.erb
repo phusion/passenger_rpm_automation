@@ -249,7 +249,10 @@ export LC_ALL=en_US.UTF-8
 %{__cp} nginx-%{nginx_version}/objs/nginx %{buildroot}%{_libdir}/%{namespace}/support-binaries/nginx-%{nginx_version}
 
 # Install bootstrapping code into the executables and the Nginx config script.
-./dev/install_scripts_bootstrap_code.rb --ruby %{passenger_ruby_libdir} %{buildroot}%{_bindir}/* %{buildroot}%{_sbindir}/*
+./dev/install_scripts_bootstrap_code.rb --ruby %{passenger_ruby_libdir} \
+    %{buildroot}%{_bindir}/* \
+    %{buildroot}%{_sbindir}/* \
+    `find %{buildroot} -name rack_handler.rb`
 ./dev/install_scripts_bootstrap_code.rb --nginx-module-config %{_bindir} %{buildroot}%{_datadir}/%{namespace}/ngx_http_passenger_module/config
 
 # Install Apache config.
