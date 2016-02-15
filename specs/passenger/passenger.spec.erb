@@ -85,12 +85,7 @@ Requires: selinux-policy >= %{_selinux_policy_version}
 Requires(post):   /usr/sbin/semodule, /sbin/restorecon, /sbin/fixfiles
 Requires(postun): /usr/sbin/semodule, /sbin/restorecon, /sbin/fixfiles
 
-%if 0%{?rhel} >= 6 || 0%{?fedora} >= 15
-BuildRequires: libcurl-devel
-%else
-BuildRequires: curl-devel
-%endif
-
+BuildRequires: pkg-config
 BuildRequires: httpd-devel
 BuildRequires: ruby
 BuildRequires: ruby-devel
