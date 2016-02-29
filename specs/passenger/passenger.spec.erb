@@ -339,7 +339,7 @@ done
 %postun
 if [ $1 -eq 0 ] ; then
     for selinuxvariant in %{selinux_variants}; do
-        /usr/sbin/semodule -s ${selinuxvariant} -r passeneger &> /dev/null || :
+        /usr/sbin/semodule -s ${selinuxvariant} -r passenger &> /dev/null || :
     done
     /sbin/fixfiles -R %{package_name} restore || :
     [ -d %{_libdir}/%{namespace}/support-binaries ] && \
