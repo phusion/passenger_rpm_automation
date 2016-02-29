@@ -346,6 +346,20 @@ if [ $1 -eq 0 ] ; then
         /sbin/restorecon -R %{_libdir}/%{namespace}/support-binaries &> /dev/null || :
 fi
 
+%define fixupSelinuxPolicy() \
+    /usr/sbin/semodule -s %1 -i %{_datadir}/selinux/%1/passenger.pp &> /dev/null || : \
+    /sbin/fixfiles -R %{package_name} restore || : \
+    /sbin/restorecon -R %{_libdir}/%{namespace}/support-binaries || :
+
+%triggerin -- selinux-policy-minimum
+%fixupSelinuxPolicy minimum
+
+%triggerin -- selinux-policy-mls
+%fixupSelinuxPolicy mls
+
+%triggerin -- selinux-policy-targeted
+%fixupSelinuxPolicy targeted
+
 
 %files
 %{_bindir}/*
