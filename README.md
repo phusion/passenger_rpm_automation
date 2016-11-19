@@ -339,3 +339,4 @@ If you are not on a Linux system, then you should spin down the Vagrant VM. Run 
 
  * https://github.com/phusion/passenger_autobuilder
  * https://github.com/phusion/passenger_apt_automation
+ * http://pkgs.fedoraproject.org/cgit/rpms/passenger.git/tree/
