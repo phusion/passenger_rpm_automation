@@ -227,6 +227,9 @@ popd
 
 # Build SELinux policy modules.
 %{__cp} %{SOURCE3} %{SOURCE4} .
+%if !(0%{?rhel} >= 7 || 0%{?fedora} >= 16)
+    %{__sed} -i "s|user system_u roles { unconfined_r } level s0 range s0;||g" passenger.te
+%endif
 %{__cp} %{SOURCE2} passenger.fc.tmp
 %{__sed} -i "s|SUPPORT_BINARIES_DIR_MAIN|%{_libdir}/%{namespace}/support-binaries|g" passenger.fc.tmp
 %{__sed} -i "s|SUPPORT_BINARIES_DIR_ALT|%{_prefix}/lib/%{namespace}/support-binaries|g" passenger.fc.tmp
