@@ -224,7 +224,7 @@ task :finish do
   end
 
   puts
-  puts "Commiting build products to output directory..."
+  puts "Committing build products to output directory..."
   sh "rm -rf /output/*"
   DISTROS.each do |distro_id|
     files = Dir["/work/#{distro_id}-*/*.rpm"]
