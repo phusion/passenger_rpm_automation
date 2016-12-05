@@ -332,12 +332,14 @@ if test "$policy_version" != "" && test "$policy_version" -lt 25; then
 fi
 
 %post
-for selinuxvariant in %{selinux_variants}; do
-    /usr/sbin/semodule -s ${selinuxvariant} -i \
-        %{_datadir}/selinux/${selinuxvariant}/passenger.pp &> /dev/null || :
-done
-/sbin/fixfiles -R %{package_name} restore || :
-/sbin/restorecon -R %{_libdir}/%{namespace}/support-binaries || :
+if /usr/sbin/sestatus | grep 'SELinux status' | grep -q enabled; then
+    for selinuxvariant in %{selinux_variants}; do
+        /usr/sbin/semodule -s ${selinuxvariant} -i \
+            %{_datadir}/selinux/${selinuxvariant}/passenger.pp
+    done
+    /sbin/fixfiles -R %{package_name} restore
+    /sbin/restorecon -R %{_libdir}/%{namespace}/support-binaries
+fi
 
 %postun
 if [ $1 -eq 0 ] ; then
@@ -350,9 +352,12 @@ if [ $1 -eq 0 ] ; then
 fi
 
 %define fixupSelinuxPolicy() \
-    /usr/sbin/semodule -s %1 -i %{_datadir}/selinux/%1/passenger.pp &> /dev/null || : \
-    /sbin/fixfiles -R %{package_name} restore || : \
-    /sbin/restorecon -R %{_libdir}/%{namespace}/support-binaries || :
+    if /usr/sbin/sestatus | grep 'SELinux status' | grep -q enabled; then \
+        echo "Fixing up Passenger's SELinux policy"; \
+        /usr/sbin/semodule -s %1 -i %{_datadir}/selinux/%1/passenger.pp; \
+        /sbin/fixfiles -R %{package_name} restore; \
+        /sbin/restorecon -R %{_libdir}/%{namespace}/support-binaries; \
+    fi
 
 %triggerin -- selinux-policy-minimum
 %fixupSelinuxPolicy minimum
