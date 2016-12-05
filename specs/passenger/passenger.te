@@ -1,4 +1,4 @@
-policy_module(passenger, 103.0)
+policy_module(passenger, 104.0)
 
 require {
 	type httpd_t, unconfined_t;
@@ -13,13 +13,16 @@ require {
 # domain when executed from a web server. The process works as follows:
 #
 # Web server security labels:
-#   system_u:system_r:httpd_t:s0
+#   unconfined_u:system_r:httpd_t:s0 (RHEL 6)
+#   system_u:system_r:httpd_t:s0     (RHEL 7)
 #
 # The PassengerAgent file has labels:
-#   system_u:object_r:passenger_exec_t:s0
+#   unconfined_u:object_r:passenger_exec_t:s0 (RHEL 6)
+#   system_u:object_r:passenger_exec_t:s0     (RHEL 7)
 #
 # Via passenger_exec_t, PassengerAgent transitions to
-# system_u:unconfined_r:unconfined_t:s0.
+#   unconfined_u:unconfined_r:unconfined_t:s0 (RHEL 6)
+#   system_u:unconfined_r:unconfined_t:s0     (RHEL 7)
 
 type passenger_exec_t;
 
@@ -41,17 +44,20 @@ domtrans_pattern(httpd_t, passenger_exec_t, unconfined_t)
 type passenger_instance_registry_t;      # /var/run/passenger-instreg
 type passenger_instance_dir_t;           # passenger-instreg/instance_dir
 type passenger_instance_content_t;       # instance_dir/*
-type passenger_instance_httpd_file_t;    # instance_dir/web_server_control_process.pid
+type passenger_instance_httpd_dir_t;     # instance_dir/web_server_info
+type passenger_instance_httpd_file_t;    # instance_dir/web_server_info/*
 type passenger_instance_httpd_socket_t;  # instance_dir/agents.s/core
 
 files_type(passenger_instance_registry_t)
 files_type(passenger_instance_dir_t)
 files_type(passenger_instance_content_t)
+files_type(passenger_instance_httpd_dir_t)
 files_type(passenger_instance_httpd_file_t)
 files_type(passenger_instance_httpd_socket_t)
 typeattribute passenger_instance_registry_t tmpfile;
 typeattribute passenger_instance_dir_t tmpfile;
 typeattribute passenger_instance_content_t tmpfile;
+typeattribute passenger_instance_httpd_dir_t tmpfile;
 typeattribute passenger_instance_httpd_file_t tmpfile;
 typeattribute passenger_instance_httpd_socket_t tmpfile;
 
@@ -63,33 +69,42 @@ filetrans_pattern(unconfined_t, passenger_instance_registry_t, passenger_instanc
 # automatically give it the passenger_instance_content_t label.
 filetrans_pattern(unconfined_t, passenger_instance_dir_t, passenger_instance_content_t, { dir file lnk_file sock_file fifo_file })
 
-# When web_server_control_process.pid is created in an instance dir,
-# automatically give it the passenger_instance_httpd_file_t label.
-filetrans_pattern(unconfined_t, passenger_instance_dir_t, passenger_instance_httpd_file_t, { file }, "web_server_control_process.pid")
-filetrans_pattern(httpd_t, passenger_instance_dir_t, passenger_instance_httpd_file_t, { file }, "web_server_control_process.pid")
-
-# When a socket named 'core' is created in an instance dir,
-# automatically give it the passenger_instance_httpd_socket_t label.
-filetrans_pattern(unconfined_t, passenger_instance_content_t, passenger_instance_httpd_socket_t, { sock_file }, "core")
+# When something is created in web_server_info/,
+# automatically give it the passenger_instance_httpd_file_t_t label.
+filetrans_pattern(unconfined_t, passenger_instance_httpd_dir_t, passenger_instance_httpd_file_t, { file })
+filetrans_pattern(httpd_t, passenger_instance_httpd_dir_t, passenger_instance_httpd_file_t, { file })
 
 
 ###### Web server <-> instance registry dir access rules ######
 
-# Allow web server to create web_server_control_process.pid and various other files
-# inside a Passenger instance dir.
-allow httpd_t passenger_instance_dir_t:dir { write add_name remove_name };
+# Allow web server to create files in web_server_info/.
+allow httpd_t passenger_instance_httpd_dir_t:dir { write add_name remove_name };
 allow httpd_t passenger_instance_httpd_file_t:file { create open write append setattr unlink };
 
-# Allow PassengerAgent core to create a Unix domain socket with
-# the passenger_instance_httpd_socket_t type.
-allow unconfined_t passenger_instance_httpd_socket_t:unix_stream_socket { create bind listen connectto setopt accept read write shutdown };
-
-# Allow web server Apache to connect to the PassengerAgent unix
-# domain socket.
+# Allow web server to connect to the Passenger core Unix domain socket.
 allow httpd_t passenger_instance_httpd_socket_t:sock_file { open read write };
 allow httpd_t passenger_instance_httpd_socket_t:unix_stream_socket { connectto setopt read write shutdown };
 
 
+###### Passenger core <-> instance registry dir access rules ######
+
+# Allow Passenger core to create a Unix domain socket with
+# the passenger_instance_httpd_socket_t type.
+allow unconfined_t passenger_instance_httpd_socket_t:unix_stream_socket { create bind listen connectto setopt accept read write shutdown };
+
+# Allow Passenger core to relabel files inside the instance
+# directory.
+allow unconfined_t passenger_instance_content_t:file relabelfrom;
+
+# Allow Passenger core to relabel "agents.s/core"
+# from passenger_instance_content_t to passenger_instance_httpd_socket_t.
+allow unconfined_t passenger_instance_httpd_socket_t:file relabelto;
+
+# Allow Passenger core to relabel "web_server_info/"
+# from passenger_instance_content_t to passenger_instance_httpd_dir_t.
+allow unconfined_t passenger_instance_httpd_dir_t:file relabelto;
+
+
 ###### Misc ######
 
-user system_u roles { unconfined_r } level s0 range s0;
+# user system_u roles { unconfined_r } level s0 range s0;
