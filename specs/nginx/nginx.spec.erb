@@ -151,7 +151,7 @@ export EXTRA_CXXFLAGS="${CXXFLAGS:-%optflags} -Wno-deprecated"
 export EXTRA_CFLAGS=`echo "$EXTRA_CFLAGS" | sed 's|-O2||g'`
 export EXTRA_CXXFLAGS=`echo "$EXTRA_CXXFLAGS" | sed 's|-O2||g'`
 export OPTIMIZE=yes
-
+export USE_SELINUX=yes
 export CACHING=false
 
 # Speed up ccache (reduce I/O) by lightly compressing things.
