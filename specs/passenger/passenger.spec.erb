@@ -38,8 +38,14 @@
 %{!?ruby_vendorarchdir: %global ruby_vendorarchdir %(ruby -rrbconfig -e 'puts RbConfig::CONFIG["vendorarchdir"]')}
 %global passenger_ruby_libdir %{ruby_vendorlibdir}
 %global locations_ini %{passenger_ruby_libdir}/phusion_passenger/locations.ini
-%global selinux_types %(%{__awk} '/^#[[:space:]]*SELINUXTYPE=/,/^[^#]/ { if ($3 == "-") printf "%s ", $2 }' /etc/selinux/config 2>/dev/null)
-%global selinux_variants %([ -z "%{selinux_types}" ] && echo mls targeted || echo %{selinux_types})
+
+# We leave out the 'mls' and 'minimum' variants on purpose: we don't
+# support those variants because they either lack unconfined_t or httpd_t.
+%if 0%{?rhel} >= 7
+%global static_selinux_variants targeted sandbox strict
+%else
+%global static_selinux_variants targeted
+%endif
 
 
 Summary: Phusion Passenger application server
@@ -101,6 +107,10 @@ BuildRequires: rubygem(rack)
 BuildRequires: zlib-devel
 BuildRequires: pcre-devel
 BuildRequires: openssl-devel
+BuildRequires: selinux-policy-targeted
+%if 0%{?rhel} >= 7
+BuildRequires: selinux-policy-sandbox
+%endif
 BuildRequires: checkpolicy, selinux-policy-devel, /usr/share/selinux/devel/policyhelp
 BuildRequires: libselinux-devel
 
@@ -231,7 +241,7 @@ popd
 %{__sed} -i "s|SUPPORT_BINARIES_DIR_MAIN|%{_libdir}/%{namespace}/support-binaries|g" passenger.fc.tmp
 %{__sed} -i "s|SUPPORT_BINARIES_DIR_ALT|%{_prefix}/lib/%{namespace}/support-binaries|g" passenger.fc.tmp
 uniq passenger.fc.tmp > passenger.fc
-for selinuxvariant in %{selinux_variants}; do
+for selinuxvariant in %{static_selinux_variants}; do
     %{__make} -f %{_datadir}/selinux/devel/Makefile NAME=passenger
     %{__mv} passenger.pp passenger.pp.${selinuxvariant}
     %{__make} -f %{_datadir}/selinux/devel/Makefile NAME=passenger clean
@@ -296,7 +306,7 @@ export LC_ALL=en_US.UTF-8
 %{__chmod} +x %{buildroot}%{_datadir}/%{namespace}/helper-scripts/wsgi-loader.py
 
 # Install SELinux policy module.
-for selinuxvariant in %{selinux_variants}; do
+for selinuxvariant in %{static_selinux_variants}; do
     %{__install} -d %{buildroot}%{_datadir}/selinux/${selinuxvariant}
     %{__install} -p -m 644 passenger.pp.${selinuxvariant} \
         %{buildroot}%{_datadir}/selinux/${selinuxvariant}/passenger.pp
@@ -328,19 +338,35 @@ if test "$policy_version" != "" && test "$policy_version" -lt 25; then
     exit 1
 fi
 
+%define listActualSelinuxVariants() \
+    actual_selinux_variants=; \
+    for selinux_policy_file in /etc/selinux/*/policy; do \
+        selinux_policy_dir=$(dirname ${selinux_policy_file}); \
+        actual_selinux_variants="$actual_selinux_variants $(basename ${selinux_policy_dir})"; \
+    done; \
+    actual_selinux_variants=$(echo ${actual_selinux_variants}); \
+    if [ -z "${actual_selinux_variants}" ]; then \
+        actual_selinux_variants=%{static_selinux_variants}; \
+    fi
+
 %post
 if /usr/sbin/sestatus | grep 'SELinux status' | grep -q enabled; then
-    for selinuxvariant in %{selinux_variants}; do
-        /usr/sbin/semodule -s ${selinuxvariant} -i \
-            %{_datadir}/selinux/${selinuxvariant}/passenger.pp
+    %listActualSelinuxVariants
+    for selinuxvariant in ${actual_selinux_variants}; do
+        if [ -e %{_datadir}/selinux/${selinuxvariant}/passenger.pp ]; then
+            echo "Installing Passenger SELinux policy for the $selinuxvariant variant"
+            /usr/sbin/semodule -s ${selinuxvariant} -i \
+                %{_datadir}/selinux/${selinuxvariant}/passenger.pp || :
+        fi
     done
-    /sbin/fixfiles -R %{package_name} restore
-    /sbin/restorecon -R %{_libdir}/%{namespace}/support-binaries
+    /sbin/fixfiles -R %{package_name} restore || :
+    /sbin/restorecon -R %{_libdir}/%{namespace}/support-binaries || :
 fi
 
 %postun
 if [ $1 -eq 0 ] ; then
-    for selinuxvariant in %{selinux_variants}; do
+    %listActualSelinuxVariants
+    for selinuxvariant in ${actual_selinux_variants}; do
         /usr/sbin/semodule -s ${selinuxvariant} -r passenger &> /dev/null || :
     done
     /sbin/fixfiles -R %{package_name} restore || :
@@ -349,21 +375,23 @@ if [ $1 -eq 0 ] ; then
 fi
 
 %define fixupSelinuxPolicy() \
-    if /usr/sbin/sestatus | grep 'SELinux status' | grep -q enabled; then \
-        echo "Fixing up Passenger's SELinux policy"; \
-        /usr/sbin/semodule -s %1 -i %{_datadir}/selinux/%1/passenger.pp; \
-        /sbin/fixfiles -R %{package_name} restore; \
-        /sbin/restorecon -R %{_libdir}/%{namespace}/support-binaries; \
+    if /usr/sbin/sestatus | grep 'SELinux status' | grep -q enabled && \
+        [ -e %{_datadir}/selinux/%1/passenger.pp ]; \
+    then \
+        echo "Fixing up Passenger's SELinux policy for the %1 variant"; \
+        /usr/sbin/semodule -s %1 -i %{_datadir}/selinux/%1/passenger.pp || true; \
+        /sbin/fixfiles -R %{package_name} restore || true; \
+        /sbin/restorecon -R %{_libdir}/%{namespace}/support-binaries || true; \
     fi
-
-%triggerin -- selinux-policy-minimum
-%fixupSelinuxPolicy minimum
-
-%triggerin -- selinux-policy-mls
-%fixupSelinuxPolicy mls
 
 %triggerin -- selinux-policy-targeted
 %fixupSelinuxPolicy targeted
+
+%triggerin -- selinux-policy-strict
+%fixupSelinuxPolicy strict
+
+%triggerin -- selinux-policy-sandbox
+%fixupSelinuxPolicy strict
 
 
 %files
