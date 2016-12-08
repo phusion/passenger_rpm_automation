@@ -39,13 +39,16 @@
 %global passenger_ruby_libdir %{ruby_vendorlibdir}
 %global locations_ini %{passenger_ruby_libdir}/phusion_passenger/locations.ini
 
-# We leave out the 'mls' and 'minimum' variants on purpose: we don't
-# support those variants because they either lack unconfined_t or httpd_t.
-%if 0%{?rhel} >= 7
-%global static_selinux_variants targeted sandbox strict
-%else
+# We leave out the 'mls', 'minimum', 'strict' and 'sandbox' variants on purpose.
+#
+# 'mls' lacks unconfined_t.
+# 'minimum' lacks httpd_t.
+# 'sandbox' is only for the policycoreutils-sandbox tool.
+#
+# 'strict' is omitted because Passenger’s policy essentially introduces a way for
+# the web server to run PassengerAgent (and subprocesses) in the unconfined domain,
+# which is philosophically incompatible with the idea of the strict policy
 %global static_selinux_variants targeted
-%endif
 
 
 Summary: Phusion Passenger application server
