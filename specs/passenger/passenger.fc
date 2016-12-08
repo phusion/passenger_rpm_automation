@@ -1,5 +1,5 @@
-SUPPORT_BINARIES_DIR_MAIN/PassengerAgent    --    gen_context(system_u:object_r:passenger_exec_t,s0)
-SUPPORT_BINARIES_DIR_ALT/PassengerAgent    --    gen_context(system_u:object_r:passenger_exec_t,s0)
+SUPPORT_BINARIES_DIR_MAIN/PassengerAgent        --    gen_context(system_u:object_r:passenger_exec_t,s0)
+SUPPORT_BINARIES_DIR_ALT/PassengerAgent         --    gen_context(system_u:object_r:passenger_exec_t,s0)
 /var/run/passenger-instreg                      -d    gen_context(system_u:object_r:passenger_instance_registry_t,s0)
 /var/run/passenger-instreg/[a-zA-Z0-9\-\.]+     -d    gen_context(system_u:object_r:passenger_instance_dir_t,s0)
 /var/run/passenger-instreg/[a-zA-Z0-9\-\.]+/.*        gen_context(system_u:object_r:passenger_instance_content_t,s0)
