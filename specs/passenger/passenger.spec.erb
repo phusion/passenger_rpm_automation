@@ -48,6 +48,9 @@
 # 'strict' is omitted because Passenger’s policy essentially introduces a way for
 # the web server to run PassengerAgent (and subprocesses) in the unconfined domain,
 # which is philosophically incompatible with the idea of the strict policy
+#
+# REMINDER: if you change this list, don't forget to update the 'triggerin'
+# sections.
 %global static_selinux_variants targeted
 
 
@@ -364,12 +367,6 @@ fi
 
 %triggerin -- selinux-policy-targeted
 %fixupSelinuxPolicy targeted
-
-%triggerin -- selinux-policy-strict
-%fixupSelinuxPolicy strict
-
-%triggerin -- selinux-policy-sandbox
-%fixupSelinuxPolicy strict
 
 
 %files
