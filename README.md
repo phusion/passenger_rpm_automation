@@ -215,7 +215,7 @@ To fix this problem, you need to enable the [CentOS Continuous Release](https://
 To enable or disable CR:
 
  * Edit `docker-images/buildbox/epel-7-x86_64.cfg`. Under the `[cr]` section, modify the `enabled` flag. Then run `make -C docker-images buildbox`
- * Edit `docker-images/testbox-7/install.sh`. Either comment or uncomment the lines responsible for enabling CR. Then run `make -C docker-images testbox-centos-7`
+ * Edit `docker-images/testbox-centos-7/install.sh`. Either comment or uncomment the lines responsible for enabling CR. Then run `make -C docker-images testbox-centos-7`
 
 When done, push these images and pull from them the CI server.
 
