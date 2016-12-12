@@ -35,8 +35,8 @@ run env BUNDLE_GEMFILE=/pra_build/Gemfile bundle install
 # Comment out the following two lines if you see any broken packages
 # For more information, see README.md section
 # "Dealing with broken packages: enabling/disabling CR".
-run yum update -y
-run yum-config-manager --enable cr
+#run yum update -y
+#run yum-config-manager --enable cr
 
 header "Miscellaneous"
 run ln -s /usr/bin/python2.7 /sbin/my_init_python
