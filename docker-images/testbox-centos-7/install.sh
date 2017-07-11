@@ -38,6 +38,10 @@ run env BUNDLE_GEMFILE=/pra_build/Gemfile bundle install
 #run yum update -y
 #run yum-config-manager --enable cr
 
+header "Installing more dependencies"
+run curl https://dl.yarnpkg.com/rpm/yarn.repo -o /etc/yum.repos.d/yarn.repo
+run yum install -y nodejs yarn
+
 header "Miscellaneous"
 run ln -s /usr/bin/python2.7 /sbin/my_init_python
 run mkdir /etc/container_environment
