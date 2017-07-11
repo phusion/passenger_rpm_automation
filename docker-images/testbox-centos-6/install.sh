@@ -23,10 +23,10 @@ header "Installing dependencies"
 run rpm -Uvh http://mirror.overthewire.com.au/pub/epel/6/x86_64/epel-release-6-8.noarch.rpm
 run yum install -y --enablerepo centosplus centos-release-scl
 run yum install -y --enablerepo centosplus \
-	@development-tools ccache python27-python \
+	gcc gcc-c++ ccache python27-python \
 	ruby ruby-devel rubygems rubygem-rack rubygem-rake perl git tar which \
-	httpd httpd-devel httpd-tools zlib-devel sqlite-devel curl-devel \
-	GeoIP gd libxslt
+	httpd httpd-devel httpd-tools zlib-devel sqlite-devel libcurl-devel \
+	GeoIP gd libxslt openssl-devel
 run gem install bundler -v 1.10.6 --no-rdoc --no-ri
 run env BUNDLE_GEMFILE=/pra_build/Gemfile bundle install
 
