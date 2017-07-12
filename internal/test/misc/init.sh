@@ -1,8 +1,5 @@
 #!/bin/bash
 
-# Activate before setting -e
-source /etc/activate_passenger_rpm_automation_test
-
 set -e
 
 echo "PS1='\\u@testbox:\\w\\\$ '" >> /root/.bashrc

@@ -47,7 +47,6 @@ run ln -s /usr/bin/python2.7 /sbin/my_init_python
 run mkdir /etc/container_environment
 run mkdir /pra
 run cp /pra_build/Gemfile* /pra/
-run cp /pra_build/activate_passenger_rpm_automation_test /etc/activate_passenger_rpm_automation_test
 
 header "Cleaning up"
 run yum clean all
