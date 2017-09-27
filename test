@@ -86,7 +86,7 @@ function parse_options()
 		echo "ERROR: please specify a distribution with -x."
 		exit 1
 	else
-		IMAGE=`distro_name_to_testbox_image "$DISTRIBUTION"`
+		TEST_IMAGE=`distro_name_to_testbox_image "$DISTRIBUTION"`
 	fi
 	if [[ "$OUTPUT_DIR" = "" ]]; then
 		echo "ERROR: please specify a build products directory with -d."
@@ -132,7 +132,7 @@ exec docker run \
 	-e "JENKINS=$JENKINS" \
 	-e "APP_UID=`/usr/bin/id -u`" \
 	-e "APP_GID=`/usr/bin/id -g`" \
-	$IMAGE \
+	$TEST_IMAGE \
 	/system/internal/scripts/my_init --quiet --skip-runit --skip-startup-files -- \
 	/system/internal/scripts/inituidgid.sh \
 	/system/internal/test/misc/init.sh \

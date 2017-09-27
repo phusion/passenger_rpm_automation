@@ -18,6 +18,7 @@ The goal of this project is twofold:
    - [The test script](#the-test-script)
    - [The publish script](#the-publish-script)
  * [Maintenance](#maintenance)
+   - [Updating build and/or testboxes](#updating-build-and-or-testboxes)
    - [Adding support for a new distribution](#adding-support-for-a-new-distribution)
    - [Building Nginx packages only](#building-nginx-packages-only)
    - [Updating SSL certificates](#updating-ssl-certificates)
@@ -130,6 +131,13 @@ Once packages have been built, you can publish them to PackageCloud. The `publis
  * The last argument is the task to run. The `publish:all` publishes all packages inside the build script output directory.
 
 ## Maintenance
+
+### Updating build and/or testboxes
+
+If you change the buildbox or testbox, you should create a new version:
+
+1. Update the relevant part(s) in `internal/lib/docker_image_info.sh`.
+2. Run `./internal/scripts/regen_distro_info_script.sh`.
 
 ### Adding support for a new distribution
 

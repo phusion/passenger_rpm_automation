@@ -5,11 +5,15 @@
 #
 # Edit those and regenerate distro_info.sh by running:
 # internal/scripts/regen_distro_info_script.sh
+<% BUILDBOX_NAME=`internal/lib/docker_image_info.sh buildbox_name`
+   BUILDBOX_VERSION=`internal/lib/docker_image_info.sh buildbox_version`
 
+   TESTBOX_BASE_NAME=`internal/lib/docker_image_info.sh testbox_base_name`
+   TESTBOX_VERSION=`internal/lib/docker_image_info.sh testbox_version` %>
 
 function get_buildbox_image()
 {
-  echo "phusion/passenger_rpm_automation_buildbox:1.0.0"
+  echo "<%= BUILDBOX_NAME %>:<%= BUILDBOX_VERSION %>"
 }
 
 function el_name_to_distro_name()
@@ -29,9 +33,9 @@ function distro_name_to_testbox_image()
 {
 	local DISTRIBUTION="$1"
 	if [[ "$DISTRIBUTION" = centos7 ]]; then
-    echo phusion/passenger_rpm_automation_testbox_centos_7:1.0.0
+    echo <%= TESTBOX_BASE_NAME %>_centos_7:<%= TESTBOX_VERSION %>
 	elif [[ "$DISTRIBUTION" = centos6 ]]; then
-    echo phusion/passenger_rpm_automation_testbox_centos_6:1.0.0
+    echo <%= TESTBOX_BASE_NAME %>_centos_6:<%= TESTBOX_VERSION %>
 	else
 		echo "ERROR: unknown distribution name." >&2
 		return 1

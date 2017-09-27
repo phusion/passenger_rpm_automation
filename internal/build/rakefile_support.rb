@@ -22,7 +22,7 @@ def initialize_rakefile!
   DISTROS.each do |distro|
     if !valid_distro_name?(distro)
       abort "'#{distro}' is not a valid Red Hat distribution name. " +
-        "If this is a new distribution that passenger_apt_automation doesn't " +
+        "If this is a new distribution that passenger_rpm_automation doesn't " +
         "know about, please edit internal/lib/distro_info.rb."
     end
   end

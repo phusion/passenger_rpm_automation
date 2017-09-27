@@ -1,0 +1,12 @@
+#!/bin/bash
+set -e
+if [ $# -ne 2 ]; then
+	echo "Please specify 2 arguments: image:version subdir, for example:"
+	echo "phusion/passenger_rpm_automation_testbox_centos_7:1.0.0 testbox-centos-7"
+	exit 1
+fi
+SELFDIR=`dirname "$0"`
+SELFDIR=`cd "$SELFDIR" && pwd`
+set -x
+cd "$SELFDIR/$2"
+exec docker build --force-rm -t $1 .
