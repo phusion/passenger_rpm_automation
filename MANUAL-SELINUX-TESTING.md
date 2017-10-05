@@ -2,6 +2,8 @@
 
 The Passenger RPM contains an SELinux policy. We currently have no automated tests for this because SELinux does not work inside Docker containers. So here is the procedure for manually testing SELinux. All commands must be run as a normal user unless otherwise indicated.
 
+For your convenience, there use the Vagrantfile in the `vagrant-centos/` directory to spin up a CentOS VM.
+
 ## Preparation
 
 ### 1. Enable SELinux and set it to enforcing mode

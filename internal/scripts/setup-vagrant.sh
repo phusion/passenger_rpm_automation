@@ -3,25 +3,21 @@ set -e
 set -o pipefail
 set -x
 
-echo "exclude = kernel*" >> /etc/yum.conf
-
-yum install -y wget nano epel-release device-mapper-event-libs
 if [[ ! -e /usr/bin/docker ]]; then
-	wget -qO- https://get.docker.com/ | bash
-fi
-if ! grep -q '^docker:' /etc/group; then
-	groupadd docker
+	apt-get update
+	apt-get install -y apt-transport-https ca-certificates curl software-properties-common
+	curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add -
+	add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
+	apt-get update
+	apt-get install -y docker-ce
 fi
 usermod -aG docker vagrant
-service docker start
-systemctl enable docker.service
-
 cp /vagrant/internal/scripts/bashrc-local.sh /etc/
-if ! grep -qF bashrc-local.sh /etc/bashrc; then
+if ! grep -qF bashrc-local.sh /etc/bash.bashrc; then
 	echo ". /etc/bashrc-local.sh" >> /etc/bashrc
 fi
-if ! grep -q 'cd /vagrant' ~vagrant/.bash_profile; then
-	echo 'if tty -s; then cd /vagrant; fi' >> ~vagrant/.bash_profile
+if ! grep -q 'cd /vagrant' ~vagrant/.profile; then
+	echo 'if tty -s; then cd /vagrant; fi' >> ~vagrant/.profile
 fi
 
 mkdir -p /home/vagrant/cache

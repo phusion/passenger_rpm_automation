@@ -1,14 +1,14 @@
-ROOT = File.expand_path(File.dirname(__FILE__) + "/..")
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
 
 # Vagrantfile API/syntax version. Don't touch unless you know what you're doing!
 VAGRANTFILE_API_VERSION = "2"
 
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
-  config.vm.box = "bento/centos-7.1"
-  config.vm.hostname = "centos7"
+  config.vm.box = "boxcutter/ubuntu1604"
 
   if File.exist?("../../bin/passenger")
-    passenger_path = File.absolute_path("../../bin/passenger")
+    passenger_path = File.absolute_path("../../")
   elsif File.directory?("../passenger")
     passenger_path = File.absolute_path("../passenger")
   end
@@ -16,15 +16,15 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     config.vm.synced_folder passenger_path, "/passenger"
   end
 
-  config.vm.provider :virtualbox do |vb, override|
-    vb.cpus   = 2
-    vb.memory = 1536
-  end
-
-  config.vm.provider :vmware_fusion do |vf, override|
-    vf.vmx["numvcpus"] = 2
-    vf.vmx["memsize"]  = 1536
-  end
-
   config.vm.provision :shell, :path => "internal/scripts/setup-vagrant.sh"
+
+  config.vm.provider "virtualbox" do |v|
+    v.memory = 2048
+    v.cpus = 2
+  end
+
+  config.vm.provider "vmware_fusion" do |v|
+    v.vmx["memsize"] = "2048"
+    v.vmx["numvcpus"] = "2"
+  end
 end
