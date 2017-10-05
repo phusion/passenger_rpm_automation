@@ -4,6 +4,15 @@
 set -e
 set -o pipefail
 
+# Hack to make the Passenger RPM packaging tests on our Jenkins infrastructure
+# to work. Jenkins has UID 999 and GID 998. There is also a user saslauth and group
+# ssh_keys in the CentOS 7 container with these UID/GID, but we don't need them so
+# we just delete them.
+if grep -q 7 /etc/redhat-release; then
+	userdel saslauth
+	groupdel ssh_keys
+fi
+
 if [[ "$APP_UID" -lt 1024 ]]; then
 	if awk -F: '{ print $3 }' < /etc/passwd | grep -q "^${APP_UID}$"; then
 		echo "ERROR: you can only run this script with a user whose UID is at least 1024, or whose UID does not already exist in the Docker container. Current UID: $APP_UID"
