@@ -1,6 +1,9 @@
 require 'fileutils'
 require 'open-uri'
 require File.expand_path(File.dirname(__FILE__) + '/misc/test_support')
+require '/tmp/passenger/src/ruby_supportlib/phusion_passenger'
+PhusionPassenger.locate_directories
+PhusionPassenger.require_passenger_lib 'admin_tools/instance_registry'
 
 include FileUtils
 
@@ -92,6 +95,17 @@ describe "The system's Apache with Passenger enabled" do
     start_stop_service("httpd", "start")
     eventually do
       ping_tcp_socket("127.0.0.1", 80)
+    end
+
+    # Shortly after starting Apache, there may be two Passenger instances
+    # because Apache reloads the module immediately during startup. To
+    # prevent `passenger-config restart-app` from thinking there are two
+    # instances, we sleep a little bit here to allow the old instance to
+    # go away.
+    sleep 1
+    eventually(5) do
+      instances = PhusionPassenger::AdminTools::InstanceRegistry.new.list
+      instances.size == 1
     end
   end
 
