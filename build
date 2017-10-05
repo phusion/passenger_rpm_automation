@@ -183,7 +183,6 @@ else
 		-v "$WORK_DIR:/work" \
 		-v "$CACHE_DIR:/cache" \
 		-v "$OUTPUT_DIR:/output" \
-		-v "$CACHE_DIR/pbuilder:/var/cache/pbuilder" \
 		-e "DISTRIBUTIONS=$DISTRIBUTIONS" \
 		-e "ARCHITECTURES=$ARCHITECTURES" \
 		-e "SHOW_OVERVIEW_PERIODICALLY=$SHOW_OVERVIEW_PERIODICALLY" \

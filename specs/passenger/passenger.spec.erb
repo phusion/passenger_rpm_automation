@@ -213,9 +213,8 @@ export USE_SELINUX=yes
 export CACHING=false
 
 # Speed up ccache (reduce I/O) by lightly compressing things.
-# Always set these variables because pbuilder uses ccache transparently.
 export CCACHE_COMPRESS=1
-export CCACHE_COMPRESS_LEVEL=3
+export CCACHE_COMPRESSLEVEL=3
 
 export LANG=en_US.UTF-8
 export LANGUAGE=en_US.UTF-8
