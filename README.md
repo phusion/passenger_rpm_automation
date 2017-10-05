@@ -174,11 +174,7 @@ In these instructions, we assume that the new distribution is Red Hat 7. Update 
         cd docker-images
         make upload
 
- 8. On the Phusion CI server, pull the latest buildbox:
-
-        docker pull phusion/passenger_rpm_automation_buildbox
-
- 9. Inside the [passenger](https://github.com/phusion/passenger) repository, update the `packaging/rpm` submodule (which refers to the `passenger_rpm_automation` repository) to the latest commit, then commit the result. Assuming you want the submodule to update to the latest `master` branch commit:
+ 8. Inside the [passenger](https://github.com/phusion/passenger) repository, update the `packaging/rpm` submodule (which refers to the `passenger_rpm_automation` repository) to the latest commit, then commit the result. Assuming you want the submodule to update to the latest `master` branch commit:
 
         cd packaging/rpm
         git checkout master
@@ -186,6 +182,10 @@ In these instructions, we assume that the new distribution is Red Hat 7. Update 
         cd ../..
         git commit -a -m "Add packaging support for Red Hat 7"
         git push
+
+ 9. Inside that same passenger repository, edit dev/ci/tests/rpm/Jenkinsfile and add corresponding code for this new distribution and all its supported architectures.
+
+ 10. Inside the passenger-release repository, add this new distribution and all its supported architectures to its Jenkinsfile's `RPM_DISTROS` and `RPM_TARGETS` constants.
 
 ### Building Nginx packages only
 
