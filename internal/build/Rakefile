@@ -168,6 +168,7 @@ namespace :rpm do
             "-r #{mock_chroot_name} " +
             "--resultdir '/work/#{distro_id}-#{arch}' " +
             "--uniqueext passenger-#{distro_id}-#{arch} " +
+            "--enable-plugin=ccache " +
             "rebuild /work/#{distro_id}-#{arch}/#{passenger_srpm_name(distro_id)}"
         end
       end
@@ -197,6 +198,7 @@ namespace :rpm do
             "-r #{mock_chroot_name} " +
             "--resultdir '/work/#{distro_id}-#{arch}' " +
             "--uniqueext nginx-#{distro_id}-#{arch} " +
+            "--enable-plugin=ccache " +
             "rebuild /work/#{distro_id}-#{arch}/#{nginx_srpm_name(distro_id)}"
         end
       end
