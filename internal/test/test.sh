@@ -58,6 +58,7 @@ export PATH=/usr/lib64/ccache:$PATH
 export CCACHE_DIR=/cache/test-$DISTRIBUTION/ccache
 export CCACHE_COMPRESS=1
 export CCACHE_COMPRESS_LEVEL=3
+export PASSENGER_TEST_NODE_MODULES_DIR=/tmp/passenger/node_modules
 run setuser app mkdir -p $CCACHE_DIR
 echo "+ Updating /etc/hosts"
 cat /system/internal/test/misc/hosts.conf >> /etc/hosts
