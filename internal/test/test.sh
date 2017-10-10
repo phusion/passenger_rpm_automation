@@ -4,7 +4,10 @@ ROOTDIR=`dirname "$0"`
 ROOTDIR=`cd "$ROOTDIR/../.." && pwd`
 source "$ROOTDIR/internal/lib/library.sh"
 
-COMPILE_CONCURRENCY=${COMPILE_CONCURRENCY:-2}
+# DON'T SET ENVIRONMENT VARIABLES HERE!
+# Set them in internal/test/misc/init.sh instead. Otherwise
+# environment variables won't be available in the debugging
+# console.
 
 if ls /output/*enterprise* >/dev/null 2>/dev/null; then
 	if [[ ! -e /etc/passenger-enterprise-license ]]; then
@@ -54,11 +57,6 @@ cd /tmp/passenger
 
 echo
 header "Preparing system..."
-export PATH=/usr/lib64/ccache:$PATH
-export CCACHE_DIR=/cache/test-$DISTRIBUTION/ccache
-export CCACHE_COMPRESS=1
-export CCACHE_COMPRESS_LEVEL=3
-export PASSENGER_TEST_NODE_MODULES_DIR=/tmp/passenger/node_modules
 run setuser app mkdir -p $CCACHE_DIR
 echo "+ Updating /etc/hosts"
 cat /system/internal/test/misc/hosts.conf >> /etc/hosts

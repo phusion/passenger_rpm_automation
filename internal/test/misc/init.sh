@@ -7,6 +7,13 @@ echo "PS1='\\u@testbox:\\w\\\$ '" >> /root/.bashrc
 # Make setuser available in PATH
 cp /system/internal/scripts/setuser /sbin/
 
+export COMPILE_CONCURRENCY=${COMPILE_CONCURRENCY:-2}
+export PATH=/usr/lib64/ccache:$PATH
+export CCACHE_DIR=/cache/test-$DISTRIBUTION/ccache
+export CCACHE_COMPRESS=1
+export CCACHE_COMPRESS_LEVEL=3
+export PASSENGER_TEST_NODE_MODULES_DIR=/tmp/passenger/node_modules
+
 if ! /system/internal/test/test.sh "$@"; then
 	echo
 	echo "---------------------------------------------"
