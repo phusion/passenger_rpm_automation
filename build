@@ -1,9 +1,11 @@
 #!/bin/bash
 set -e
 
-SELFDIR="`dirname \"$0\"`"
-SELFDIR="`cd \"$SELFDIR\" && pwd`"
+SELFDIR=$(dirname "$0")
+SELFDIR=$(cd "$SELFDIR" && pwd)
+# shellcheck source=internal/lib/library.sh
 source "$SELFDIR/internal/lib/library.sh"
+# shellcheck source=internal/lib/distro_info.sh
 source "$SELFDIR/internal/lib/distro_info.sh"
 
 PASSENGER_DIR=
