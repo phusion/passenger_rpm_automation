@@ -22,20 +22,21 @@ run groupadd --gid 2467 app
 run adduser --uid 2467 --gid 2467 --password '#' app
 
 header "Installing dependencies"
-run rpm -Uvh http://mirror.overthewire.com.au/pub/epel/6/x86_64/epel-release-6-8.noarch.rpm
+run rpm -Uvh https://dl.fedoraproject.org/pub/epel/epel-release-latest-6.noarch.rpm
 run yum update -y
 run yum install -y --enablerepo centosplus --skip-broken centos-release-SCL
 run yum install -y --enablerepo centosplus --skip-broken createrepo \
-	@development-tools fedora-packager git sudo gcc gcc-c++ ccache \
+	fedora-packager git sudo gcc gcc-c++ ccache \
 	curl-devel openssl-devel python27-python \
 	httpd httpd-devel zlib-devel \
 	libxml2-devel libxslt-devel sqlite-devel \
 	libev-devel pcre-devel rubygem-rack source-highlight \
 	apr-devel apr-util-devel which GeoIP-devel \
 	gd-devel gperftools-devel perl-devel perl-ExtUtils-Embed \
-	nodejs010-nodejs nodejs010-npm
+	nodejs npm
+run yum groupinstall -y "Development Tools"
 
-run gpg --keyserver hkp://keys.gnupg.net --recv-keys 409B6B1796C275462A1703113804BB82D39DC0E3
+run gpg --keyserver hkp://keys.gnupg.net --recv-keys 409B6B1796C275462A1703113804BB82D39DC0E3 7D2BAF1CF37B13E2069D6956105BD0E739499BDB
 run curl --fail -sSLo /tmp/rvm.sh https://get.rvm.io
 run bash /tmp/rvm.sh stable
 source /usr/local/rvm/scripts/rvm

@@ -18,7 +18,7 @@ The goal of this project is twofold:
    - [The test script](#the-test-script)
    - [The publish script](#the-publish-script)
  * [Maintenance](#maintenance)
-   - [Updating build and/or testboxes](#updating-build-and-or-testboxes)
+   - [Updating build and/or testboxes](#updating-build-andor-testboxes)
    - [Adding support for a new distribution](#adding-support-for-a-new-distribution)
    - [Building Nginx packages only](#building-nginx-packages-only)
    - [Updating SSL certificates](#updating-ssl-certificates)
@@ -138,6 +138,8 @@ If you change the buildbox or testbox, you should create a new version:
 
 1. Update the relevant part(s) in `internal/lib/docker_image_info.sh`.
 2. Run `./internal/scripts/regen_distro_info_script.sh`.
+3. Run `cd docker-images/ && make all`.
+3. Run `make upload`.
 
 ### Adding support for a new distribution
 
