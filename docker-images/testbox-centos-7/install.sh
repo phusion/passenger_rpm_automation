@@ -20,9 +20,9 @@ run groupadd --gid 2467 app
 run adduser --uid 2467 --gid 2467 --password '#' app
 
 header "Installing dependencies"
-run yum install -y --enablerepo centosplus epel-release centos-release-SCL \
+run yum install -y --enablerepo centosplus epel-release centos-release-scl \
 	yum-utils deltarpm
-run yum group install -y "Development Tools"
+run yum groupinstall -y "Development Tools"
 run yum install -y --enablerepo centosplus \
 	ruby ruby-devel rubygems rubygem-rack rubygem-rake nodejs npm \
 	ccache perl git tar which \

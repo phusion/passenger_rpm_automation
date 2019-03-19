@@ -31,7 +31,8 @@ run gem install bundler -v 1.10.6 --no-rdoc --no-ri
 run env BUNDLE_GEMFILE=/pra_build/Gemfile bundle install
 
 header "Installing more dependencies"
-run curl --silent --location https://rpm.nodesource.com/setup_6.x | bash -
+echo '+ curl --silent --location https://rpm.nodesource.com/setup_6.x | bash -'
+curl --silent --location https://rpm.nodesource.com/setup_6.x | bash -
 run curl https://dl.yarnpkg.com/rpm/yarn.repo -o /etc/yum.repos.d/yarn.repo
 run yum clean all
 run yum install -y nodejs yarn
