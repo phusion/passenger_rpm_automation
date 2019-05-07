@@ -145,30 +145,39 @@ If you change the buildbox or testbox, you should create a new version:
 
 In these instructions, we assume that the new distribution is Red Hat 7. Update the actual parameters accordingly.
 
- 1. Rebuild the build box so that it has the latest distribution information:
+ 1. Bump the the buildbox version number's tiny component. Open `internal/lib/docker_image_info.sh` and change the number under `buildbox_version`.
 
-        ./docker-images/setup-buildbox-docker-image
+ 2. Add a definition for this new distribution to `internal/lib/distro_info.rb`.
 
- 2. Add a definition for this new distribution to `internal/lib/distro_info.rb` and `internal/lib/distro_info.sh`.
- 3. Add the distribution's codename to the `DISTRIBUTIONS` variable's default value inside the `build` script.
- 4. Update the package definitions in `specs/`.
- 5. Build and publish packages for this distribution only. You can do that by running the build script with the `-d` option.
+     1. Add to the `REDHAT_ENTERPRISE_DISTRIBUTIONS` constant.
+     2. Add to the `DISTRO_BUILD_PARAMS` constant.
+
+ 3. Run `internal/scripts/regen_distro_info_script.sh`.
+
+ 4. Rebuild the build box so that it has the latest distribution information:
+
+        make -C docker-images buildbox
+
+ 5. Add `<% if %>` statements accordingly to output the appropriate content for the target distribution in `specs/passenger/passenger.spec.erb`.
+
+ 6. Build and publish packages for this distribution only. You can do that by running the build script with the `-d` option.
 
         ./build -p /passenger -w work -c cache -o output -d el7 rpm:all
         ./publish -d output -c ~/.packagecloud_token -r passenger-testing publish:all
 
- 6. Create a test box for this new distribution.
+ 7. Create a test box for this new distribution.
 
-     1. Create `docker-images/setup-testbox-docker-image-centos-7`
-     2. Create `docker-images/testbox-centos-7/`
+     1. Create `docker-images/testbox-centos-7/` (copy of testbox of previous release)
+     2. Set the correct From in `docker-images/testbox-centos-7/Dockerfile`
      3. Edit `docker-images/Makefile` and add entries for this new testbox.
-     4. Run `./docker-images/setup-testbox-docker-image-centos-7`
+
+        make -C docker-images testbox-centos-7
 
     When done, test Passenger under the new testbox:
 
         ./test -p /passenger -x el7 -d output/el7 -c cache
 
- 7. Commit and push all changes, then publish the new packages and the updated Docker images by running:
+ 8. Commit and push all changes, then publish the new packages and the updated Docker images by running:
 
         git add docker-images
         git commit -a -m "Add support for Red Hat 7"
@@ -176,16 +185,21 @@ In these instructions, we assume that the new distribution is Red Hat 7. Update 
         cd docker-images
         make upload
 
- 8. Inside the [passenger](https://github.com/phusion/passenger) repository, update the `packaging/rpm` submodule (which refers to the `passenger_rpm_automation` repository) to the latest commit, then commit the result. Assuming you want the submodule to update to the latest `master` branch commit:
+ 9. Inside the [passenger](https://github.com/phusion/passenger) repository:
+
+     1. Update the `packaging/rpm` submodule (which refers to the `passenger_rpm_automation` repository) to the latest commit, then commit the result. Assuming you want the submodule to update to the latest `master` branch commit:
 
         cd packaging/rpm
         git checkout master
         git pull
         cd ../..
-        git commit -a -m "Add packaging support for Red Hat 7"
-        git push
 
- 9. Inside that same passenger repository, edit dev/ci/tests/rpm/Jenkinsfile and add corresponding code for this new distribution and all its supported architectures.
+     2. Edit `dev/ci/tests/rpm/Jenkinsfile` and add corresponding code for this new distribution and all its supported architectures.
+
+     3. Commit and push the result:
+
+            git commit -a -m "Add packaging support for CentOS 7"
+            git push
 
  10. Inside the passenger-release repository, add this new distribution and all its supported architectures to its Jenkinsfile's `RPM_DISTROS` and `RPM_TARGETS` constants.
 

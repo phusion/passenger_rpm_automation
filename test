@@ -24,7 +24,7 @@ function usage()
 	echo
 	echo "Required options:"
 	echo "  -p DIR     Path to Passenger source code"
-	echo "  -x DISTRO  Distribution to run tests in: centos6,centos7"
+	echo "  -x DISTRO  Distribution to run tests in: centos6,centos7,centos8"
 	echo "  -d DIR     Path to built packages"
 	echo "  -c DIR     Path to cache directory"
 	echo
