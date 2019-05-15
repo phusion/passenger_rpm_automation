@@ -9,7 +9,7 @@
 
 function get_buildbox_image()
 {
-  echo "phusion/passenger_rpm_automation_buildbox:1.0.1"
+  echo "phusion/passenger_rpm_automation_buildbox:1.0.2"
 }
 
 function el_name_to_distro_name()
