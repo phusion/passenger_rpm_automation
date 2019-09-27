@@ -58,6 +58,10 @@ run mkdir -p /etc/container_environment
 run cp /pra_build/my_init_python /sbin/my_init_python
 run cp /pra_build/site-defaults.cfg /etc/mock/site-defaults.cfg
 run cp /pra_build/epel-7-x86_64.cfg /etc/mock/epel-7-x86_64.cfg
+run cp /pra_build/epel-8-x86_64.cfg /etc/mock/epel-8-x86_64.cfg
+run mkdir -p /etc/mock/templates/
+run cp /pra_build/centos-8.tpl /etc/mock/templates/centos-8.tpl
+run cp /pra_build/epel-8.tpl /etc/mock/templates/epel-8.tpl
 
 header "Cleaning up"
 run yum clean all

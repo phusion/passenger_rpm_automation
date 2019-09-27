@@ -151,6 +151,7 @@ In these instructions, we assume that the new distribution is Red Hat 7. Update 
 
      1. Add to the `REDHAT_ENTERPRISE_DISTRIBUTIONS` constant.
      2. Add to the `DISTRO_BUILD_PARAMS` constant.
+     3. Add the new mock configs to the `docker-images/buildbox/install.sh` script.
 
  3. Run `internal/scripts/regen_distro_info_script.sh`.
 
