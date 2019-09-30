@@ -1,4 +1,4 @@
-FROM centos:centos6
+FROM centos:centos7
 MAINTAINER Phusion <info@phusion.nl>
 
 ADD . /pra_build
