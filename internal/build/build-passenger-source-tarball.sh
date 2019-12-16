@@ -1,5 +1,5 @@
 #!/bin/bash
-# Usage: build-passenger-source-tarball.sh <OUTPUT>
+# Usage: build-passenger-orig-tarball.sh <OUTPUT> <NGINX_MODULE_TARBALL>
 # Builds the Passenger RPM source tarball from a Passenger source directory.
 #
 # Required environment variables:
@@ -14,7 +14,7 @@ ROOTDIR=`dirname "$0"`
 ROOTDIR=`cd "$ROOTDIR/../.." && pwd`
 source "$ROOTDIR/internal/lib/library.sh"
 
-require_args_exact 1 "$@"
+require_args_exact 2 "$@"
 require_envvar PASSENGER_VERSION "$PASSENGER_VERSION"
 require_envvar PASSENGER_TARBALL_NAME "$PASSENGER_TARBALL_NAME"
 require_envvar PASSENGER_TARBALL "$PASSENGER_TARBALL"
@@ -28,15 +28,15 @@ header "Creating Passenger official tarball"
 run rm -rf /tmp/passenger
 if [[ -e /passenger/.git ]]; then
 	run mkdir /tmp/passenger
-	echo "+ cd /passenger"
+	echo "+ cd /passenger (expecting local git repo to copy from)"
 	cd /passenger
-	echo "+ Git copying to /tmp/passenger"
+	echo "+ Copying all git committed files to /tmp/passenger"
 	(
 		set -o pipefail
 		git archive --format=tar HEAD | tar -C /tmp/passenger -x
 		submodules=`git submodule status | awk '{ print $2 }'`
 		for submodule in $submodules; do
-			echo "+ Git copying submodule $submodule"
+			echo "+ Copying all git committed files from submodule $submodule"
 			pushd $submodule >/dev/null
 			mkdir -p /tmp/passenger/$submodule
 			git archive --format=tar HEAD | tar -C /tmp/passenger/$submodule -x
@@ -64,6 +64,9 @@ header "Extracting Nginx into Passenger directory"
 echo "+ cd $PASSENGER_TARBALL_NAME-$PASSENGER_VERSION"
 cd $PASSENGER_TARBALL_NAME-$PASSENGER_VERSION
 run tar xzf ~/rpmbuild/SOURCES/$NGINX_TARBALL
+
+header "Extracting Nginx into Passenger directory for Module"
+run tar xzf ~/rpmbuild/SOURCES/${NGINX_TARBALL_NAME}-${2}.tar.gz
 
 header "Packaging up"
 cd ..

@@ -12,15 +12,37 @@ SOURCE_TASKS = ['source:passenger', 'source:nginx', 'source:packaging_additions'
 register_tracking_category(:preparation, 'Preparation')
 
 namespace :source do
-  register_tracking_task(:preparation, 'passenger')
-  desc "Create Passenger source tarball"
-  task :passenger => :nginx do
-    track_task(:preparation, 'passenger') do |task|
-      if FETCH_PASSENGER_TARBALL_FROM_CACHE && File.exist?("/cache/#{PASSENGER_TARBALL}")
-        task.sh "cp /cache/#{PASSENGER_TARBALL} #{RPM_SOURCES_DIR}/#{PASSENGER_TARBALL}"
-      else
-        task.sh "./build-passenger-source-tarball.sh #{RPM_SOURCES_DIR}/#{PASSENGER_TARBALL}"
-        task.sh "cp #{RPM_SOURCES_DIR}/#{PASSENGER_TARBALL} /cache/#{PASSENGER_TARBALL}"
+  DISTROS.each do |distro|
+    register_tracking_task(:preparation, "passenger:#{distro}")
+    desc "Create Passenger source tarball"
+    if dynamic_module_supported?(distro)
+      task("passenger:#{distro}" => :nginx) do
+        track_task(:preparation, "passenger:#{distro}") do |task|
+          if FETCH_PASSENGER_TARBALL_FROM_CACHE && File.exist?("/cache/#{distro}_#{PASSENGER_TARBALL}")
+            task.sh "cp /cache/#{distro}_#{PASSENGER_TARBALL} #{RPM_SOURCES_DIR}/#{PASSENGER_TARBALL}"
+          else
+            available_nginx_version = latest_nginx_available(distro)
+            if File.exist?("/cache/nginx_#{available_nginx_version}.source.tar.gz")
+              task.sh "cp /cache/nginx_#{available_nginx_version}.source.tar.gz #{RPM_SOURCES_DIR}/"
+            else
+              task.sh "./download-nginx-source-tarball.sh #{available_nginx_version} #{RPM_SOURCES_DIR}/nginx_#{available_nginx_version}.source.tar.gz"
+              task.sh "cp #{RPM_SOURCES_DIR}/nginx_#{available_nginx_version}.source.tar.gz /cache/"
+            end
+            task.sh "./build-passenger-source-tarball.sh #{RPM_SOURCES_DIR}/#{PASSENGER_TARBALL} #{available_nginx_version}"
+            task.sh "cp #{RPM_SOURCES_DIR}/#{PASSENGER_TARBALL} /cache/#{distro}_#{PASSENGER_TARBALL}"
+          end
+        end
+      end
+    else
+      task("passenger:#{distro}" => :nginx) do
+        track_task(:preparation, "passenger:#{distro}") do |task|
+          if FETCH_PASSENGER_TARBALL_FROM_CACHE && File.exist?("/cache/#{PASSENGER_TARBALL}")
+            task.sh "cp /cache/#{PASSENGER_TARBALL} #{RPM_SOURCES_DIR}/#{PASSENGER_TARBALL}"
+          else
+            task.sh "./build-passenger-source-tarball.sh #{RPM_SOURCES_DIR}/#{PASSENGER_TARBALL} #{NGINX_VERSION}"
+            task.sh "cp #{RPM_SOURCES_DIR}/#{PASSENGER_TARBALL} /cache/#{PASSENGER_TARBALL}"
+          end
+        end
       end
     end
   end
@@ -29,18 +51,12 @@ namespace :source do
   desc "Create Nginx source tarball"
   task :nginx do
     track_task(:preparation, 'nginx') do |task|
-      if File.exist?("/cache/#{NGINX_TARBALL}")
+      if File.exist?("/cache/#{NGINX_TARBALL}") && File.exist?("/cache/#{NGINX_TARBALL}.asc")
         task.sh "cp /cache/#{NGINX_TARBALL} #{RPM_SOURCES_DIR}/"
-      else
-        task.sh "curl --fail -L -o #{RPM_SOURCES_DIR}/#{NGINX_TARBALL} " +
-          "http://nginx.org/download/#{NGINX_TARBALL}"
-        task.sh "cp #{RPM_SOURCES_DIR}/#{NGINX_TARBALL} /cache/"
-      end
-      if File.exist?("/cache/#{NGINX_TARBALL}.asc")
         task.sh "cp /cache/#{NGINX_TARBALL}.asc #{RPM_SOURCES_DIR}/"
       else
-        task.sh "curl --fail -L -o #{RPM_SOURCES_DIR}/#{NGINX_TARBALL}.asc " +
-          "http://nginx.org/download/#{NGINX_TARBALL}.asc"
+        task.sh "./download-nginx-orig-tarball.sh #{NGINX_VERSION} #{RPM_SOURCES_DIR}/#{NGINX_TARBALL}"
+        task.sh "cp #{RPM_SOURCES_DIR}/#{NGINX_TARBALL} /cache/"
         task.sh "cp #{RPM_SOURCES_DIR}/#{NGINX_TARBALL}.asc /cache/"
       end
     end
@@ -104,6 +120,7 @@ namespace :srpm do
   task "nginx:all"
 
   DISTROS.each do |distro_id|
+    next if dynamic_module_supported?(distro_id)
     distro = DISTRO_BUILD_PARAMS[distro_id]
 
     task "nginx:all" => "nginx:#{distro_id}"
@@ -181,6 +198,7 @@ namespace :rpm do
   task "nginx:all"
 
   DISTROS.each do |distro_id|
+    next if dynamic_module_supported?(distro_id)
     distro = DISTRO_BUILD_PARAMS[distro_id]
 
     ARCHITECTURES.each do |arch|

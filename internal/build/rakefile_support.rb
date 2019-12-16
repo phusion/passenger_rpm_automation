@@ -93,11 +93,6 @@ def passenger_enterprise?
   defined?(PhusionPassenger::PASSENGER_IS_ENTERPRISE)
 end
 
-def distro_architecture_allowed?(distro_id, arch)
-  # Red Hat 7 does not support x86
-  distro_id != "el7" || arch == "x86_64"
-end
-
 def passenger_srpm_name(distro_id)
   "#{PASSENGER_RPM_NAME}-#{PASSENGER_VERSION}-#{PASSENGER_RPM_RELEASE}.#{distro_id}.src.rpm"
 end

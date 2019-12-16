@@ -92,7 +92,6 @@ Requires: ruby(abi) = %{rubyabi}
 Requires: ruby(release)
 %endif
 
-%{!?_selinux_policy_version: %global _selinux_policy_version %(sed -e 's,.*selinux-policy-\\([^/]*\\)/.*,\\1,' /usr/share/selinux/devel/policyhelp 2>/dev/null)}
 %if "%{_selinux_policy_version}" != ""
 Requires: selinux-policy >= %{_selinux_policy_version}
 %endif
@@ -103,6 +102,10 @@ Requires(postun): /usr/sbin/semodule, /sbin/restorecon, /sbin/fixfiles
 BuildRequires: libcurl-devel
 %else
 BuildRequires: curl-devel
+%endif
+%if 0%{?rhel} >= 8 || 0%{?fedora} >= 30
+BuildRequires: /usr/bin/pathfix.py
+BuildRequires: python3-devel
 %endif
 
 BuildRequires: httpd-devel
@@ -119,7 +122,7 @@ BuildRequires: selinux-policy-targeted
 %if 0%{?rhel} >= 7
 BuildRequires: selinux-policy-sandbox
 %endif
-BuildRequires: checkpolicy, selinux-policy-devel, /usr/share/selinux/devel/policyhelp
+BuildRequires: checkpolicy, selinux-policy-devel
 BuildRequires: libselinux-devel
 
 Provides: %{package_name} = %{version}-%{release}
@@ -242,6 +245,25 @@ pushd nginx-%{nginx_version}
 make
 popd
 
+<% if dynamic_module_supported?(@distribution) -%>
+	/usr/bin/rake nginx:as_dynamic_module && \
+		cd nginx-<%= latest_nginx_available(@distribution) %> && \
+		./configure \
+		--with-pcre-jit \
+		--with-threads \
+		--with-ipv6 \
+		--with-file-aio \
+		--with-compat \
+		--http-proxy-temp-path=/var/lib/nginx/proxy \
+		--add-dynamic-module=`pwd`/../src/nginx_module && \
+		echo '#define NGX_HTTP_HEADERS 1' >> objs/ngx_auto_config.h && \
+		make -f objs/Makefile modules && \
+		mv objs/ngx_http_passenger_module.so ../debian/ || \
+		mv modules/ngx_http_passenger_module.so ../debian/
+<% else -%>
+	rm debian/libnginx-mod-http-passenger.*
+<% end -%>
+
 # Build SELinux policy modules.
 %{__cp} %{SOURCE3} %{SOURCE4} .
 %{__cp} %{SOURCE2} passenger.fc.tmp
@@ -314,6 +336,9 @@ export LC_ALL=en_US.UTF-8
 %{__cp} man/*.8 %{buildroot}%{_mandir}/man8
 
 # Fix Python scripts with shebang which are not executable
+%if 0%{?rhel} >= 8 || 0%{?fedora} >= 30
+pathfix.py -pni "%{__python3} %{py3_shbang_opts}" %{buildroot}%{_datadir}/%{namespace}/helper-scripts/wsgi-loader.py
+%endif
 %{__chmod} +x %{buildroot}%{_datadir}/%{namespace}/helper-scripts/wsgi-loader.py
 
 # Install SELinux policy module.
