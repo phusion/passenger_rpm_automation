@@ -3,6 +3,8 @@ set -e
 set -o pipefail
 set -x
 
+export DEBIAN_FRONTEND=noninteractive
+
 if [[ ! -e /usr/bin/docker ]]; then
 	apt-get update
 	apt-get install -y apt-transport-https ca-certificates curl software-properties-common
