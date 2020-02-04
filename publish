@@ -34,7 +34,7 @@ function usage()
 	echo
 	echo "Optional options:"
 	echo "  -l DIR     Write logs to the given directory"
-	echo "  -j NUM     Set concurrency. Default: 8"
+	echo "  -j NUM     Set concurrency. Default: 1"
 	echo "  -y         Yank old packages"
 	echo "  -Y         Yank all packages from repository before publishing"
 	echo "  -O         Periodically show progress overview"
