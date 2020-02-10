@@ -35,14 +35,6 @@ if [[ ! -e "$REPO_SERVER_API_TOKEN_FILE" ]]; then
 	echo "ERROR: $REPO_SERVER_API_TOKEN_FILE required."
 	exit 1
 fi
-if [[ ! -e ~/.oss_packagecloud_proxy_admin_password ]]; then
-	echo "ERROR: ~/.oss_packagecloud_proxy_admin_password required."
-	exit 1
-fi
-if [[ ! -e ~/.enterprise_packagecloud_proxy_admin_password ]]; then
-	echo "ERROR: ~/.enterprise_packagecloud_proxy_admin_password required."
-	exit 1
-fi
 
 run ./build \
 	-w "$WORKSPACE/work" \
@@ -61,17 +53,3 @@ run ./publish \
 	-l "$WORKSPACE/publish-log" \
 	$YANK \
 	publish:all
-
-header "Clearing proxy caches"
-exec docker run $TTY_ARGS --rm \
-	-v "$SELFDIR:/system:ro" \
-	-v "$HOME/.oss_packagecloud_proxy_admin_password:/oss_packagecloud_proxy_admin_password.txt:ro" \
-	-v "$HOME/.enterprise_packagecloud_proxy_admin_password:/enterprise_packagecloud_proxy_admin_password.txt:ro" \
-	-e "APP_UID=`/usr/bin/id -u`" \
-	-e "APP_GID=`/usr/bin/id -g`" \
-	-e "LC_CTYPE=en_US.UTF-8" \
-	phusion/passenger_rpm_automation_buildbox \
-	/system/internal/scripts/my_init --quiet --skip-runit --skip-startup-files -- \
-	/system/internal/scripts/inituidgid.sh \
-	/system/internal/scripts/setuser app \
-	/system/jenkins/publish/clear_caches.rb
