@@ -1,9 +1,9 @@
 [phusion_passenger-testing]
 name=phusion_passenger-testing
-baseurl=https://packagecloud.io/phusion/passenger-testing/el/7/$basearch
+baseurl=https://yum-repo-oss.staging.phusionpassenger.com/phusion/passenger-testing/el/7/$basearch
 repo_gpgcheck=1
 gpgcheck=0
 enabled=0
-gpgkey=https://packagecloud.io/gpg.key
+gpgkey=https://oss-binaries.phusionpassenger.com/auto-software-signing-gpg-key.txt
 sslverify=1
 sslcacert=/etc/pki/tls/certs/ca-bundle.crt
