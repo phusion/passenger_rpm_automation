@@ -6,4 +6,4 @@ gem 'bluecloth'
 gem 'mizuho'
 gem 'paint'
 gem 'net-http-persistent'
-gem 'package_cloud'
+
