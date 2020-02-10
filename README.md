@@ -34,7 +34,7 @@ This project consists of three major tools:
 
  * **build** -- Given a Passenger source directory, this script builds RPM packages for it.
  * **test** -- Given a directory with built RPM packages (as produced by the `build` script), this script runs tests against them.
- * **publish** -- Given a directory with built RPM packages, this script publishes them to [PackageCloud](https://packagecloud.io/).
+ * **publish** -- Given a directory with built RPM packages, this script publishes them to repos.phusionpassenger.com.
 
 RPM package definitions are located in the `specs` directory:
 
@@ -59,7 +59,7 @@ The Passenger source directory (`../..`) will be automatically mounted inside th
 
 ## Package building process
 
-The package build process is as follows. First, the `build` script is used to build RPM packages from a Passenger source code directory. Next, either the `test` script is run to test the built packages, or the `publish` script is run to publish the built packages to PackageCloud.
+The package build process is as follows. First, the `build` script is used to build RPM packages from a Passenger source code directory. Next, either the `test` script is run to test the built packages, or the `publish` script is run to publish the built packages to repos.phusionpassenger.com.
 
     build   ------------>   test
                  \
@@ -121,13 +121,14 @@ When using Vagrant, the directory referred to by `-c` must be a native filesyste
 
 ### The publish script
 
-Once packages have been built, you can publish them to PackageCloud. The `publish` script publishes all packages inside a build script output directory. Example invocation:
+Once packages have been built, you can publish them to repos.phusionpassenger.com. The `publish` script publishes all packages inside a build script output directory. Example invocation:
 
-    ./publish -d output -c ~/.packagecloud_token -r passenger-testing publish:all
+    ./publish -d output -u phusion -c ~/token_file -r passenger-testing publish:all
 
  * `-d` tells it where the build script output directory is.
- * `-c` refers to a file that contains the PackageCloud security token.
- * `-r` tells it the name of the PackageCloud repository. For example `passenger-5`, `passenger-testing`.
+ * `-u` tells it the repo server API username.
+ * `-c` tells it the path to the repo server API token file.
+ * `-r` tells it the name of the package repository. For example `yum-repo-(oss|enterprise)(.staging)`.
  * The last argument is the task to run. The `publish:all` publishes all packages inside the build script output directory.
 
 ## Maintenance
@@ -164,7 +165,7 @@ In these instructions, we assume that the new distribution is Red Hat 7. Update 
  6. Build and publish packages for this distribution only. You can do that by running the build script with the `-d` option.
 
         ./build -p /passenger -w work -c cache -o output -d el7 rpm:all
-        ./publish -d output -c ~/.packagecloud_token -r passenger-testing publish:all
+        ./publish -d output -u phusion -c ~/token_file -r passenger-testing publish:all
 
  7. Create a test box for this new distribution.
 
@@ -212,7 +213,7 @@ Sometimes you want to build Nginx packages only, without building the Phusion Pa
 
 After the build script finishes, you can publish these Nginx packages:
 
-    ./publish -d output -c ~/.packagecloud_token -r passenger-testing publish:all
+    ./publish -d output -u phusion -c ~/token_file -r passenger-testing publish:all
 
 ### Updating SSL certificates
 
