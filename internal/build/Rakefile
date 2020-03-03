@@ -7,7 +7,7 @@ initialize_tracking_database!(SHOW_OVERVIEW_PERIODICALLY)
 
 ##### Source tarballs and initialization #####
 
-SOURCE_TASKS = ['source:passenger', 'source:nginx', 'source:packaging_additions']
+source_tasks = lambda (distro) { ["source:passenger:#{distro}", 'source:nginx', 'source:packaging_additions'] }
 
 register_tracking_category(:preparation, 'Preparation')
 
@@ -89,7 +89,7 @@ namespace :srpm do
 
     register_tracking_task(:srpm, "passenger:#{distro_id}")
     desc "Build Passenger SRPM for #{distro[:name]}"
-    task("passenger:#{distro_id}" => SOURCE_TASKS) do
+    task("passenger:#{distro_id}" => source_tasks(distro_id)) do
       track_task(:srpm, "passenger:#{distro_id}") do |task|
         spec_target_dir  = "#{RPM_SPECS_DIR}/#{distro_id}"
         spec_target_file = "#{spec_target_dir}/#{PASSENGER_RPM_NAME}.spec"
@@ -127,7 +127,7 @@ namespace :srpm do
 
     register_tracking_task(:srpm, "nginx:#{distro_id}")
     desc "Build Nginx SRPM for #{distro[:name]}"
-    task("nginx:#{distro_id}" => SOURCE_TASKS) do
+    task("nginx:#{distro_id}" => source_tasks(distro_id)) do
       track_task(:srpm, "nginx:#{distro_id}") do |task|
         spec_target_dir  = "#{RPM_SPECS_DIR}/#{distro_id}"
         spec_target_file = "#{spec_target_dir}/#{NGINX_RPM_NAME}.spec"
