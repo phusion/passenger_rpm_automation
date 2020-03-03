@@ -7,7 +7,7 @@ initialize_tracking_database!(SHOW_OVERVIEW_PERIODICALLY)
 
 ##### Source tarballs and initialization #####
 
-source_tasks = lambda (distro) { ["source:passenger:#{distro}", 'source:nginx', 'source:packaging_additions'] }
+source_tasks = lambda { |distro| ["source:passenger:#{distro}", 'source:nginx', 'source:packaging_additions'] }
 
 register_tracking_category(:preparation, 'Preparation')
 
