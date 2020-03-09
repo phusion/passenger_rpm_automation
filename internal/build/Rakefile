@@ -23,15 +23,15 @@ namespace :source do
             if File.exist?("/cache/nginx_#{available_nginx_version}.source.tar.gz")
               task.sh "cp /cache/nginx_#{available_nginx_version}.source.tar.gz #{RPM_SOURCES_DIR}/"
             else
-              task.sh `pwd`
-              task.sh `whoami`
-              task.sh `ls -l`
+              task.sh 'pwd'
+              task.sh 'whoami'
+              task.sh 'ls -l'
               task.sh "./download-nginx-source-tarball.sh #{available_nginx_version} #{RPM_SOURCES_DIR}/nginx_#{available_nginx_version}.source.tar.gz"
               task.sh "cp #{RPM_SOURCES_DIR}/nginx_#{available_nginx_version}.source.tar.gz /cache/"
             end
-            task.sh `pwd`
-            task.sh `whoami`
-            task.sh `ls -l`
+            task.sh 'pwd'
+            task.sh 'whoami'
+            task.sh 'ls -l'
             task.sh "./build-passenger-source-tarball.sh #{RPM_SOURCES_DIR}/#{PASSENGER_TARBALL} #{available_nginx_version}"
             task.sh "cp #{RPM_SOURCES_DIR}/#{PASSENGER_TARBALL} /cache/#{distro}_#{PASSENGER_TARBALL}"
           end
