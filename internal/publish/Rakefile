@@ -49,6 +49,7 @@ register_tracking_category(:publish, "Packages")
 
 DISTROS.each do |distro_dir, distro_version|
   desc "Publish el#{distro_version} packages"
+  task "publish:all" => "publish:el#{distro_version}"
   task "publish:el#{distro_version}" => [:init_repo_server_client] do
 
     Dir.mktmpdir do |tmpdir|
