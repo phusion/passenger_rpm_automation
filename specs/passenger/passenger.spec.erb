@@ -6,10 +6,12 @@
 %global tarball_name <%= PASSENGER_TARBALL_NAME %>
 %global tarball_version <%= PASSENGER_VERSION %>
 %global apache_module_package_name <%= PASSENGER_APACHE_MODULE_RPM_NAME %>
+%global nginx_module_package_name <%= PASSENGER_NGINX_MODULE_RPM_NAME %>
 %global namespace <%= PhusionPassenger::GLOBAL_NAMESPACE_DIRNAME %>
 %global nginx_version <%= NGINX_VERSION %>
 %global bundled_boost_version 1.54.0
 %global is_enterprise <%= PASSENGER_ENTERPRISE ? 1 : 0 %>
+%global dynamic_module_supported <%= dynamic_module_supported?(@distribution) ? 1 : 0 %>
 %global release_dist .<%= @distribution %>
 
 # Fedora <= 18 and RHEL <= 6 used the rubyabi requirement.
@@ -33,6 +35,10 @@
 # /etc/httpd/conf.d with httpd < 2.4 and defined as /etc/httpd/conf.modules.d with httpd >= 2.4
 %{!?_httpd_modconfdir:  %{expand: %%global _httpd_modconfdir  %%{_sysconfdir}/httpd/conf.d}}
 %{!?_httpd_moddir:      %{expand: %%global _httpd_moddir      %%{_libdir}/httpd/modules}}
+
+%{!?_nginx_confdir:     %{expand: %%global _nginx_confdir     %%{_sysconfdir}/nginx/conf.d}}
+%{!?_nginx_modconfdir:  %{expand: %%global _nginx_modconfdir  %%{_datadir}/nginx/modules}}
+%{!?_nginx_moddir:      %{expand: %%global _nginx_moddir      %%{_libdir}/nginx/modules}}
 
 %{!?ruby_vendorlibdir: %global ruby_vendorlibdir %(ruby -rrbconfig -e 'puts RbConfig::CONFIG["vendorlibdir"]')}
 %{!?ruby_vendorarchdir: %global ruby_vendorarchdir %(ruby -rrbconfig -e 'puts RbConfig::CONFIG["vendorarchdir"]')}
@@ -195,6 +201,20 @@ License: CC-BY-SA and MIT and (MIT or GPL+)
 %description doc
 This package contains documentation files for Phusion Passenger®.
 
+%if %{dynamic_module_supported}
+%package -n %{nginx_module_package_name}
+Summary: Nginx Module for Phusion Passenger
+Group: System Environment/Daemons
+Requires: nginx = %{_nginx}
+Requires: %{package_name}%{?_isa} = %{version}-%{release}
+%if %{is_enterprise}
+Obsoletes: nginx-mod-http-passenger
+%endif
+License: Boost and BSD and BSD with advertising and MIT and zlib
+
+%description -n %{nginx_module_package_name}
+This package contains the pluggable Nginx server module for Phusion Passenger®.
+%endif
 
 %prep
 %setup -q -n %{tarball_name}-%{tarball_version}
@@ -245,7 +265,7 @@ pushd nginx-%{nginx_version}
 make
 popd
 
-<% if dynamic_module_supported?(@distribution) -%>
+%if %{dynamic_module_supported}
 	/usr/bin/rake nginx:as_dynamic_module && \
 		cd nginx-<%= latest_nginx_available(@distribution) %> && \
 		./configure \
@@ -258,11 +278,9 @@ popd
 		--add-dynamic-module=`pwd`/../src/nginx_module && \
 		echo '#define NGX_HTTP_HEADERS 1' >> objs/ngx_auto_config.h && \
 		make -f objs/Makefile modules && \
-		mv objs/ngx_http_passenger_module.so ../debian/ || \
-		mv modules/ngx_http_passenger_module.so ../debian/
-<% else -%>
-	rm debian/libnginx-mod-http-passenger.*
-<% end -%>
+		mv objs/ngx_http_passenger_module.so %{_nginx_moddir} || \
+		mv modules/ngx_http_passenger_module.so %{_nginx_moddir}
+%endif
 
 # Build SELinux policy modules.
 %{__cp} %{SOURCE3} %{SOURCE4} .
