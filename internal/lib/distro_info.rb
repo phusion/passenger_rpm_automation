@@ -28,7 +28,8 @@ def distro_architecture_allowed?(distro_id, arch)
 end
 
 def dynamic_module_supported?(distro)
-  distro.delete_prefix("el").to_i > 6
+  #distro.delete_prefix("el").to_i > 6
+  false
 end
 
 def latest_nginx_available(distro)
