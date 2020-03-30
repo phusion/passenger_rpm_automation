@@ -265,7 +265,7 @@ pushd nginx-%{nginx_version}
 make
 popd
 
-%if %{dynamic_module_supported}
+<% if dynamic_module_supported?(@distribution) %>
 	/usr/bin/rake nginx:as_dynamic_module && \
 		cd nginx-<%= latest_nginx_available(@distribution) %> && \
 		./configure \
@@ -280,7 +280,7 @@ popd
 		make -f objs/Makefile modules && \
 		mv objs/ngx_http_passenger_module.so %{_nginx_moddir} || \
 		mv modules/ngx_http_passenger_module.so %{_nginx_moddir}
-%endif
+<% end %>
 
 # Build SELinux policy modules.
 %{__cp} %{SOURCE3} %{SOURCE4} .

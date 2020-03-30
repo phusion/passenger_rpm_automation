@@ -63,12 +63,13 @@ def set_constants_and_envvars
     set_constant_and_envvar :PASSENGER_RPM_RELEASE, 2
     set_constant_and_envvar :PASSENGER_TARBALL_NAME, "passenger-enterprise-server"
     set_constant_and_envvar :PASSENGER_APACHE_MODULE_RPM_NAME, "mod_passenger_enterprise"
-    set_constant_and_envvar :PASSENGER_NGINX_MODULE_RPM_NAME, "nginx-mod-http-passenger"
+    set_constant_and_envvar :PASSENGER_NGINX_MODULE_RPM_NAME, "nginx-mod-http-passenger-enterprise"
   else
     set_constant_and_envvar :PASSENGER_RPM_NAME, "passenger"
     set_constant_and_envvar :PASSENGER_RPM_RELEASE, 1
     set_constant_and_envvar :PASSENGER_TARBALL_NAME, "passenger"
     set_constant_and_envvar :PASSENGER_APACHE_MODULE_RPM_NAME, "mod_passenger"
+    set_constant_and_envvar :PASSENGER_NGINX_MODULE_RPM_NAME, "nginx-mod-http-passenger"
   end
   set_constant_and_envvar :PASSENGER_ENTERPRISE, passenger_enterprise?
   set_constant_and_envvar :PASSENGER_VERSION, PhusionPassenger::VERSION_STRING
