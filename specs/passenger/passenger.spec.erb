@@ -11,7 +11,14 @@
 %global nginx_version <%= NGINX_VERSION %>
 %global bundled_boost_version 1.54.0
 %global is_enterprise <%= PASSENGER_ENTERPRISE ? 1 : 0 %>
-%global dynamic_module_supported <%= dynamic_module_supported?(@distribution) ? 1 : 0 %>
+<% if dynamic_module_supported?(@distribution) %>
+%global dynamic_module_supported 1
+%global latest_nginx_epoch <%= latest_nginx_epoch(@distribution) %>
+%global latest_nginx_release <%= latest_nginx_release(@distribution) %>
+%global latest_nginx_version <%= latest_nginx_version(@distribution) %>
+<% else %>
+%global dynamic_module_supported 0
+<% end %>
 %global release_dist .<%= @distribution %>
 
 # Fedora <= 18 and RHEL <= 6 used the rubyabi requirement.
@@ -205,7 +212,7 @@ This package contains documentation files for Phusion Passenger®.
 %package -n %{nginx_module_package_name}
 Summary: Nginx Module for Phusion Passenger
 Group: System Environment/Daemons
-Requires: nginx = %{_nginx}
+Requires: nginx = %{latest_nginx_epoch}:%{latest_nginx_version}-%{latest_nginx_release}%{?release_dist}
 Requires: %{package_name}%{?_isa} = %{version}-%{release}
 %if %{is_enterprise}
 Obsoletes: nginx-mod-http-passenger
@@ -265,9 +272,9 @@ pushd nginx-%{nginx_version}
 make
 popd
 
-<% if dynamic_module_supported?(@distribution) %>
+%if %{dynamic_module_supported}
 	/usr/bin/rake nginx:as_dynamic_module && \
-		cd nginx-<%= latest_nginx_available(@distribution) %> && \
+		pushd nginx-%{latest_nginx_version} && \
 		./configure \
 		--with-pcre-jit \
 		--with-threads \
@@ -278,9 +285,8 @@ popd
 		--add-dynamic-module=`pwd`/../src/nginx_module && \
 		echo '#define NGX_HTTP_HEADERS 1' >> objs/ngx_auto_config.h && \
 		make -f objs/Makefile modules && \
-		mv objs/ngx_http_passenger_module.so %{_nginx_moddir} || \
-		mv modules/ngx_http_passenger_module.so %{_nginx_moddir}
-<% end %>
+		popd
+%endif
 
 # Build SELinux policy modules.
 %{__cp} %{SOURCE3} %{SOURCE4} .
@@ -304,6 +310,11 @@ export LC_ALL=en_US.UTF-8
 %{__mkdir} %{buildroot}
 %{__cp} -a pkg/fakeroot/* %{buildroot}/
 %{__cp} nginx-%{nginx_version}/objs/nginx %{buildroot}%{_libdir}/%{namespace}/support-binaries/nginx-%{nginx_version}
+
+%if %{dynamic_module_supported}
+%{__mkdir_p} %{buildroot}%{_nginx_moddir}
+%{__cp} nginx-%{latest_nginx_version}/objs/ngx_http_passenger_module.so %{buildroot}%{_nginx_moddir}/
+%endif
 
 # Install bootstrapping code into the executables and the Nginx config script.
 ./dev/install_scripts_bootstrap_code.rb --ruby %{passenger_ruby_libdir} \
@@ -457,6 +468,11 @@ fi
     %config(noreplace) %{_httpd_confdir}/*.conf
 %endif
 %{_httpd_moddir}/mod_passenger.so
+
+%if %{dynamic_module_supported}
+%files -n %{nginx_module_package_name}
+%{_nginx_moddir}/ngx_http_passenger_module.so
+%endif
 
 %changelog
 * Thu Nov 14 2013 Jan Kaluza <jkaluza@redhat.com> - 4.0.18-4

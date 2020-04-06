@@ -20,12 +20,11 @@ namespace :source do
             task.sh "cp /cache/#{distro}_#{PASSENGER_TARBALL} #{RPM_SOURCES_DIR}/#{PASSENGER_TARBALL}"
           else
             available_nginx_version = latest_nginx_available(distro)
-            if File.exist?("/cache/nginx_#{available_nginx_version}.source.tar.gz")
-              task.sh "cp /cache/nginx_#{available_nginx_version}.source.tar.gz #{RPM_SOURCES_DIR}/"
-            else
+            if ! File.exist?("/cache/nginx_#{available_nginx_version}.source.tar.gz")
               task.sh "./download-nginx-orig-tarball.sh #{available_nginx_version} #{RPM_SOURCES_DIR}/nginx_#{available_nginx_version}.source.tar.gz"
               task.sh "cp #{RPM_SOURCES_DIR}/nginx_#{available_nginx_version}.source.tar.gz /cache/"
             end
+            task.sh "cp /cache/nginx_#{available_nginx_version}.source.tar.gz #{RPM_SOURCES_DIR}/SOURCES/nginx-#{available_nginx_version}.tar.gz"
             task.sh "./build-passenger-source-tarball.sh #{RPM_SOURCES_DIR}/#{PASSENGER_TARBALL} #{available_nginx_version}"
             task.sh "cp #{RPM_SOURCES_DIR}/#{PASSENGER_TARBALL} /cache/#{distro}_#{PASSENGER_TARBALL}"
           end

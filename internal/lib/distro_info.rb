@@ -28,11 +28,10 @@ def distro_architecture_allowed?(distro_id, arch)
 end
 
 def dynamic_module_supported?(distro)
-  #distro.delete_prefix("el").to_i > 6
-  false
+  distro.delete_prefix("el").to_i > 6
 end
 
-def latest_nginx_available(distro)
+def latest_nginx_available_parts(distro)
   cache_file = "/tmp/#{distro}_nginx_version.txt"
   if !File.exists?(cache_file) || ((Time.now - 60*60*24) > File.mtime(cache_file))
     if distro == "el7"
@@ -45,10 +44,22 @@ def latest_nginx_available(distro)
     doc = open(url) do |io|
       Nokogiri.HTML(io)
     end
-    version = doc.at_css('a[href^="nginx-"]').text.lines.select{|s|!(s.include?("-mod-") || s.include?(".noarch."))}.first.strip.split('-').select{|s|/^[\d\.]+$/.match?(s)}.first
-    File.write(cache_file,version)
+    version_parts = doc.at_css('a[href^="nginx-"]').text.lines.select{|s|!(s.include?("-mod-") || s.include?(".noarch."))}.first.strip
+    File.write(cache_file,version_parts)
   else
-    version = File.read(cache_file)
+    version_parts = File.read(cache_file)
   end
-  version
+  version_parts.split('-')
+end
+
+def latest_nginx_version(distro)
+  latest_nginx_available_parts(distro).select{|s|/^[\d\.]+$/.match?(s)}.first
+end
+
+def latest_nginx_release(distro)
+  latest_nginx_available_parts(distro).last.split('.').first
+end
+
+def latest_nginx_epoch(distro)
+  1
 end
