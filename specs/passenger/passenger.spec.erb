@@ -212,7 +212,7 @@ This package contains documentation files for Phusion Passenger®.
 %package -n %{nginx_module_package_name}
 Summary: Nginx Module for Phusion Passenger
 Group: System Environment/Daemons
-Requires: nginx = %{latest_nginx_epoch}:%{latest_nginx_version}-%{latest_nginx_release}%{?release_dist}
+Requires: nginx = %{latest_nginx_epoch}:%{latest_nginx_version}
 Requires: %{package_name}%{?_isa} = %{version}-%{release}
 %if %{is_enterprise}
 Obsoletes: nginx-mod-http-passenger
