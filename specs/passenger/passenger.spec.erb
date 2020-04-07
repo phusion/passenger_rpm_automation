@@ -91,6 +91,10 @@ Source10: passenger.logrotate
 Source100: apache-passenger.conf.in
 Source101: apache-passenger-module.conf
 Source102: passenger.tmpfiles
+%if %{dynamic_module_supported}
+Source200: nginx-passenger-module.conf
+Source201: nginx-mod-passenger.conf
+%endif
 
 # https://bugzilla.redhat.com/show_bug.cgi?id=985634
 Patch107:       rubygem-passenger-4.0.18-GLIBC_HAVE_LONG_LONG.patch
@@ -312,8 +316,16 @@ export LC_ALL=en_US.UTF-8
 %{__cp} nginx-%{nginx_version}/objs/nginx %{buildroot}%{_libdir}/%{namespace}/support-binaries/nginx-%{nginx_version}
 
 %if %{dynamic_module_supported}
-%{__mkdir_p} %{buildroot}%{_nginx_moddir}
+%{__mkdir_p} %{buildroot}%{_nginx_moddir} %{buildroot}%{_nginx_confdir} %{buildroot}%{_nginx_modconfdir}
 %{__cp} nginx-%{latest_nginx_version}/objs/ngx_http_passenger_module.so %{buildroot}%{_nginx_moddir}/
+
+# Install Nginx config.
+%{__install} -pm 0644 %{SOURCE200} %{buildroot}%{_nginx_confdir}/passenger.conf
+
+%{__sed} -e 's|@PASSENGERROOT@|%{passenger_ruby_libdir}/phusion_passenger/locations.ini|g' %{SOURCE201} > nginx.conf
+touch -r %{SOURCE201} nginx.conf
+%{__install} -pm 0644 nginx.conf %{buildroot}%{_nginx_modconfdir}/ngx_http_passenger_module.conf
+
 %endif
 
 # Install bootstrapping code into the executables and the Nginx config script.
@@ -471,6 +483,8 @@ fi
 
 %if %{dynamic_module_supported}
 %files -n %{nginx_module_package_name}
+    %config(noreplace) %{_nginx_modconfdir}/*.conf
+    %config(noreplace) %{_nginx_confdir}/*.conf
 %{_nginx_moddir}/ngx_http_passenger_module.so
 %endif
 
