@@ -320,11 +320,11 @@ export LC_ALL=en_US.UTF-8
 %{__cp} nginx-%{latest_nginx_version}/objs/ngx_http_passenger_module.so %{buildroot}%{_nginx_moddir}/
 
 # Install Nginx config.
-%{__install} -pm 0644 %{SOURCE200} %{buildroot}%{_nginx_confdir}/passenger.conf
+%{__install} -pm 0644 %{SOURCE200} %{buildroot}%{_nginx_modconfdir}/mod-http-passenger.conf
 
 %{__sed} -e 's|@PASSENGERROOT@|%{passenger_ruby_libdir}/phusion_passenger/locations.ini|g' %{SOURCE201} > nginx.conf
 touch -r %{SOURCE201} nginx.conf
-%{__install} -pm 0644 nginx.conf %{buildroot}%{_nginx_modconfdir}/ngx_http_passenger_module.conf
+%{__install} -pm 0644 nginx.conf %{buildroot}%{_nginx_confdir}/passenger.conf
 
 %endif
 
