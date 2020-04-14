@@ -12,6 +12,5 @@
     "nonexistant_gid": 9999,
 
     "nginx": "/usr/sbin/nginx",
-    "nginx_passenger_dynamic_module_conf_file": "/etc/nginx/conf.d/passenger.conf"
-
+    "nginx_passenger_dynamic_module_conf_file": "/usr/share/nginx/modules/mod-http-passenger.conf"
 }
