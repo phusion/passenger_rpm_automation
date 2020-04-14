@@ -20,6 +20,7 @@ run groupadd --gid 2467 app
 run adduser --uid 2467 --gid 2467 --password '#' app
 
 header "Installing dependencies"
+run yum --releasever=8 -y update # fix broken dnf/yum/rpm shit
 run yum install -y --enablerepo centosplus epel-release yum-utils deltarpm
 run yum groupinstall -y "Development Tools"
 run yum install -y --enablerepo centosplus \
