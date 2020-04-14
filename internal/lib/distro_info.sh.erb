@@ -24,10 +24,21 @@ function get_buildbox_image()
 function el_name_to_distro_name()
 {
 	local EL="$1"
-	if [[ "$EL" = el7 ]]; then
-		echo centos7
-	elif [[ "$EL" = el6 ]]; then
-		echo centos6
+
+	if [[ "$EL" =~ ^el[0-9]+$ ]]; then
+		echo centos${EL#"el"}
+	else
+		echo "ERROR: unknown distribution name." >&2
+		return 1
+	fi
+}
+
+function distro_name_to_el_name()
+{
+	local DISTRIBUTION="$1"
+
+	if [[ "$DISTRIBUTION" =~ ^centos[0-9]+$ ]]; then
+		echo el${DISTRIBUTION#"centos"}
 	else
 		echo "ERROR: unknown distribution name." >&2
 		return 1
@@ -37,12 +48,27 @@ function el_name_to_distro_name()
 function distro_name_to_testbox_image()
 {
 	local DISTRIBUTION="$1"
-	if [[ "$DISTRIBUTION" = centos7 ]]; then
-    echo <%= TESTBOX_BASE_NAME %>_centos_7:<%= TESTBOX_VERSION %>
-	elif [[ "$DISTRIBUTION" = centos6 ]]; then
-    echo <%= TESTBOX_BASE_NAME %>_centos_6:<%= TESTBOX_VERSION %>
+	if [[ "$DISTRIBUTION" =~ ^centos[0-9]+$ ]]; then
+		echo <%= TESTBOX_BASE_NAME %>_centos_${DISTRIBUTION#"centos"}:<%= TESTBOX_VERSION %>
 	else
 		echo "ERROR: unknown distribution name." >&2
 		return 1
 	fi
+}
+
+function dynamic_module_supported()
+{
+	local CODENAME=$(distro_name_to_el_name "$1")
+
+	<% REDHAT_ENTERPRISE_DISTRIBUTIONS.keys.each do |codename|
+		if dynamic_module_supported?(codename)
+	%>
+		if [[ "$CODENAME" = <%= codename.inspect %> ]]; then
+			echo true
+			return
+		fi
+	<% 	end
+	   end %>
+
+	echo false
 }

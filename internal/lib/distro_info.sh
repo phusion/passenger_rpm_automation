@@ -17,10 +17,21 @@ function get_buildbox_image()
 function el_name_to_distro_name()
 {
 	local EL="$1"
-	if [[ "$EL" = el7 ]]; then
-		echo centos7
-	elif [[ "$EL" = el6 ]]; then
-		echo centos6
+
+	if [[ "$EL" =~ ^el[0-9]+$ ]]; then
+		echo centos${EL#"el"}
+	else
+		echo "ERROR: unknown distribution name." >&2
+		return 1
+	fi
+}
+
+function distro_name_to_el_name()
+{
+	local DISTRIBUTION="$1"
+
+	if [[ "$DISTRIBUTION" =~ ^centos[0-9]+$ ]]; then
+		echo el${DISTRIBUTION#"centos"}
 	else
 		echo "ERROR: unknown distribution name." >&2
 		return 1
@@ -30,12 +41,29 @@ function el_name_to_distro_name()
 function distro_name_to_testbox_image()
 {
 	local DISTRIBUTION="$1"
-	if [[ "$DISTRIBUTION" = centos7 ]]; then
-    echo phusion/passenger_rpm_automation_testbox_centos_7:1.0.2
-	elif [[ "$DISTRIBUTION" = centos6 ]]; then
-    echo phusion/passenger_rpm_automation_testbox_centos_6:1.0.2
+	if [[ "$DISTRIBUTION" =~ ^centos[0-9]+$ ]]; then
+		echo phusion/passenger_rpm_automation_testbox_centos_${DISTRIBUTION#"centos"}:1.0.2
 	else
 		echo "ERROR: unknown distribution name." >&2
 		return 1
 	fi
+}
+
+function dynamic_module_supported()
+{
+	local CODENAME=$(distro_name_to_el_name "$1")
+
+	
+		if [[ "$CODENAME" = "el7" ]]; then
+			echo true
+			return
+		fi
+	
+		if [[ "$CODENAME" = "el8" ]]; then
+			echo true
+			return
+		fi
+	
+
+	echo false
 }
