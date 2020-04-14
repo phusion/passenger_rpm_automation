@@ -24,7 +24,7 @@ DISTRO_BUILD_PARAMS = {
 
 def distro_architecture_allowed?(distro_id, arch)
   # Red Hat does not support x86 after RHEL 6
-  (distro_id.delete_prefix("el").to_i > 6) || arch == "x86_64"
+  (distro_id.delete_prefix("el").to_i < 7) || arch == "x86_64"
 end
 
 def dynamic_module_supported?(distro)
