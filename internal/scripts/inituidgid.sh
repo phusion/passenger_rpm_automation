@@ -12,11 +12,10 @@ if grep -q 'release 7' /etc/redhat-release; then
 	groupdel ssh_keys
 fi
 
-# There is a user systemd-coredump and group pesign in the CentOS 8 container with these UID/GID, but we don't need them so we just delete them.
+# There are users systemd-coredump and pesign in the CentOS 8 container with these UID/GID, but we don't need them so we just delete them.
 if grep -q 'release 8' /etc/redhat-release; then
 	userdel systemd-coredump
 	userdel pesign
-	groupdel pesign
 fi
 
 if [[ "$APP_UID" -lt 1024 ]]; then
