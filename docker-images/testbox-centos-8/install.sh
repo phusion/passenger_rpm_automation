@@ -45,6 +45,7 @@ run yum install -y nodejs yarn
 
 header "Miscellaneous"
 run ln -s /usr/bin/python2.7 /sbin/my_init_python
+run alternatives --set python /usr/bin/python2
 run mkdir /etc/container_environment
 run mkdir /pra
 run cp /pra_build/Gemfile* /pra/
