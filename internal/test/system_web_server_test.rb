@@ -37,7 +37,11 @@ def start_stop_service(name, action)
   if redhat_major_release >= 7
     if name == "httpd"
       if action == "start"
-        sh(". /etc/sysconfig/httpd && /usr/sbin/httpd $OPTIONS")
+        if File.exist?("/etc/sysconfig/httpd")
+          sh(". /etc/sysconfig/httpd && /usr/sbin/httpd $OPTIONS")
+        else
+          sh("/usr/sbin/httpd $OPTIONS")
+        end
       elsif action == "stop"
         sh("kill `cat /run/httpd/httpd.pid`")
       else
