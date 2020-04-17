@@ -4,13 +4,18 @@
 set -e
 set -o pipefail
 
-# Hack to make the Passenger RPM packaging tests on our Jenkins infrastructure
-# to work. Jenkins has UID 999 and GID 998. There is also a user saslauth and group
-# ssh_keys in the CentOS 7 container with these UID/GID, but we don't need them so
-# we just delete them.
+# Hack to make the Passenger RPM packaging tests on our Jenkins infrastructure work. Jenkins has UID 999 and GID 998.
+
+# There is a user saslauth and group ssh_keys in the CentOS 7 container with these UID/GID, but we don't need them so we just delete them.
 if grep -q 7 /etc/redhat-release; then
 	userdel saslauth
 	groupdel ssh_keys
+fi
+
+# There is a user systemd-coredump and group pesign in the CentOS 8 container with these UID/GID, but we don't need them so we just delete them.
+if grep -q 8 /etc/redhat-release; then
+	userdel systemd-coredump
+	groupdel pesign
 fi
 
 if [[ "$APP_UID" -lt 1024 ]]; then
