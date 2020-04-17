@@ -22,12 +22,13 @@ run adduser --uid 2467 --gid 2467 --password '#' app
 header "Installing dependencies"
 run yum --releasever=8 -y update # fix broken dnf/yum/rpm shit
 run yum install -y --enablerepo centosplus epel-release yum-utils drpm
-run yum groupinstall -y "Development Tools"
+#asciidoc in centos 8 installs all of X11
+run yum groupinstall -y "Development Tools" --exclude asciidoc
 run yum install -y --enablerepo centosplus \
 	ruby ruby-devel rubygems rubygem-rack rubygem-rake nodejs npm \
 	ccache perl git tar which python27 \
 	httpd httpd-devel httpd-tools zlib-devel sqlite-devel curl-devel \
-	GeoIP gd libxslt openssl-devel
+	GeoIP libxslt openssl-devel
 run gem install bundler --no-document
 run gem install bundler -v 1.17.3 --no-document
 run env BUNDLE_GEMFILE=/pra_build/Gemfile bundle install
