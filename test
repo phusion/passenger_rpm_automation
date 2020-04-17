@@ -121,27 +121,6 @@ fi
 run mkdir -p "$CACHE_DIR/test-$DISTRIBUTION/yumcache"
 
 echo "-------- Entering Docker container --------"
-echo docker run \
-	--rm \
-	-v "$SELFDIR/internal:/system/internal:ro" \
-	-v "$PASSENGER_DIR:/passenger:ro" \
-	-v "$OUTPUT_DIR:/output:ro" \
-	-v "$CACHE_DIR:/cache" \
-	-v "$CACHE_DIR/test-$DISTRIBUTION/yumcache:/var/cache/yum" \
-	"${EXTRA_ARGS[@]}" \
-	-e "DISTRIBUTION=$DISTRIBUTION" \
-	-e "DYNAMIC_MODULE_SUPPORTED=$DYNAMIC_MODULE_SUPPORTED" \
-	-e "DEBUG_CONSOLE=$DEBUG_CONSOLE" \
-	-e "DEBUG_CONSOLE_ON_FAIL=$DEBUG_CONSOLE_ON_FAIL" \
-	-e "JENKINS=$JENKINS" \
-	-e "APP_UID=`/usr/bin/id -u`" \
-	-e "APP_GID=`/usr/bin/id -g`" \
-	$TEST_IMAGE \
-	/system/internal/scripts/my_init --quiet --skip-runit --skip-startup-files -- \
-	/system/internal/scripts/inituidgid.sh \
-	/system/internal/test/misc/init.sh \
-	/system/internal/test/test.sh
-
 exec docker run \
 	--rm \
 	-v "$SELFDIR/internal:/system/internal:ro" \
