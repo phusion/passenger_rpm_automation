@@ -53,3 +53,18 @@ run ./publish \
 	-l "$WORKSPACE/publish-log" \
 	$YANK \
 	publish:all
+
+header "Clearing proxy caches"
+exec docker run $TTY_ARGS --rm \
+	-v "$SELFDIR:/system:ro" \
+	-e "REPO_SERVER_API_USERNAME=$(cat "$REPO_SERVER_API_USERNAME_FILE")" \
+	-v "$REPO_SERVER_API_TOKEN_FILE:/repo_server_api_token.txt:ro" \
+	-e "REPOSITORY=$REPOSITORY" \
+	-e "APP_UID=$(/usr/bin/id -u)" \
+	-e "APP_GID=$(/usr/bin/id -g)" \
+	-e "LC_CTYPE=en_US.UTF-8" \
+	phusion/passenger_rpm_automation_buildbox \
+	/system/internal/scripts/my_init --quiet --skip-runit --skip-startup-files -- \
+	/system/internal/scripts/inituidgid.sh \
+	/system/internal/scripts/setuser app \
+	/system/jenkins/publish/clear_caches.rb
