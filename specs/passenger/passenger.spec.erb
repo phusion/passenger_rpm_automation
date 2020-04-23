@@ -320,10 +320,20 @@ export LC_ALL=en_US.UTF-8
 
 %if %{dynamic_module_supported}
 %{__mkdir_p} %{buildroot}%{_nginx_moddir} %{buildroot}%{_nginx_confdir} %{buildroot}%{_nginx_modconfdir}
-%{__cp} nginx-%{latest_nginx_version}/objs/ngx_http_passenger_module.so %{buildroot}%{_nginx_moddir}/
+
+%if %{is_enterprise}
+    %{__cp} nginx-%{latest_nginx_version}/objs/ngx_http_passenger_module.so %{buildroot}%{_nginx_moddir}/ngx_http_passenger_enterprise_module.so
+%else
+    %{__cp} nginx-%{latest_nginx_version}/objs/ngx_http_passenger_module.so %{buildroot}%{_nginx_moddir}/ngx_http_passenger_module.so
+%endif
 
 # Install Nginx config.
-%{__install} -pm 0644 %{SOURCE200} %{buildroot}%{_nginx_modconfdir}/mod-http-passenger.conf
+%if %{is_enterprise}
+    %{__sed} -e 's|passenger_module|passenger_enterprise_module|g' %{SOURCE200} > mod-http-passenger-enterprise.conf
+    %{__install} -pm 0644 mod-http-passenger-enterprise.conf %{buildroot}%{_nginx_modconfdir}/mod-http-passenger-enterprise.conf
+%else
+    %{__install} -pm 0644 %{SOURCE200} %{buildroot}%{_nginx_modconfdir}/mod-http-passenger.conf
+%endif
 
 %{__sed} -e 's|@PASSENGERROOT@|%{passenger_ruby_libdir}/phusion_passenger/locations.ini|g' %{SOURCE201} > nginx.conf
 touch -r %{SOURCE201} nginx.conf
@@ -488,7 +498,7 @@ fi
 %files -n %{nginx_module_package_name}
     %config(noreplace) %{_nginx_modconfdir}/*.conf
     %config(noreplace) %{_nginx_confdir}/*.conf
-%{_nginx_moddir}/ngx_http_passenger_module.so
+%{_nginx_moddir}/ngx_http_passenger*_module.so
 %endif
 
 %changelog
