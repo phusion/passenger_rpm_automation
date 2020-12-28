@@ -4,8 +4,8 @@ ROOT = File.absolute_path(File.dirname(__FILE__))
 VAGRANTFILE_API_VERSION = "2"
 
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
-  config.vm.box = "chef/centos-6.5"
-  config.vm.hostname = "vmtest6"
+  config.vm.box = "chef/centos-7.0"
+  config.vm.hostname = "vmtest7"
 
   config.vm.synced_folder File.absolute_path("#{ROOT}/../../.."), "/vagrant"
 

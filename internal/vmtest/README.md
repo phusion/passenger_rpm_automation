@@ -1,4 +1,4 @@
-This directory contains Vagrant VMs for testing RPMs under CentOS 6 and CentOS 7. The test script already tests RPMs in Docker containers, but we can't test SELinux and Systemd that way. With these VMs we can perform full end-to-end tests.
+This directory contains Vagrant VMs for testing RPMs under CentOS 8 and CentOS 7. The test script already tests RPMs in Docker containers, but we can't test SELinux and Systemd that way. With these VMs we can perform full end-to-end tests.
 
 These VMs include a sample Ruby app under /app. Apache and Nginx config entries are already installed (though Apache and Nginx themselves are not installed), under the host name `foo.com`. A /etc/hosts entry is installed so that foo.com points to 127.0.0.1. If Apache/Nginx is installed and started, you can access the sample app with `curl http://foo.com`.
 

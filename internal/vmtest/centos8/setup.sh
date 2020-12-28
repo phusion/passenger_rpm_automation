@@ -4,17 +4,16 @@ set -ex
 echo "exclude = kernel*" >> /etc/yum.conf
 
 yum install -y wget nano epel-release dbus setroubleshoot-server selinux-policy-devel ack pygpgme
-chkconfig messagebus on
 service messagebus start
 
-cp /vagrant/internal/vmtest/centos6/passenger-testing.repo /etc/yum.repos.d/
+cp /vagrant/internal/vmtest/centos7/passenger-testing.repo /etc/yum.repos.d/
 
 mkdir -p /app
 mkdir -p /app/public
 mkdir -p /app/tmp
 mkdir -p /app/log
 if [[ ! -e /app/config.ru ]]; then
-	cp /vagrant/internal/vmtest/centos6/config.ru /app/
+	cp /vagrant/internal/vmtest/centos7/config.ru /app/
 fi
 chown vagrant: /app /app/public /app/tmp /app/log /app/config.ru
 chcon -t httpd_sys_content_t -R /app
@@ -22,10 +21,10 @@ chcon -t httpd_sys_content_t -R /app
 mkdir -p /etc/httpd/conf.d
 mkdir -p /etc/nginx/conf.d
 if [[ ! -e /etc/httpd/conf.d/app.conf ]]; then
-	cp /vagrant/internal/vmtest/centos6/app-apache.conf /etc/httpd/conf.d/app.conf
+	cp /vagrant/internal/vmtest/centos7/app-apache.conf /etc/httpd/conf.d/app.conf
 fi
 if [[ ! -e /etc/nginx/conf.d/app.conf ]]; then
-	cp /vagrant/internal/vmtest/centos6/app-nginx.conf /etc/nginx/conf.d/app.conf
+	cp /vagrant/internal/vmtest/centos7/app-nginx.conf /etc/nginx/conf.d/app.conf
 fi
 
 cp /vagrant/internal/scripts/bashrc-local.sh /etc/
