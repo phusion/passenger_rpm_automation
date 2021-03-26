@@ -6,7 +6,7 @@
 #
 # Edit those and regenerate distro_info.sh by running:
 # internal/scripts/regen_distro_info_script.sh
-DEFAULT_DISTROS="el6 el7 el8"
+DEFAULT_DISTROS="el7 el8"
 
 
 function get_buildbox_image()
