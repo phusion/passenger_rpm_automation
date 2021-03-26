@@ -146,11 +146,8 @@ Provides: %{package_name} = %{version}-%{release}
 Provides: bundled(boost)  = %{bundled_boost_version}
 
 Obsoletes: rubygem-passenger < %{version}-%{release}
-Obsoletes: rubygem-passenger%{?_isa} < %{version}-%{release}
 Obsoletes: rubygem-passenger-native < %{version}-%{release}
-Obsoletes: rubygem-passenger-native%{?_isa} < %{version}-%{release}
 Obsoletes: rubygem-passenger-native-libs < %{version}-%{release}
-Obsoletes: rubygem-passenger-native-libs%{?_isa} < %{version}-%{release}
 
 %if %{is_enterprise}
 Obsoletes: passenger
@@ -186,7 +183,6 @@ Group: System Environment/Daemons
 Requires: %{package_name}%{?_isa} = %{version}-%{release}
 Provides: bundled(boost-devel) = %{bundled_boost_version}
 Obsoletes: rubygem-passenger-devel < 4.0.33
-Obsoletes: rubygem-passenger-devel%{?_isa} < 4.0.33
 %if %{is_enterprise}
 Obsoletes: passenger-devel
 %endif
