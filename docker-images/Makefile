@@ -26,7 +26,7 @@ tag_latest:
 
 upload: tag_latest
 	docker push $(BUILDBOX_NAME):latest
-	docker push $(BUILDBOX_NAME):$(TESTBOX_VERSION)
+	docker push $(BUILDBOX_NAME):$(BUILDBOX_VERSION)
 	docker push $(TESTBOX_BASE_NAME)_centos_7:latest
 	docker push $(TESTBOX_BASE_NAME)_centos_7:$(TESTBOX_VERSION)
 	docker push $(TESTBOX_BASE_NAME)_centos_8:latest
