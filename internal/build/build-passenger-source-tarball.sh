@@ -52,7 +52,7 @@ fi
 echo "+ cd /tmp/passenger"
 cd /tmp/passenger
 run mkdir ~/pkg
-run /usr/local/rvm/bin/rvm all do rake package:set_official package:tarball CACHING=false PKG_DIR=~/pkg
+run rake package:set_official package:tarball CACHING=false PKG_DIR=~/pkg
 
 header "Extracting Passenger tarball"
 echo "+ cd ~/pkg"
