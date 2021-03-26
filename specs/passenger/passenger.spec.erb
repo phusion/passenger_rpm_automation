@@ -109,7 +109,7 @@ Requires: ruby(abi) = %{rubyabi}
 Requires: ruby(release)
 %endif
 
-%if "%{_selinux_policy_version}" != ""
+%if "0%{_selinux_policy_version}" != "0"
 Requires: selinux-policy >= %{_selinux_policy_version}
 %endif
 Requires(post):   /usr/sbin/semodule, /sbin/restorecon, /sbin/fixfiles
