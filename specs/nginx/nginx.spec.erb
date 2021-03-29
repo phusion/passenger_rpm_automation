@@ -161,8 +161,8 @@ export CCACHE_COMPRESS=1
 export CCACHE_COMPRESSLEVEL=3
 
 pushd `pwd`/%{passenger_tarball_name}-%{passenger_version}
-if command -v drake; then
-    drake %{?_smp_mflags} nginx
+if command -v rake; then
+    rake %{?_smp_mflags} nginx
 else
     rake nginx
 fi

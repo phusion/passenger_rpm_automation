@@ -165,7 +165,7 @@ if $SHOW_TASKS; then
 		$BUILDBOX_IMAGE \
 		/system/internal/scripts/my_init --quiet --skip-runit --skip-startup-files -- \
 		/system/internal/build/resetpaths.sh \
-		drake -f /system/internal/build/Rakefile -T --trace
+		rake -f /system/internal/build/Rakefile -T --trace
 else
 	PASSENGER_DIR="`absolute_path \"$PASSENGER_DIR\"`"
 	WORK_DIR="`absolute_path \"$WORK_DIR\"`"
@@ -198,5 +198,5 @@ else
 		/system/internal/build/preinit.sh \
 		/system/internal/scripts/setuser app \
 		/system/internal/build/resetpaths.sh \
-		drake -f /system/internal/build/Rakefile -j $CONCURRENCY "${ARGV[@]}"
+		rake -f /system/internal/build/Rakefile -j $CONCURRENCY "${ARGV[@]}"
 fi
