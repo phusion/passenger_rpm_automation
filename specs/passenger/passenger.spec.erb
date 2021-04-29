@@ -9,7 +9,7 @@
 %global nginx_module_package_name <%= PASSENGER_NGINX_MODULE_RPM_NAME %>
 %global namespace <%= PhusionPassenger::GLOBAL_NAMESPACE_DIRNAME %>
 %global nginx_version <%= NGINX_VERSION %>
-%global bundled_boost_version 1.54.0
+%global bundled_boost_version 1.76.0
 %global is_enterprise <%= PASSENGER_ENTERPRISE ? 1 : 0 %>
 <% if dynamic_module_supported?(@distribution) %>
 %global dynamic_module_supported 1
