@@ -277,7 +277,6 @@ popd
 		pushd nginx-%{latest_nginx_version} && \
 		./configure \
 %if 0%{?el7}
-# Epel nginx has these flags now:
 		--with-compat \
 		--with-threads \
 %endif
