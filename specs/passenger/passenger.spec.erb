@@ -276,13 +276,16 @@ popd
 	/usr/bin/rake nginx:as_dynamic_module && \
 		pushd nginx-%{latest_nginx_version} && \
 		./configure \
+%if 0%{?el7}
+# Epel nginx has these flags now:
 		--with-compat \
+		--with-threads \
+%endif
 		--with-pcre \
 		--with-pcre-jit \
 		--with-ipv6 \
 		--with-file-aio \
 		--with-debug \
-		--with-threads \
 		--with-http_realip_module \
 		--with-http_dav_module \
 		--with-http_ssl_module \
