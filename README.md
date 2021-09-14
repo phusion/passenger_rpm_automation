@@ -299,7 +299,7 @@ NOTE: If you are on OS X, installing boot2docker is NOT enough. You MUST use Vag
 
 First, clone the Passenger git repository and its submodules:
 
-    git clone git://github.com/phusion/passenger.git
+    git clone https://github.com/phusion/passenger.git
     cd passenger
     git submodule update --init --recursive
 
