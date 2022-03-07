@@ -32,7 +32,7 @@ def latest_nginx_available_parts(distro)
     if distro == "el7"
       url = "https://dl.fedoraproject.org/pub/epel/7/x86_64/Packages/n/"
     elsif distro == "el8"
-      url = "http://mirror.centos.org/centos/8/AppStream/x86_64/os/Packages/"
+      url = "http://mirror.centos.org/centos/8-stream/AppStream/x86_64/os/Packages/"
     else
       abort "Unknown distro: '#{distro.to_s}', add to latest_nginx_available method."
     end
