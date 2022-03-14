@@ -20,7 +20,7 @@ elif [ $1 == "buildbox_version" ]; then
 elif [ $1 == "testbox_base_name" ]; then
 	echo -n "phusion/passenger_rpm_automation_testbox"
 elif [ $1 == "testbox_version" ]; then
-	echo -n "1.0.3"
+	echo -n "2.0.0"
 else
 	echo "$USAGE"
 	exit 1
