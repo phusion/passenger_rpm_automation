@@ -18,8 +18,10 @@ function el_name_to_distro_name()
 {
 	local EL="$1"
 
-	if [[ "$EL" =~ ^el[0-9]+$ ]]; then
+	if [[ "$EL" =~ ^el[0-7]$ ]]; then
 		echo centos${EL#"el"}
+	elif [[ "$EL" =~ ^el([8-9]|[1-9][0-9]+)$ ]]; then
+		echo alma${EL#"el"}
 	else
 		echo "ERROR: unknown distribution name." >&2
 		return 1
@@ -32,6 +34,8 @@ function distro_name_to_el_name()
 
 	if [[ "$DISTRIBUTION" =~ ^centos[0-9]+$ ]]; then
 		echo el${DISTRIBUTION#"centos"}
+	elif [[ "$DISTRIBUTION" =~ ^alma[0-9]+$ ]]; then
+		echo el${DISTRIBUTION#"alma"}
 	else
 		echo "ERROR: unknown distribution name." >&2
 		return 1
@@ -43,6 +47,8 @@ function distro_name_to_testbox_image()
 	local DISTRIBUTION="$1"
 	if [[ "$DISTRIBUTION" =~ ^centos[0-9]+$ ]]; then
 		echo phusion/passenger_rpm_automation_testbox_centos_${DISTRIBUTION#"centos"}:1.0.3
+	elif [[ "$DISTRIBUTION" =~ ^alma[0-9]+$ ]]; then
+		echo phusion/passenger_rpm_automation_testbox_alma_${DISTRIBUTION#"alma"}:1.0.3
 	else
 		echo "ERROR: unknown distribution name." >&2
 		return 1

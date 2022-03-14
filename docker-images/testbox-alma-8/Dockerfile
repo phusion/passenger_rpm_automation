@@ -1,4 +1,4 @@
-FROM centos:centos8
+FROM almalinux:8
 MAINTAINER Phusion <info@phusion.nl>
 
 ADD . /pra_build
