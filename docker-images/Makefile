@@ -16,6 +16,13 @@ buildbox:
 testbox-centos-7:
 	./setup-testbox-docker-image "$(TESTBOX_BASE_NAME)_centos_7:$(TESTBOX_VERSION)" "testbox-centos-7"
 
+buildbox-labels:
+	echo "$(BUILDBOX_NAME):$(BUILDBOX_VERSION)"
+
+testbox-labels:
+	echo "$(TESTBOX_BASE_NAME)_centos_7:$(TESTBOX_VERSION)"
+	echo "$(TESTBOX_BASE_NAME)_alma_8:$(TESTBOX_VERSION)"
+
 testbox-alma-8:
 	./setup-testbox-docker-image "$(TESTBOX_BASE_NAME)_alma_8:$(TESTBOX_VERSION)" "testbox-alma-8"
 

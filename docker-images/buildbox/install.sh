@@ -23,13 +23,12 @@ run adduser --uid 2467 --gid 2467 --password '#' app
 
 header "Installing dependencies"
 run yum install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
-run curl --fail -sSLo /etc/yum.repos.d/mock.repo https://copr.fedorainfracloud.org/coprs/g/mock/mock-stable/repo/epel-7/group_mock-mock-stable-epel-7.repo
 run yum update -y
 run yum install -y --enablerepo centosplus --skip-broken centos-release-scl
 run yum install -y --enablerepo centosplus --skip-broken createrepo \
 	fedora-packager git sudo gcc gcc-c++ ccache \
 	curl-devel openssl-devel python27-python \
-	httpd httpd-devel zlib-devel \
+	httpd httpd-devel zlib-devel ca-certificates \
 	libxml2-devel libxslt-devel sqlite-devel \
 	libev-devel pcre-devel rubygem-rack source-highlight \
 	apr-devel apr-util-devel which GeoIP-devel \
@@ -38,7 +37,39 @@ run yum install -y --enablerepo centosplus --skip-broken createrepo \
 	nodejs npm
 run yum --disablerepo=\* --enablerepo=base,updates groupinstall -y "Development Tools"
 
-run gpg --keyserver hkp://keys.gnupg.net --recv-keys 409B6B1796C275462A1703113804BB82D39DC0E3 7D2BAF1CF37B13E2069D6956105BD0E739499BDB
+KEYSERVERS=(
+	hkp://keyserver.pgp.com
+	hkp://keys.gnupg.net
+	ha.pool.sks-keyservers.net
+	hkp://p80.pool.sks-keyservers.net:80
+	hkp://ipv4.pool.sks-keyservers.net
+	keyserver.ubuntu.com
+	hkp://keyserver.ubuntu.com:80
+	hkp://pgp.mit.edu
+	pgp.mit.edu
+	-end-
+)
+
+KEYS=(
+	409B6B1796C275462A1703113804BB82D39DC0E3
+	7D2BAF1CF37B13E2069D6956105BD0E739499BDB
+)
+
+# We've had too many problems with keyservers. No matter which one we pick,
+# it will fail some of the time for some people. So just try a whole bunch
+# of them.
+for KEY in "${KEYS[@]}"; do
+	for KEYSERVER in "${KEYSERVERS[@]}"; do
+		if [[ "$KEYSERVER" = -end- ]]; then
+			echo 'ERROR: exhausted list of keyservers' >&2
+			exit 1
+		else
+			echo "+ gpg --keyserver $KEYSERVER --recv-keys ${KEY}"
+			gpg --keyserver "$KEYSERVER" --recv-keys "${KEY}" && break || echo 'Trying another keyserver...'
+		fi
+	done
+done
+
 run curl --fail -sSLo /tmp/rvm.sh https://get.rvm.io
 run bash /tmp/rvm.sh stable
 source /usr/local/rvm/scripts/rvm
