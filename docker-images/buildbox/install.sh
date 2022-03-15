@@ -90,7 +90,8 @@ run sudo -u app -H rpmdev-setuptree
 run mkdir -p /etc/container_environment
 run cp /pra_build/my_init_python /sbin/my_init_python
 run cp /pra_build/site-defaults.cfg /etc/mock/site-defaults.cfg
-echo "config_opts['chroot_setup_cmd'] += ' selinux-policy'" >> /etc/mock/epel-8-x86_64.cfg
+echo "config_opts['chroot_setup_cmd'] += ' selinux-policy'" >> /etc/mock/centos+epel-7-x86_64.cfg
+echo "config_opts['chroot_setup_cmd'] += ' selinux-policy'" >> /etc/mock/alma+epel-8-x86_64.cfg
 
 header "Cleaning up"
 run yum clean all

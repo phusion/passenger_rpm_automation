@@ -8,11 +8,11 @@ REDHAT_ENTERPRISE_DISTRIBUTIONS = {
 
 DISTRO_BUILD_PARAMS = {
   "el7" => {
-    :mock_chroot_name => "epel-7",
+    :mock_chroot_name => "centos+epel-7",
     :name => "Enterprise Linux 7"
   },
   "el8" => {
-    :mock_chroot_name => "epel-8",
+    :mock_chroot_name => "alma+epel-8",
     :name => "Enterprise Linux 8"
   },
 }
