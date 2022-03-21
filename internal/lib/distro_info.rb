@@ -12,7 +12,7 @@ DISTRO_BUILD_PARAMS = {
     :name => "Enterprise Linux 7"
   },
   "el8" => {
-    :mock_chroot_name => "alma+epel-8",
+    :mock_chroot_name => "rocky+epel-8",
     :name => "Enterprise Linux 8"
   },
 }
@@ -32,7 +32,7 @@ def latest_nginx_available_parts(distro)
     if distro == "el7"
       url = "https://dl.fedoraproject.org/pub/epel/7/x86_64/Packages/n/"
     elsif distro == "el8"
-      url = "https://repo.almalinux.org/almalinux/8/AppStream/x86_64/os/Packages/"
+      url = "https://dl.rockylinux.org/pub/rocky/8/AppStream/x86_64/os/Packages/n/"
     else
       abort "Unknown distro: '#{distro.to_s}', add to latest_nginx_available method."
     end

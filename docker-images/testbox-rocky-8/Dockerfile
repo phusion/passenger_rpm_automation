@@ -1,4 +1,4 @@
-FROM almalinux:8
+FROM rockylinux:8
 MAINTAINER Phusion <info@phusion.nl>
 
 ADD . /pra_build

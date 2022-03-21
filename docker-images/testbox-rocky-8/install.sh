@@ -22,7 +22,7 @@ run adduser --uid 2467 --gid 2467 --password '#' app
 header "Installing dependencies"
 run yum --releasever=8 -y update # fix broken dnf/yum/rpm shit
 run yum install -y --enablerepo plus epel-release yum-utils drpm
-#asciidoc in almalinux 8 installs all of X11
+#asciidoc in rockylinux 8 installs all of X11
 run yum groupinstall -y "Development Tools" --exclude asciidoc
 run yum install -y --enablerepo plus \
 	ruby ruby-devel rubygems rubygem-rack rubygem-rake nodejs npm \
@@ -33,7 +33,7 @@ run gem install bundler --no-document
 run gem install bundler -v 1.17.3 --no-document
 run env BUNDLE_GEMFILE=/pra_build/Gemfile bundle install
 
-# Enable Almalinux CR: https://wiki.centos.org/AdditionalResources/Repositories/CR
+# Enable RockyLinux CR: https://wiki.centos.org/AdditionalResources/Repositories/CR
 # Comment out the following two lines if you see any broken packages
 # For more information, see README.md section
 # "Dealing with broken packages: enabling/disabling CR".

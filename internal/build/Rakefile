@@ -183,7 +183,7 @@ namespace :rpm do
             "--resultdir '/work/#{distro_id}-#{arch}' " +
             "--uniqueext passenger-#{distro_id}-#{arch} " +
             "--enable-plugin=ccache " +
-            "rebuild /work/#{distro_id}-#{arch}/#{passenger_srpm_name(distro_id)}"
+            "--rebuild /work/#{distro_id}-#{arch}/#{passenger_srpm_name(distro_id)}"
         end
       end
     end
@@ -214,7 +214,7 @@ namespace :rpm do
             "--resultdir '/work/#{distro_id}-#{arch}' " +
             "--uniqueext nginx-#{distro_id}-#{arch} " +
             "--enable-plugin=ccache " +
-            "rebuild /work/#{distro_id}-#{arch}/#{nginx_srpm_name(distro_id)}"
+            "--rebuild /work/#{distro_id}-#{arch}/#{nginx_srpm_name(distro_id)}"
         end
       end
     end
