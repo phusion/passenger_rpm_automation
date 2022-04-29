@@ -35,7 +35,12 @@ class Preprocessor
     end
     the_binding  = create_binding(variables)
 
-    erb = ERB.new(File.read(filename), nil, "-")
+    if RUBY_VERSION >= '2.6'
+      erb = ERB.new(File.read(filename), trim_mode: "-")
+    else
+      erb = ERB.new(File.read(filename), nil, "-")
+    end
+
     erb.filename = filename
     output.write(erb.result(the_binding))
   ensure
