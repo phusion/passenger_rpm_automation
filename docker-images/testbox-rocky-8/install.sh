@@ -25,7 +25,7 @@ run yum install -y --enablerepo plus epel-release yum-utils drpm
 #asciidoc in rockylinux 8 installs all of X11
 run yum groupinstall -y "Development Tools" --exclude asciidoc
 run yum install -y --enablerepo plus \
-	ruby ruby-devel rubygems rubygem-rack rubygem-rake nodejs npm \
+	ruby ruby-devel rubygems rubygem-rack rubygem-rake \
 	ccache perl git tar which python27 \
 	httpd httpd-devel httpd-tools zlib-devel sqlite-devel curl-devel \
 	GeoIP libxslt openssl-devel
@@ -40,9 +40,8 @@ run env BUNDLE_GEMFILE=/pra_build/Gemfile bundle install
 #run yum update -y
 #run yum-config-manager --enable cr
 
-header "Installing more dependencies"
-run curl https://dl.yarnpkg.com/rpm/yarn.repo -o /etc/yum.repos.d/yarn.repo
-run yum install -y nodejs yarn
+header "Installing node related dependencies"
+run dnf module install -y nodejs:16
 
 header "Miscellaneous"
 run ln -s /usr/bin/python2.7 /sbin/my_init_python
