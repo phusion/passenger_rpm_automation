@@ -4,6 +4,7 @@ require 'nokogiri'
 REDHAT_ENTERPRISE_DISTRIBUTIONS = {
   "el7" => "el7.0",
   "el8" => "el8.0",
+  "el9" => "el9.0",
 }
 
 DISTRO_BUILD_PARAMS = {
@@ -14,6 +15,10 @@ DISTRO_BUILD_PARAMS = {
   "el8" => {
     :mock_chroot_name => "rocky+epel-8",
     :name => "Enterprise Linux 8"
+  },
+  "el9" => {
+    :mock_chroot_name => "rocky+epel-9",
+    :name => "Enterprise Linux 9"
   },
 }
 
@@ -33,6 +38,8 @@ def latest_nginx_available_parts(distro)
       url = "https://dl.fedoraproject.org/pub/epel/7/x86_64/Packages/n/"
     elsif distro == "el8"
       url = "https://dl.rockylinux.org/pub/rocky/8/AppStream/x86_64/os/Packages/n/"
+    elsif distro == "el9"
+      url = "https://dl.rockylinux.org/pub/rocky/9/AppStream/x86_64/os/Packages/n/"
     else
       abort "Unknown distro: '#{distro.to_s}', add to latest_nginx_available method."
     end

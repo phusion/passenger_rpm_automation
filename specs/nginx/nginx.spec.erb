@@ -68,7 +68,9 @@ Source104:         50x.html
 # -D_FORTIFY_SOURCE=2 causing warnings to turn into errors.
 Patch0:            nginx-auto-cc-gcc.patch
 
+%if 0%{?rhel} < 9 || 0%{?fedora} < 35
 BuildRequires:     GeoIP-devel
+%endif
 BuildRequires:     gd-devel
 %if 0%{?with_gperftools}
 BuildRequires:     gperftools-devel
@@ -81,7 +83,10 @@ BuildRequires:     perl(ExtUtils::Embed)
 BuildRequires:     zlib-devel
 
 Requires:          nginx-filesystem = %{epoch}:%{version}-%{release}
+
+%if 0%{?rhel} < 9 || 0%{?fedora} < 35
 Requires:          GeoIP
+%endif
 Requires:          gd
 Requires:          openssl
 Requires:          pcre
@@ -202,7 +207,9 @@ export DESTDIR=%{buildroot}
     --with-http_addition_module \
     --with-http_xslt_module \
     --with-http_image_filter_module \
+%if 0%{?rhel} < 9 || 0%{?fedora} < 35
     --with-http_geoip_module \
+%endif
     --with-http_sub_module \
     --with-http_dav_module \
     --with-http_flv_module \
