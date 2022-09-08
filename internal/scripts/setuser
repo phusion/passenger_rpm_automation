@@ -20,10 +20,7 @@ os.setuid(user.pw_uid)
 os.environ['USER'] = username
 os.environ['HOME'] = user.pw_dir
 os.environ['UID']  = str(user.pw_uid)
-# Undo the LD_LIBRARY_PATH set specifically for /sbin/my_init_python.
-if 'ORIG_LD_LIBRARY_PATH' in os.environ:
-	os.environ['LD_LIBRARY_PATH'] = os.environ['ORIG_LD_LIBRARY_PATH']
-	del os.environ['ORIG_LD_LIBRARY_PATH']
+
 try:
 	os.execvp(sys.argv[2], sys.argv[2:])
 except OSError as e:

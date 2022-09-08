@@ -22,20 +22,19 @@ run groupadd --gid 2467 app
 run adduser --uid 2467 --gid 2467 --password '#' app
 
 header "Installing dependencies"
-run yum install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
-run yum update -y
-run yum install -y --enablerepo centosplus --skip-broken centos-release-scl
-run yum install -y --enablerepo centosplus --skip-broken createrepo \
-	fedora-packager git sudo gcc gcc-c++ ccache \
-	curl-devel openssl-devel python27-python \
+run dnf install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm
+run dnf update -y
+run dnf install -y --skip-broken \
+	git sudo gcc gcc-c++ ccache \
+	curl-devel openssl-devel \
 	httpd httpd-devel zlib-devel ca-certificates \
 	libxml2-devel libxslt-devel sqlite-devel \
-	libev-devel pcre-devel rubygem-rack source-highlight \
-	apr-devel apr-util-devel which GeoIP-devel \
+	libev-devel pcre-devel source-highlight \
+	apr-devel apr-util-devel which \
 	gd-devel gperftools-devel perl-devel perl-ExtUtils-Embed \
-	centos-release bash procps-ng python2-pyroute2 \
-	nodejs npm
-run yum --disablerepo=\* --enablerepo=base,updates groupinstall -y "Development Tools"
+	centos-release bash procps-ng \
+	nodejs npm createrepo mock rpmdevtools
+run dnf --disablerepo=\* --enablerepo=baseos groupinstall -y "Development Tools"
 
 KEYSERVERS=(
 	hkp://keyserver.pgp.com
@@ -73,9 +72,10 @@ done
 run curl --fail -sSLo /tmp/rvm.sh https://get.rvm.io
 run bash /tmp/rvm.sh stable
 source /usr/local/rvm/scripts/rvm
-run rvm install ruby-2.6.3
-rvm use ruby-2.6.3
-rvm --default ruby-2.6.3
+RUBY=3.1.2
+run rvm install ruby-$RUBY || cat /usr/local/rvm/log/*_ruby-$RUBY/make.log
+rvm use ruby-$RUBY
+rvm --default ruby-$RUBY
 run gem install bundler --no-document
 run env BUNDLE_GEMFILE=/pra_build/Gemfile bundle install -j 4
 
@@ -90,9 +90,7 @@ run sudo -u app -H rpmdev-setuptree
 run mkdir -p /etc/container_environment
 run cp /pra_build/my_init_python /sbin/my_init_python
 run cp /pra_build/site-defaults.cfg /etc/mock/site-defaults.cfg
-echo "config_opts['chroot_setup_cmd'] += ' selinux-policy'" >> /etc/mock/centos+epel-7-x86_64.cfg
-echo "config_opts['chroot_setup_cmd'] += ' selinux-policy'" >> /etc/mock/rocky+epel-8-x86_64.cfg
 
 header "Cleaning up"
-run yum clean all
+run dnf clean all
 run rm -rf /pra_build

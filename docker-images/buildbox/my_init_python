@@ -1,4 +1,2 @@
 #!/bin/sh
-export ORIG_LD_LIBRARY_PATH="$LD_LIBRARY_PATH"
-export LD_LIBRARY_PATH=/opt/rh/python27/root/usr/lib64:/opt/rh/python27/root/usr/lib
-exec /opt/rh/python27/root/usr/bin/python2.7 "$@"
+exec /usr/bin/python3 "$@"

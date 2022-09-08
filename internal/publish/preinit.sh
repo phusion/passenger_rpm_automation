@@ -6,9 +6,6 @@ if [[ ! -e /work ]]; then
 fi
 
 source /usr/local/rvm/scripts/rvm
-rvm use 2.6.3
-
-# Remove python27 from LD_LIBRARY_PATH. python27 was only used for my_init.
-unset LD_LIBRARY_PATH
+rvm use 3.1.2
 
 exec "$@"

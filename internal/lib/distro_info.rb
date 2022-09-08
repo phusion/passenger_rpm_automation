@@ -43,8 +43,14 @@ def latest_nginx_available_parts(distro)
     else
       abort "Unknown distro: '#{distro.to_s}', add to latest_nginx_available method."
     end
-    doc = open(url) do |io|
-      Nokogiri.HTML(io)
+    if RUBY_VERSION >= '2.5'
+      doc = URI.open(url) do |io|
+        Nokogiri.HTML(io)
+      end
+    else
+	    doc = open(url) do |io|
+        Nokogiri.HTML(io)
+      end
     end
     version_parts = doc.at_css('a[href^="nginx-"]').text.lines.select{|s|!(s.include?("-mod-") || s.include?(".noarch."))}.first.strip
     File.write(cache_file,version_parts)

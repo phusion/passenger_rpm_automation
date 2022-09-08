@@ -1,4 +1,4 @@
-FROM centos:centos7
+FROM rockylinux:9
 MAINTAINER Phusion <info@phusion.nl>
 
 ADD . /pra_build

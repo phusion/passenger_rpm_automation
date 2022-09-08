@@ -300,11 +300,6 @@ def main(args):
 				stop_child_process("runit daemon", runit_pid)
 			wait_for_runit_services()
 
-# Undo the LD_LIBRARY_PATH set specifically for /sbin/my_init_python.
-if 'ORIG_LD_LIBRARY_PATH' in os.environ:
-	os.environ['LD_LIBRARY_PATH'] = os.environ['ORIG_LD_LIBRARY_PATH']
-	del os.environ['ORIG_LD_LIBRARY_PATH']
-
 # Parse options.
 parser = argparse.ArgumentParser(description = 'Initialize the system.')
 parser.add_argument('main_command', metavar = 'MAIN_COMMAND', type = str, nargs = '*',
