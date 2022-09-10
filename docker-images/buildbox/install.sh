@@ -17,6 +17,9 @@ export HOME=/root
 export LANG=en_US.UTF-8
 export LC_CTYPE=en_US.UTF-8
 
+header "deleting user"
+run userdel systemd-coredump
+
 header "Creating users"
 run groupadd --gid 2467 app
 run adduser --uid 2467 --gid 2467 --password '#' app

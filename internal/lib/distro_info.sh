@@ -11,7 +11,7 @@ DEFAULT_DISTROS="el7 el8 el9"
 
 function get_buildbox_image()
 {
-  echo "phusion/passenger_rpm_automation_buildbox:2.0.0"
+  echo "phusion/passenger_rpm_automation_buildbox:2.0.1"
 }
 
 function el_name_to_distro_name()
