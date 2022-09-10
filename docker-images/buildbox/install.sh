@@ -19,6 +19,7 @@ export LC_CTYPE=en_US.UTF-8
 
 header "deleting user"
 run userdel systemd-coredump
+run groupdel render
 
 header "Creating users"
 run groupadd --gid 2467 app
