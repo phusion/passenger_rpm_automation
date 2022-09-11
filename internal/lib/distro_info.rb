@@ -4,7 +4,7 @@ require 'nokogiri'
 REDHAT_ENTERPRISE_DISTRIBUTIONS = {
   "el7" => "el7.0",
   "el8" => "el8.0",
-  "el9" => "el9.0",
+#  "el9" => "el9.0",
 }
 
 DISTRO_BUILD_PARAMS = {
