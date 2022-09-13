@@ -6,7 +6,7 @@
 #
 # Edit those and regenerate distro_info.sh by running:
 # internal/scripts/regen_distro_info_script.sh
-DEFAULT_DISTROS="el7 el8"
+DEFAULT_DISTROS="el7 el8 el9"
 
 
 function get_buildbox_image()
@@ -66,6 +66,11 @@ function dynamic_module_supported()
 		fi
 	
 		if [[ "$CODENAME" = "el8" ]]; then
+			echo true
+			return
+		fi
+	
+		if [[ "$CODENAME" = "el9" ]]; then
 			echo true
 			return
 		fi
