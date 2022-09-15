@@ -116,12 +116,12 @@ Requires(post):   /usr/sbin/semodule, /sbin/restorecon, /sbin/fixfiles
 Requires(postun): /usr/sbin/semodule, /sbin/restorecon, /sbin/fixfiles
 
 BuildRequires: g++
-%if 0%{?rhel} >= 6 || 0%{?fedora} >= 15
+%if 0%{?rhel} >= 6 || 0%{?fedora} >= 12
 BuildRequires: libcurl-devel
 %else
 BuildRequires: curl-devel
 %endif
-%if 0%{?rhel} >= 8 || 0%{?fedora} >= 30
+%if 0%{?rhel} >= 8 || 0%{?fedora} >= 28
 BuildRequires: /usr/bin/pathfix.py
 BuildRequires: python3-devel
 %endif
@@ -138,7 +138,7 @@ BuildRequires: pcre-devel
 BuildRequires: openssl-devel
 BuildRequires: selinux-policy
 BuildRequires: selinux-policy-targeted
-%if 0%{?rhel} >= 7
+%if 0%{?rhel} >= 7 || 0%{?fedora} >= 19
 BuildRequires: selinux-policy-sandbox
 %endif
 BuildRequires: checkpolicy, selinux-policy-devel
@@ -357,7 +357,7 @@ touch -r %{SOURCE201} nginx.conf
 # Install Apache config.
 %{__mkdir_p} %{buildroot}%{_httpd_confdir} %{buildroot}%{_httpd_modconfdir}
 %{__sed} -e 's|@PASSENGERROOT@|%{passenger_ruby_libdir}/phusion_passenger/locations.ini|g' %{SOURCE100} > passenger.conf
-%if !(0%{?rhel} >= 7 || 0%{?fedora} >= 16)
+%if !(0%{?rhel} >= 7 || 0%{?fedora} >= 19)
     %{__sed} -i -e '/^# *Require all granted/d' passenger.conf
 %endif
 
@@ -376,7 +376,7 @@ touch -r %{SOURCE201} nginx.conf
 %{__mkdir_p} %{buildroot}%{_localstatedir}/log/passenger-analytics
 %{__mkdir_p} %{buildroot}%{_localstatedir}/run/passenger-instreg
 %{__mkdir_p} %{buildroot}%{_prefix}/lib/tmpfiles.d 
-%if 0%{?rhel} >= 7 || 0%{?fedora} >= 16
+%if 0%{?rhel} >= 7 || 0%{?fedora} >= 19
     %{__install} -m 644 -p %{SOURCE102} \
         %{buildroot}%{_prefix}/lib/tmpfiles.d/passenger.conf
 %endif
@@ -392,7 +392,7 @@ touch -r %{SOURCE201} nginx.conf
 %{__cp} man/*.8 %{buildroot}%{_mandir}/man8
 
 # Fix Python scripts with shebang which are not executable
-%if 0%{?rhel} >= 8 || 0%{?fedora} >= 30
+%if 0%{?rhel} >= 8 || 0%{?fedora} >= 28
 pathfix.py -pni "%{__python3} %{py3_shbang_opts}" %{buildroot}%{_datadir}/%{namespace}/helper-scripts/wsgi-loader.py
 %endif
 %{__chmod} +x %{buildroot}%{_datadir}/%{namespace}/helper-scripts/wsgi-loader.py
@@ -459,7 +459,7 @@ fi
 %{_bindir}/*
 %{_sbindir}/*
 %{_libdir}/%{namespace}/support-binaries
-%if 0%{?rhel} >= 7 || 0%{?fedora} >= 16
+%if 0%{?rhel} >= 7 || 0%{?fedora} >= 19
     %{_prefix}/lib/tmpfiles.d/passenger.conf
 %endif
 %{_datadir}/%{namespace}/helper-scripts
