@@ -15,6 +15,10 @@ function run()
 
 export HOME=/root
 
+header "deleting conflicting user & group"
+run userdel systemd-coredump
+run groupdel render
+
 header "Creating users"
 run groupadd --gid 2467 app
 run adduser --uid 2467 --gid 2467 --password '#' app

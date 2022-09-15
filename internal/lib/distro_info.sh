@@ -46,9 +46,9 @@ function distro_name_to_testbox_image()
 {
 	local DISTRIBUTION="$1"
 	if [[ "$DISTRIBUTION" =~ ^centos[0-9]+$ ]]; then
-		echo phusion/passenger_rpm_automation_testbox_centos_${DISTRIBUTION#"centos"}:2.0.1
+		echo phusion/passenger_rpm_automation_testbox_centos_${DISTRIBUTION#"centos"}:2.0.2
 	elif [[ "$DISTRIBUTION" =~ ^rocky[0-9]+$ ]]; then
-		echo phusion/passenger_rpm_automation_testbox_rocky_${DISTRIBUTION#"rocky"}:2.0.1
+		echo phusion/passenger_rpm_automation_testbox_rocky_${DISTRIBUTION#"rocky"}:2.0.2
 	else
 		echo "ERROR: unknown distribution name." >&2
 		return 1

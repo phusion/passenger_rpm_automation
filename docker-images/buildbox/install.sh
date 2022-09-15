@@ -17,7 +17,7 @@ export HOME=/root
 export LANG=en_US.UTF-8
 export LC_CTYPE=en_US.UTF-8
 
-header "deleting user"
+header "deleting conflicting user & group"
 run userdel systemd-coredump
 run groupdel render
 
