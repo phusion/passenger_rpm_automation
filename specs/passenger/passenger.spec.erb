@@ -115,7 +115,9 @@ Requires: selinux-policy >= %{_selinux_policy_version}
 Requires(post):   /usr/sbin/semodule, /sbin/restorecon, /sbin/fixfiles
 Requires(postun): /usr/sbin/semodule, /sbin/restorecon, /sbin/fixfiles
 
+%if 0%{?rhel} >= 9 || 0%{?fedora} >= 34
 BuildRequires: g++
+%endif
 %if 0%{?rhel} >= 6 || 0%{?fedora} >= 12
 BuildRequires: libcurl-devel
 %else
