@@ -33,7 +33,7 @@ end
 
 def latest_nginx_available_parts(distro)
   cache_file = "/tmp/#{distro}_nginx_version.txt"
-  if !File.exists?(cache_file) || ((Time.now - 60*60*24) > File.mtime(cache_file))
+  if !File.exist?(cache_file) || ((Time.now - 60*60*24) > File.mtime(cache_file))
     if distro == "el7"
       url = "https://dl.fedoraproject.org/pub/epel/7/x86_64/Packages/n/"
     elsif distro == "el8"
