@@ -18,6 +18,12 @@ if grep -q 'release 8' /etc/redhat-release; then
 	groupdel render
 fi
 
+# There is a user pesign and group input in the CentOS 9 container with these UID/GID, but we don't need them so we just delete them.
+if grep -q 'release 9' /etc/redhat-release; then
+	userdel pesign
+	groupdel input
+fi
+
 if [[ "$APP_UID" -lt 1024 ]]; then
 	if awk -F: '{ print $3 }' < /etc/passwd | grep -q "^${APP_UID}$"; then
 		echo "ERROR: you can only run this script with a user whose UID is at least 1024, or whose UID does not already exist in the Docker container. Current UID: $APP_UID"

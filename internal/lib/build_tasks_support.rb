@@ -5,7 +5,7 @@ require 'singleton'
 require File.expand_path(File.dirname(__FILE__) + '/preprocessor')
 
 MUTEX = Mutex.new
-SUPPORTED_ARCHS = ['i386', 'x86_64']
+SUPPORTED_ARCHS = ['i386', 'x86_64', 'aarch64']
 
 class TrackingDatabase
   include Singleton

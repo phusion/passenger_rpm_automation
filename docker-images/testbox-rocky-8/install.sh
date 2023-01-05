@@ -29,7 +29,7 @@ run yum install -y --enablerepo plus \
 	ccache perl git tar which python27 \
 	httpd httpd-devel httpd-tools zlib-devel sqlite-devel curl-devel \
 	GeoIP libxslt openssl-devel
-run gem install bundler --no-document
+run gem install bundler -v 2.3.26 --no-document
 run gem install bundler -v 1.17.3 --no-document
 run env BUNDLE_GEMFILE=/pra_build/Gemfile bundle install
 

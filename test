@@ -136,6 +136,7 @@ exec docker run \
 	-e "JENKINS=$JENKINS" \
 	-e "APP_UID=`/usr/bin/id -u`" \
 	-e "APP_GID=`/usr/bin/id -g`" \
+	--platform "linux/$(dpkg --print-architecture)" \
 	$TEST_IMAGE \
 	/system/internal/scripts/my_init --quiet --skip-runit --skip-startup-files -- \
 	/system/internal/scripts/inituidgid.sh \

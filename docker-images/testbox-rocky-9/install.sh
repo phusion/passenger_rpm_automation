@@ -27,11 +27,11 @@ run dnf install -y epel-release yum-utils
 
 run dnf groupinstall -y "Development Tools" --exclude asciidoc
 run dnf install -y alternatives \
-	ruby ruby-devel rubygems rubygem-rake \
-	perl git tar which python3 \
-	httpd httpd-devel httpd-tools zlib-devel sqlite-devel curl-devel \
-	libxslt openssl-devel \
-	rubygem-rack ccache
+    ruby ruby-devel rubygems rubygem-rake \
+    perl git tar which python3 \
+    httpd httpd-devel httpd-tools zlib-devel sqlite-devel curl-devel \
+    libxslt openssl-devel \
+    rubygem-rack ccache
 run gem install bundler --no-document
 run gem install bundler -v 1.17.3 --no-document
 run env BUNDLE_GEMFILE=/pra_build/Gemfile bundle install
@@ -50,7 +50,3 @@ run cp /pra_build/Gemfile* /pra/
 header "Cleaning up"
 run dnf clean all
 run rm -rf /pra_build
-
-header "Deleting conflicting user & group"
-run userdel systemd-coredump
-run groupdel render

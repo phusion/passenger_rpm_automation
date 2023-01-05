@@ -24,7 +24,7 @@ DISTRO_BUILD_PARAMS = {
 
 def distro_architecture_allowed?(distro_id, arch)
   # Red Hat does not support x86 after RHEL 6
-  (distro_id.delete_prefix("el").to_i < 7) || arch == "x86_64"
+  (distro_id.delete_prefix("el").to_i < 7) || arch.include?("64")
 end
 
 def dynamic_module_supported?(distro)
@@ -41,7 +41,7 @@ def latest_nginx_available_parts(distro)
     elsif distro == "el9"
       url = "https://dl.rockylinux.org/pub/rocky/9/AppStream/x86_64/os/Packages/n/"
     else
-      abort "Unknown distro: '#{distro.to_s}', add to latest_nginx_available method."
+      abort "Unknown distro: '#{distro.to_s}', add to latest_nginx_available method in #{__FILE__}."
     end
     if RUBY_VERSION >= '2.5'
       doc = URI.open(url) do |io|
