@@ -5,24 +5,8 @@ set -e
 set -o pipefail
 
 # Hack to make the Passenger RPM packaging tests on our Jenkins infrastructure work. Jenkins has UID 999 and GID 998.
-
-# There is a user saslauth and group ssh_keys in the CentOS 7 container with these UID/GID, but we don't need them so we just delete them.
-if grep -q 'release 7' /etc/redhat-release; then
-	userdel saslauth
-	groupdel ssh_keys
-fi
-
-# There is a user systemd-coredump and group render in the CentOS 8 container with these UID/GID, but we don't need them so we just delete them.
-if grep -q 'release 8' /etc/redhat-release; then
-	userdel systemd-coredump
-	groupdel render
-fi
-
-# There is a user pesign and group input in the CentOS 9 container with these UID/GID, but we don't need them so we just delete them.
-if grep -q 'release 9' /etc/redhat-release; then
-	userdel pesign
-	groupdel input
-fi
+userdel $(getent passwd 999 | cut -d: -f1)
+groupdel $(getent group 998 | cut -d: -f1)
 
 if [[ "$APP_UID" -lt 1024 ]]; then
 	if awk -F: '{ print $3 }' < /etc/passwd | grep -q "^${APP_UID}$"; then
