@@ -71,7 +71,7 @@ upload_testbox: tag_latest_testbox
 	docker push $(TESTBOX_BASE_NAME)_rocky_9:$(TESTBOX_VERSION)-arm64
 	docker push $(TESTBOX_BASE_NAME)_rocky_9:$(TESTBOX_VERSION)-amd64
 
-release_testboxes: upload_testboxes
+release_testboxes: upload_testbox
 	docker manifest rm $(TESTBOX_BASE_NAME)_centos_7:latest || true
 	docker manifest create $(TESTBOX_BASE_NAME)_centos_7:latest             $(TESTBOX_BASE_NAME)_centos_7:latest-amd64	     $(TESTBOX_BASE_NAME)_centos_7:latest-arm64
 	docker manifest create $(TESTBOX_BASE_NAME)_centos_7:$(TESTBOX_VERSION) $(TESTBOX_BASE_NAME)_centos_7:$(TESTBOX_VERSION)-amd64 $(TESTBOX_BASE_NAME)_centos_7:$(TESTBOX_VERSION)-arm64
