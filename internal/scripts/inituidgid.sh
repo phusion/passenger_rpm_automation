@@ -5,8 +5,15 @@ set -e
 set -o pipefail
 
 # Hack to make the Passenger RPM packaging tests on our Jenkins infrastructure work. Jenkins has UID 999 and GID 998.
-userdel $(getent passwd 999 | cut -d: -f1)
-groupdel $(getent group 998 | cut -d: -f1)
+local USER_NAME="$(getent passwd "${APP_UID}" | cut -d: -f1)"
+if [ -n "$USER_NAME" ]; then
+	userdel "$USER_NAME"
+fi
+
+local GROUP_NAME="$(getent group "${APP_GID}" | cut -d: -f1)"
+if [ -n "$GROUP_NAME" ]; then
+	groupdel "$GROUP_NAME"
+fi
 
 if [[ "$APP_UID" -lt 1024 ]]; then
 	if awk -F: '{ print $3 }' < /etc/passwd | grep -q "^${APP_UID}$"; then
