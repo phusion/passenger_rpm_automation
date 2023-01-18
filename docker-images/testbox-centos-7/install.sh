@@ -28,7 +28,7 @@ run yum install -y --enablerepo centosplus \
 	ccache perl git tar which \
 	httpd httpd-devel httpd-tools zlib-devel sqlite-devel curl-devel \
 	GeoIP gd libxslt openssl-devel
-run gem install bundler -v 1.10.6 --no-rdoc --no-ri
+run gem install bundler -v 1.17.3 --no-rdoc --no-ri
 run env BUNDLE_GEMFILE=/pra_build/Gemfile bundle install
 
 # Enable CentOS CR: https://wiki.centos.org/AdditionalResources/Repositories/CR
