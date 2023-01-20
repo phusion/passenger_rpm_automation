@@ -67,7 +67,7 @@ def passenger_root
   `passenger-config --root`.strip
 end
 
-shared_examples_for "Hello world Ruby application" do
+RSpec.shared_examples_for "Hello world Ruby application" do
   it "works" do
     if RUBY_VERSION >= '2.5'
       URI.open("http://passenger.test/", "rb") do |io|
@@ -81,7 +81,7 @@ shared_examples_for "Hello world Ruby application" do
   end
 end
 
-shared_examples_for "Hello world Python application" do
+RSpec.shared_examples_for "Hello world Python application" do
   it "works" do
     if RUBY_VERSION >= '2.5'
       URI.open("http://1.passenger.test/", "rb") do |io|
@@ -95,7 +95,7 @@ shared_examples_for "Hello world Python application" do
   end
 end
 
-shared_examples_for "Hello world Node.js application" do
+RSpec.shared_examples_for "Hello world Node.js application" do
   it "works" do
     if RUBY_VERSION >= '2.5'
       URI.open("http://2.passenger.test/", "rb") do |io|
