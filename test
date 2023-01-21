@@ -121,7 +121,7 @@ fi
 run mkdir -p "$CACHE_DIR/test-$DISTRIBUTION/yumcache"
 
 echo "-------- Entering Docker container --------"
-echo exec docker run \
+echo '+' exec docker run \
 	--rm \
 	-v "$SELFDIR/internal:/system/internal:ro" \
 	-v "$PASSENGER_DIR:/passenger:ro" \
@@ -159,7 +159,7 @@ exec docker run \
 	-e "APP_GID=`/usr/bin/id -g`" \
 	--platform "linux/$(dpkg --print-architecture)" \
 	$TEST_IMAGE \
-	/system/internal/scripts/my_init --quiet --skip-runit --skip-startup-files -- \
+	/system/internal/scripts/my_init --skip-runit --skip-startup-files -- \
 	/system/internal/scripts/inituidgid.sh \
 	/system/internal/test/misc/init.sh \
 	/system/internal/test/test.sh
