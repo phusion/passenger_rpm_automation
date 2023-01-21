@@ -1,8 +1,6 @@
 #!/bin/bash
 # Changes the 'app' user's UID and GID to the values specified
 # in $APP_UID and $APP_GID.
-set -e
-set -o pipefail
 
 # Hack to make the Passenger RPM packaging tests on our Jenkins infrastructure work. Jenkins has UID 999 and GID 998.
 USER_NAME="$(getent passwd "${APP_UID}" | cut -d: -f1)"
@@ -14,6 +12,8 @@ GROUP_NAME="$(getent group "${APP_GID}" | cut -d: -f1)"
 if [ -n "$GROUP_NAME" ]; then
 	groupdel "$GROUP_NAME"
 fi
+
+set -exo pipefail
 
 if [[ "$APP_UID" -lt 1024 ]]; then
 	if awk -F: '{ print $3 }' < /etc/passwd | grep -q "^${APP_UID}$"; then
