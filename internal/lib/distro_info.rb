@@ -52,7 +52,12 @@ def latest_nginx_available_parts(distro)
         Nokogiri.HTML(io)
       end
     end
-    version_parts = doc.at_css('a[href^="nginx-"]').text.lines.select{|s|!(s.include?("-mod-") || s.include?(".noarch."))}.first.strip
+    version_parts = doc
+                      .css('a[href^="nginx-"]')
+                      .map { |el| el['href'] }
+                      .reject { |s| ["-mod-",".noarch.","-core-"].any?{ |p| s.include?(p) } }
+                      .max_by { |v| Gem::Version.new(v.split('-').find{ |s| is_version? s}) }
+                      .strip
     File.write(cache_file,version_parts)
   else
     version_parts = File.read(cache_file)
@@ -60,8 +65,12 @@ def latest_nginx_available_parts(distro)
   version_parts.split('-')
 end
 
+def is_version?(s)
+  /^[\d\.]+$/.match?(s)
+end
+
 def latest_nginx_version(distro)
-  latest_nginx_available_parts(distro).select{|s|/^[\d\.]+$/.match?(s)}.first
+  latest_nginx_available_parts(distro).find{ |s| is_version? s }
 end
 
 def latest_nginx_release(distro)
