@@ -3,6 +3,7 @@ set -e
 ROOTDIR=`dirname "$0"`
 ROOTDIR=`cd "$ROOTDIR/../.." && pwd`
 source "$ROOTDIR/internal/lib/library.sh"
+source "$ROOTDIR/internal/lib/distro_info.sh"
 
 # DON'T SET ENVIRONMENT VARIABLES HERE!
 # Set them in internal/test/misc/init.sh instead. Otherwise
@@ -21,6 +22,9 @@ header "Installing packages..."
 # Allows installing passenger-doc
 echo '%_excludedocs 0' > /etc/rpm/macros.imgcreate
 run sed -i 's/nodocs//' /etc/yum.conf
+if [[ "$(distro_name_to_el_name "$DISTRIBUTION")" != "el7" ]]; then
+run dnf module enable -y nginx:$(nginx_minor_version $(latest_nginx_for_distro $DISTRIBUTION))
+fi
 run yum install -y /output/*.x86_64.rpm /output/*.noarch.rpm
 
 echo
