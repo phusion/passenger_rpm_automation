@@ -281,15 +281,12 @@ popd
 	/usr/bin/rake nginx:as_dynamic_module && \
 		pushd nginx-%{latest_nginx_version} && \
 		./configure \
-%if 0%{?el7} || 0%{?rhel} >= 9
 		--with-compat \
+%if 0%{?el7} || 0%{?rhel} >= 9
 		--with-threads \
 %endif
 		--with-pcre \
 		--with-pcre-jit \
-%if 0%{?rhel} < 9
-		--with-ipv6 \
-%endif
 		--with-file-aio \
 		--with-debug \
 		--with-http_realip_module \
