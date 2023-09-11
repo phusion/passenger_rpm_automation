@@ -25,7 +25,8 @@ run sed -i 's/nodocs//' /etc/yum.conf
 if [[ "$(distro_name_to_el_name "$DISTRIBUTION")" != "el7" ]]; then
 run dnf module enable -y nginx:$(nginx_minor_version $(latest_nginx_for_distro $DISTRIBUTION))
 fi
-run yum install -y /output/*.x86_64.rpm /output/*.noarch.rpm
+ARCHITECTURE=$(uname -m)
+run yum install -y /output/*.${ARCHITECTURE}.rpm /output/*.noarch.rpm
 
 echo
 header "Preparing Passenger source code..."
