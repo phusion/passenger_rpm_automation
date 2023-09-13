@@ -36,6 +36,8 @@ run dnf install -y --skip-broken \
 	nodejs npm createrepo mock rpmdevtools
 run dnf --disablerepo=\* --enablerepo=baseos groupinstall -y "Development Tools"
 
+run ln -sf /etc/mock/eol/centos+epel-7-aarch64.cfg /etc/mock/centos+epel-7-aarch64.cfg
+
 KEYSERVERS=(
 	hkp://keyserver.pgp.com
 	hkp://keys.gnupg.net
