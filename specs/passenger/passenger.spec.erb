@@ -271,9 +271,9 @@ rake fakeroot \
     APACHE2_MODULE_PATH=%{_httpd_moddir}/mod_passenger.so
 
 # Build Nginx core for Passenger Standalone.
-nginx_config_opts=`ruby -Isrc/ruby_supportlib -rphusion_passenger -e 'PhusionPassenger.locate_directories; PhusionPassenger.require_passenger_lib "config/nginx_engine_compiler"; puts PhusionPassenger::Config::NginxEngineCompiler.configure_script_options'`
+<% PhusionPassenger.locate_directories; PhusionPassenger.require_passenger_lib "config/nginx_engine_compiler" %>
 pushd nginx-%{nginx_version}
-./configure --prefix=/tmp $nginx_config_opts --add-module=`pwd`/../src/nginx_module
+./configure --prefix=/tmp <%= PhusionPassenger::Config::NginxEngineCompiler.configure_script_options %> --add-module=`pwd`/../src/nginx_module
 make
 popd
 
