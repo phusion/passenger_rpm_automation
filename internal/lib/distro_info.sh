@@ -95,7 +95,7 @@ function latest_nginx_for_distro()
 		fi
 	
 	if [[ "$CODENAME" = "el9" ]]; then
-			echo "1.22.1"
+			echo "1.24.0"
 			return
 		fi
 	
