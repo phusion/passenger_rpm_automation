@@ -2,16 +2,11 @@ require 'open-uri'
 require 'nokogiri'
 
 REDHAT_ENTERPRISE_DISTRIBUTIONS = {
-  "el7" => "el7.0",
   "el8" => "el8.0",
   "el9" => "el9.0",
 }
 
 DISTRO_BUILD_PARAMS = {
-  "el7" => {
-    :mock_chroot_name => "centos+epel-7",
-    :name => "Enterprise Linux 7"
-  },
   "el8" => {
     :mock_chroot_name => "rocky+epel-8",
     :name => "Enterprise Linux 8"
@@ -34,9 +29,7 @@ end
 def latest_nginx_available_parts(distro)
   cache_file = "/tmp/#{distro}_nginx_version.txt"
   if !File.exist?(cache_file) || ((Time.now - 60*60*24) > File.mtime(cache_file))
-    if distro == "el7"
-      url = "https://dl.fedoraproject.org/pub/epel/7/x86_64/Packages/n/"
-    elsif distro == "el8"
+    if distro == "el8"
       url = "https://dl.rockylinux.org/pub/rocky/8/AppStream/x86_64/os/Packages/n/"
     elsif distro == "el9"
       url = "https://dl.rockylinux.org/pub/rocky/9/AppStream/x86_64/os/Packages/n/"

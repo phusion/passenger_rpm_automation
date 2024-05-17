@@ -282,7 +282,7 @@ popd
 		pushd nginx-%{latest_nginx_version} && \
 		./configure \
 		--with-compat \
-%if 0%{?el7} || 0%{?rhel} >= 9
+%if 0%{?rhel} >= 9
 		--with-threads \
 %endif
 		--with-pcre \

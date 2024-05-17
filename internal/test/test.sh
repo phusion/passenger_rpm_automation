@@ -22,9 +22,7 @@ header "Installing packages..."
 # Allows installing passenger-doc
 echo '%_excludedocs 0' > /etc/rpm/macros.imgcreate
 run sed -i 's/nodocs//' /etc/yum.conf
-if [[ "$(distro_name_to_el_name "$DISTRIBUTION")" != "el7" ]]; then
 run dnf module enable -y nginx:$(nginx_minor_version $(latest_nginx_for_distro $DISTRIBUTION))
-fi
 ARCHITECTURE=$(uname -m)
 run yum install -y /output/*.${ARCHITECTURE}.rpm /output/*.noarch.rpm
 

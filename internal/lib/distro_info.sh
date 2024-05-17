@@ -6,7 +6,7 @@
 #
 # Edit those and regenerate distro_info.sh by running:
 # internal/scripts/regen_distro_info_script.sh
-DEFAULT_DISTROS="el7 el8 el9"
+DEFAULT_DISTROS="el8 el9"
 
 
 function get_buildbox_image()
@@ -60,11 +60,6 @@ function dynamic_module_supported()
 	local CODENAME=$(distro_name_to_el_name "$1")
 
 	
-		if [[ "$CODENAME" = "el7" ]]; then
-			echo true
-			return
-		fi
-	
 		if [[ "$CODENAME" = "el8" ]]; then
 			echo true
 			return
@@ -84,11 +79,6 @@ function latest_nginx_for_distro()
         local CODENAME=$(distro_name_to_el_name "$1")
 
         
-	if [[ "$CODENAME" = "el7" ]]; then
-			echo "1.20.1"
-			return
-		fi
-	
 	if [[ "$CODENAME" = "el8" ]]; then
 			echo "1.22.1"
 			return
