@@ -80,7 +80,7 @@ function latest_nginx_for_distro()
 
         
 	if [[ "$CODENAME" = "el8" ]]; then
-			echo "1.22.1"
+			echo "1.24.0"
 			return
 		fi
 	
