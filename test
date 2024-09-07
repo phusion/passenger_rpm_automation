@@ -104,8 +104,8 @@ function parse_options()
 		echo "ERROR: please specify a distribution with -x."
 		exit 1
 	else
-		TEST_IMAGE=`distro_name_to_testbox_image "$DISTRIBUTION"`
-		DYNAMIC_MODULE_SUPPORTED=`dynamic_module_supported "$DISTRIBUTION"`
+		TEST_IMAGE="$(distro_name_to_testbox_image "$DISTRIBUTION")"
+		DYNAMIC_MODULE_SUPPORTED="$(dynamic_module_supported "$DISTRIBUTION")"
 	fi
 	if [[ "$OUTPUT_DIR" = "" ]]; then
 		echo "ERROR: please specify a build products directory with -d."
@@ -118,13 +118,13 @@ function parse_options()
 }
 
 parse_options "$@"
-PASSENGER_DIR="`absolute_path \"$PASSENGER_DIR\"`"
-OUTPUT_DIR="`absolute_path \"$OUTPUT_DIR\"`"
-CACHE_DIR="`absolute_path \"$CACHE_DIR\"`"
+PASSENGER_DIR="$(absolute_path "$PASSENGER_DIR")"
+OUTPUT_DIR="$(absolute_path "$OUTPUT_DIR")"
+CACHE_DIR="$(absolute_path "$CACHE_DIR")"
 
 EXTRA_ARGS=()
 if [[ "$PASSENGER_ENTERPRISE_LICENSE_KEY" != "" ]]; then
-	PASSENGER_ENTERPRISE_LICENSE_KEY="`absolute_path \"$PASSENGER_ENTERPRISE_LICENSE_KEY\"`"
+	PASSENGER_ENTERPRISE_LICENSE_KEY="$(absolute_path "$PASSENGER_ENTERPRISE_LICENSE_KEY")"
 	EXTRA_ARGS+=(-v "$PASSENGER_ENTERPRISE_LICENSE_KEY:/etc/passenger-enterprise-license:ro")
 fi
 if tty -s; then
@@ -152,10 +152,10 @@ exec docker run \
 	-e "DEBUG_CONSOLE_ON_FAIL=$DEBUG_CONSOLE_ON_FAIL" \
 	-e "JENKINS=$JENKINS" \
 	-e "ARCHITECTURE=$ARCH" \
-	-e "APP_UID=`/usr/bin/id -u`" \
-	-e "APP_GID=`/usr/bin/id -g`" \
+	-e "APP_UID=$(/usr/bin/id -u)" \
+	-e "APP_GID=$(/usr/bin/id -g)" \
 	--platform "linux/$(dpkg --print-architecture)" \
-	$TEST_IMAGE \
+	"$TEST_IMAGE" \
 	/system/internal/scripts/my_init --quiet --skip-runit --skip-startup-files -- \
 	/system/internal/scripts/inituidgid.sh \
 	/system/internal/test/misc/init.sh \
