@@ -27,6 +27,7 @@ function usage()
 	echo "  -x DISTRO  Distribution to run tests in: centos7,rocky8,rocky9"
 	echo "  -d DIR     Path to built packages"
 	echo "  -c DIR     Path to cache directory"
+	echo "  -a ARCH    Test only given architecture: x86_64 or aarch64"
 	echo
 	echo "Optional options:"
 	echo "  -O         Open debugging console instead of running test script"
@@ -41,10 +42,13 @@ function parse_options()
 {
 	local OPTIND=1
 	local opt
-	while getopts "p:x:d:c:ODe:jh" opt; do
+	while getopts "p:a:x:d:c:ODe:jh" opt; do
 		case "$opt" in
 		p)
 			PASSENGER_DIR="$OPTARG"
+			;;
+		a)
+			ARCH="$OPTARG"
 			;;
 		x)
 			DISTRIBUTION="$OPTARG"
@@ -82,6 +86,18 @@ function parse_options()
 
 	if [[ "$PASSENGER_DIR" = "" ]]; then
 		echo "ERROR: please specify a Passenger source directory with -p."
+		exit 1
+	fi
+	if [[ "$ARCH" = "" ]]; then
+		echo "ERROR: please specify a machine architecture with -a."
+		exit 1
+	fi
+	if [[ "$ARCH" = "x86_64" ]]; then
+		PLAT="linux/amd64"
+	elif [[ "$ARCH" = "aarch64" ]]; then
+		PLAT="linux/arm64"
+	else
+		echo "ERROR: please specify a valid machine architecture with -a."
 		exit 1
 	fi
 	if [[ "$DISTRIBUTION" = "" ]]; then
@@ -123,6 +139,7 @@ run mkdir -p "$CACHE_DIR/test-$DISTRIBUTION/yumcache"
 echo "-------- Entering Docker container --------"
 exec docker run \
 	--rm \
+	--platform "$PLAT" \
 	-v "$SELFDIR/internal:/system/internal:ro" \
 	-v "$PASSENGER_DIR:/passenger:ro" \
 	-v "$OUTPUT_DIR:/output:ro" \
@@ -134,6 +151,7 @@ exec docker run \
 	-e "DEBUG_CONSOLE=$DEBUG_CONSOLE" \
 	-e "DEBUG_CONSOLE_ON_FAIL=$DEBUG_CONSOLE_ON_FAIL" \
 	-e "JENKINS=$JENKINS" \
+	-e "ARCHITECTURE=$ARCH" \
 	-e "APP_UID=`/usr/bin/id -u`" \
 	-e "APP_GID=`/usr/bin/id -g`" \
 	--platform "linux/$(dpkg --print-architecture)" \
