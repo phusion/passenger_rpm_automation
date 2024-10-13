@@ -53,7 +53,7 @@ echo "+ cd /tmp/passenger"
 cd /tmp/passenger
 run mkdir ~/pkg
 # the Passenger dev gems are used here, so check the top level Gemfile
-run rake package:set_official package:tarball CACHING=false PKG_DIR=~/pkg
+run env NOEXEC_DISABLE=1 rake package:set_official package:tarball CACHING=false PKG_DIR=~/pkg
 
 header "Extracting Passenger tarball"
 echo "+ cd ~/pkg"
