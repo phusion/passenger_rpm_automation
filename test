@@ -12,6 +12,8 @@ PASSENGER_DIR=
 DISTRIBUTION=
 OUTPUT_DIR=
 CACHE_DIR=
+RPM_ARCH=
+DOCKER_ARCH=
 DEBUG_CONSOLE=false
 DEBUG_CONSOLE_ON_FAIL=false
 PASSENGER_ENTERPRISE_LICENSE_KEY=
@@ -27,7 +29,8 @@ function usage()
 	echo "  -x DISTRO  Distribution to run tests in: centos7,rocky8,rocky9"
 	echo "  -d DIR     Path to built packages"
 	echo "  -c DIR     Path to cache directory"
-	echo "  -a ARCH    Test only given architecture: x86_64 or aarch64"
+	echo "  -a ARCH    Test only given RPM architecture: x86_64 or aarch64"
+	echo "  -A ARCH    Docker architecture to use: amd64 or arm64"
 	echo
 	echo "Optional options:"
 	echo "  -O         Open debugging console instead of running test script"
@@ -42,13 +45,16 @@ function parse_options()
 {
 	local OPTIND=1
 	local opt
-	while getopts "p:a:x:d:c:ODe:jh" opt; do
+	while getopts "p:a:A:x:d:c:ODe:jh" opt; do
 		case "$opt" in
 		p)
 			PASSENGER_DIR="$OPTARG"
 			;;
 		a)
-			ARCH="$OPTARG"
+			RPM_ARCH="$OPTARG"
+			;;
+		A)
+			DOCKER_ARCH="$OPTARG"
 			;;
 		x)
 			DISTRIBUTION="$OPTARG"
@@ -88,16 +94,12 @@ function parse_options()
 		echo "ERROR: please specify a Passenger source directory with -p."
 		exit 1
 	fi
-	if [[ "$ARCH" = "" ]]; then
-		echo "ERROR: please specify a machine architecture with -a."
+	if [[ "$RPM_ARCH" = "" ]]; then
+		echo "ERROR: please specify an RPM architecture with -a."
 		exit 1
 	fi
-	if [[ "$ARCH" = "x86_64" ]]; then
-		PLAT="linux/amd64"
-	elif [[ "$ARCH" = "aarch64" ]]; then
-		PLAT="linux/arm64"
-	else
-		echo "ERROR: please specify a valid machine architecture with -a."
+	if [[ "$DOCKER_ARCH" = "" ]]; then
+		echo "ERROR: please specify a Docker architecture with -A."
 		exit 1
 	fi
 	if [[ "$DISTRIBUTION" = "" ]]; then
@@ -151,10 +153,10 @@ exec docker run \
 	-e "DEBUG_CONSOLE=$DEBUG_CONSOLE" \
 	-e "DEBUG_CONSOLE_ON_FAIL=$DEBUG_CONSOLE_ON_FAIL" \
 	-e "JENKINS=$JENKINS" \
-	-e "ARCHITECTURE=$ARCH" \
+	-e "RPM_ARCH=$RPM_ARCH" \
 	-e "APP_UID=$(/usr/bin/id -u)" \
 	-e "APP_GID=$(/usr/bin/id -g)" \
-	--platform "linux/$(dpkg --print-architecture)" \
+	--platform "linux/$DOCKER_ARCH" \
 	"$TEST_IMAGE" \
 	/system/internal/scripts/my_init --quiet --skip-runit --skip-startup-files -- \
 	/system/internal/scripts/inituidgid.sh \

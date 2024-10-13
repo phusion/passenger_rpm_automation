@@ -14,7 +14,8 @@ CACHE_DIR=
 OUTPUT_DIR=
 CONCURRENCY=1
 DISTRIBUTIONS="$DEFAULT_DISTROS"
-ARCHITECTURES="x86_64 aarch64"
+RPM_ARCH=
+DOCKER_ARCH=
 FETCH_PASSENGER_TARBALL_FROM_CACHE=true
 CLEAR_WORK_DIR=true
 SHOW_OVERVIEW_PERIODICALLY=false
@@ -32,15 +33,14 @@ function usage()
 	echo "  -w DIR     Path to work directory (for temporary files)"
 	echo "  -c DIR     Path to cache directory"
 	echo "  -o DIR     Path in which to store build products"
+	echo "  -a NAME    RPM architecture name to build for (e.g., x86_64); must match -A"
+	echo "  -A NAME    Docker architecture name to build for (e.g. amd64); must match -a"
 	echo
 	echo "Optional options:"
 	echo "  -j NUM     Set build concurrency. Default: 1"
 	echo "  -d NAMES   Build only for given distributions. This is a space-separated list"
 	echo "             of distribution names."
 	echo "             Default: $DISTRIBUTIONS"
-	echo "  -a NAMES   Build only for given architectures. This is a space-separated list"
-	echo "             of architecture names."
-	echo "             Default: $ARCHITECTURES"
 	echo "  -R         Do not fetch Passenger tarball from cache"
 	echo "  -N         Do not clear work directory on startup"
 	echo "  -O         Periodically show progress overview"
@@ -55,7 +55,7 @@ function parse_options()
 	local OPTIND=1
 	local ORIG_ARGV
 	local opt
-	while getopts "p:w:c:o:j:d:a:tNROTh" opt; do
+	while getopts "p:w:c:o:j:d:a:A:tNROTh" opt; do
 		case "$opt" in
 		p)
 			PASSENGER_DIR="$OPTARG"
@@ -76,7 +76,10 @@ function parse_options()
 			DISTRIBUTIONS="$OPTARG"
 			;;
 		a)
-			ARCHITECTURES="$OPTARG"
+			RPM_ARCH="$OPTARG"
+			;;
+		A)
+			DOCKER_ARCH="$OPTARG"
 			;;
 		t)
 			SHOW_BACKTRACES=true
@@ -144,6 +147,14 @@ function parse_options()
 			exit 1
 		fi
 	fi
+	if [[ "$RPM_ARCH" = "" ]]; then
+		echo "ERROR: please specify an RPM architecture with -a."
+		exit 1
+	fi
+	if [[ "$DOCKER_ARCH" = "" ]]; then
+		echo "ERROR: please specify a Docker architecture with -a."
+		exit 1
+	fi
 }
 
 parse_options "$@"
@@ -159,10 +170,10 @@ if $SHOW_TASKS; then
 		--rm $TTY_ARGS \
 		-v "$SELFDIR:/system:ro" \
 		-e "DISTRIBUTIONS=$DISTRIBUTIONS" \
-		-e "ARCHITECTURES=$ARCHITECTURES" \
+		-e "RPM_ARCH=$RPM_ARCH" \
 		-e "SHOW_TASKS=true" \
 		-e "LC_CTYPE=en_US.UTF-8" \
-		--platform "linux/$(dpkg --print-architecture)" \
+		--platform "linux/$DOCKER_ARCH" \
 		$BUILDBOX_IMAGE \
 		/system/internal/scripts/my_init --quiet --skip-runit --skip-startup-files -- \
 		/system/internal/build/resetpaths.sh \
@@ -177,7 +188,6 @@ else
 	run mkdir -p "$CACHE_DIR"
 	run mkdir -p "$OUTPUT_DIR"
 
-for ARCH in $ARCHITECTURES; do
 	echo "-------- Entering Docker container --------"
 	exec docker run \
 		--rm $TTY_ARGS \
@@ -188,13 +198,13 @@ for ARCH in $ARCHITECTURES; do
 		-v "$CACHE_DIR:/cache" \
 		-v "$OUTPUT_DIR:/output" \
 		-e "DISTRIBUTIONS=$DISTRIBUTIONS" \
-		-e "ARCHITECTURES=$ARCH" \
+		-e "RPM_ARCH=$RPM_ARCH" \
 		-e "SHOW_OVERVIEW_PERIODICALLY=$SHOW_OVERVIEW_PERIODICALLY" \
 		-e "FETCH_PASSENGER_TARBALL_FROM_CACHE=$FETCH_PASSENGER_TARBALL_FROM_CACHE" \
 		-e "APP_UID=`/usr/bin/id -u`" \
 		-e "APP_GID=`/usr/bin/id -g`" \
 		-e "LC_CTYPE=en_US.UTF-8" \
-		--platform "linux/$ARCH" \
+		--platform "linux/$DOCKER_ARCH" \
 		$BUILDBOX_IMAGE \
 		/system/internal/scripts/my_init --quiet --skip-runit --skip-startup-files -- \
 		/system/internal/scripts/inituidgid.sh \
@@ -202,5 +212,4 @@ for ARCH in $ARCHITECTURES; do
 		/system/internal/scripts/setuser app \
 		/system/internal/build/resetpaths.sh \
 		rake -f /system/internal/build/Rakefile -j $CONCURRENCY "${ARGV[@]}"
-done
 fi

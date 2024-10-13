@@ -5,7 +5,6 @@ require 'singleton'
 require File.expand_path(File.dirname(__FILE__) + '/preprocessor')
 
 MUTEX = Mutex.new
-SUPPORTED_ARCHS = ['i386', 'x86_64', 'aarch64']
 
 class TrackingDatabase
   include Singleton
@@ -207,14 +206,6 @@ def get_distros_option
   end
 end
 
-def get_archs_option
-  if archs = string_option('ARCHS')
-    archs.split(/[, ]/)
-  else
-    abort("Please set the ARCHS option.")
-  end
-end
-
 def load_passenger
   if !defined?(PhusionPassenger)
     require "/passenger/src/ruby_supportlib/phusion_passenger"
@@ -256,14 +247,6 @@ def check_distros_supported!
   DISTROS.each do |distro_id|
     if !SUPPORTED_DISTROS[distro_id]
       abort("Unsupported distribution: #{distro_id}. Supported distributions are: #{SUPPORTED_DISTROS.keys.join(' ')}")
-    end
-  end
-end
-
-def check_archs_supported!
-  ARCHS.each do |arch|
-    if !SUPPORTED_ARCHS.include?(arch)
-      abort("Unsupported architecture: #{arch}. Supported architectures are: #{SUPPORTED_ARCHS.keys.join(' ')}")
     end
   end
 end

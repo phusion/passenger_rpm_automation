@@ -69,12 +69,14 @@ The package build process is as follows. First, the `build` script is used to bu
 
 Everything begins with the `build` script and a copy of the Passenger source code. Here's an example invocation:
 
-    ./build -p /passenger -w work -c cache -o output rpm:all
+    ./build -p /passenger -w work -c cache -o output -a x86_64 -A amd64 rpm:all
 
  * `-p` tells it where the Passenger source code is.
  * `-w` tells it where it's work directory is. This is a directory in which in stores temporary files while building packages. WARNING: everything inside this directory will be deleted before the build begins, so only specify a directory that doesn't contain anything important.
  * `-c` tells it where the cache directory is. The build script caches files into this directory so that subsequent runs will be faster.
  * `-o` tells it where to store the final built RPM packages (the output directory). WARNING: everything inside this directory will be deleted when the build finishes, so only specify a directory that doesn't contain anything important.
+ * `-a` tells it what architecture to build for. This uses RHEL architecture names, such as "x86_64" and "aarch64".
+ * `-A` tells it what Docker platform to run the build process in. This must match `-a`, but note that Docker uses different naming than RHEL. For example, RHEL "x86_64" is called "amd64" by Docker. RHEL "aarch64" is called "arm64" by Docker.
  * The final argument, `rpm:all`, is the task that the build script must run. The build script provides a number of tasks, such as tasks for building packages for specific distributions or architecture only, or tasks for building source packages only. The `rpm:all` task builds all source and binary RPMs for all supported distributions and architectures.
 
 More command line options are available. Run `./build -h` to learn more. You can also run `./build -T` to learn which tasks are available.
@@ -108,11 +110,13 @@ If anything goes wrong during a build, please take a look at the various log fil
 
 Once packages have been built, you can test them with the test script. Here is an example invocation:
 
-    ./test -p /passenger -x centos7 -d output/el7 -c cache
+    ./test -p /passenger -x rocky9 -d output/el9 -a x86_64 -A amd64 -c cache
 
  * `-p` tells it where the Passenger source code is.
  * `-x` tells it which environment it should use for running the tests. To learn which environments are supported, run `./test -h`.
  * `-d` tells it where to find the packages that are to be tested. This must point to a subdirectory in the output directory produced by the build script, and the packages must match the test environment as specified by `-x`. For example, if you specified `-x centos7`, and if the build script stored packages in the directory `output`, then you should pass `-d output/el7`.
+ * `-a` tells it the RHEL architecture name.
+ * `-A` tells it the Docker platform name.
  * `-c` tells it where the cache directory is. The test script caches files into this directory so that subsequent runs will be faster.
 
 #### Vagrant notes
@@ -144,7 +148,7 @@ If you change the buildbox or testbox, you should create a new version:
 
 ### Adding support for a new distribution
 
-In these instructions, we assume that the new distribution is Red Hat 7. Update the actual parameters accordingly.
+In these instructions, we assume that the new distribution is Red Hat 9. Update the actual parameters accordingly.
 
  1. Bump the the buildbox version number's tiny component. Open `internal/lib/docker_image_info.sh` and change the number under `buildbox_version`.
 
@@ -164,25 +168,25 @@ In these instructions, we assume that the new distribution is Red Hat 7. Update 
 
  6. Build and publish packages for this distribution only. You can do that by running the build script with the `-d` option.
 
-        ./build -p /passenger -w work -c cache -o output -d el7 rpm:all
+        ./build -p /passenger -w work -c cache -o output -d el9 -a x86_64 -A amd64 rpm:all
         ./publish -d output -u phusion -c ~/token_file -r passenger-testing publish:all
 
  7. Create a test box for this new distribution.
 
-     1. Create `docker-images/testbox-centos-7/` (copy of testbox of previous release)
-     2. Set the correct From in `docker-images/testbox-centos-7/Dockerfile`
+     1. Create `docker-images/testbox-rocky-9/` (copy of testbox of previous release)
+     2. Set the correct From in `docker-images/testbox-rocky-9/Dockerfile`
      3. Edit `docker-images/Makefile` and add entries for this new testbox.
 
-        make -C docker-images testbox-centos-7
+        make -C docker-images testbox-rocky-9
 
     When done, test Passenger under the new testbox:
 
-        ./test -p /passenger -x el7 -d output/el7 -c cache
+        ./test -p /passenger -x el9 -d output/el9 -a x86_64 -A amd64 -c cache
 
  8. Commit and push all changes, then publish the new packages and the updated Docker images by running:
 
         git add docker-images
-        git commit -a -m "Add support for Red Hat 7"
+        git commit -a -m "Add support for Red Hat 9"
         git push
         cd docker-images
         make upload
@@ -200,7 +204,7 @@ In these instructions, we assume that the new distribution is Red Hat 7. Update 
 
      3. Commit and push the result:
 
-            git commit -a -m "Add packaging support for CentOS 7"
+            git commit -a -m "Add packaging support for Red Hat 9"
             git push
 
  10. Inside the passenger-release repository, add this new distribution and all its supported architectures to its Jenkinsfile's `RPM_DISTROS` and `RPM_TARGETS` constants.
@@ -209,7 +213,7 @@ In these instructions, we assume that the new distribution is Red Hat 7. Update 
 
 Sometimes you want to build Nginx packages only, without building the Phusion Passenger packages. You can do this by invoking the build script with the `rpm:nginx:all` task. For example:
 
-    ./build -p /passenger -w work -c cache -o output -d el7 rpm:nginx:all
+    ./build -p /passenger -w work -c cache -o output -d el9 -a x86_64 -A amd64 rpm:nginx:all
 
 After the build script finishes, you can publish these Nginx packages:
 
@@ -240,8 +244,8 @@ To fix this problem, you need to enable the [CentOS Continuous Release](https://
 
 To enable or disable CR:
 
- * Edit `docker-images/buildbox/epel-7-x86_64.cfg`. Under the `[cr]` section, modify the `enabled` flag. Then run `make -C docker-images buildbox`
- * Edit `docker-images/testbox-centos-7/install.sh`. Either comment or uncomment the lines responsible for enabling CR. Then run `make -C docker-images testbox-centos-7`
+ * Edit `docker-images/buildbox/epel-9-x86_64.cfg`. Under the `[cr]` section, modify the `enabled` flag. Then run `make -C docker-images buildbox`
+ * Edit `docker-images/testbox-rocky-9/install.sh`. Either comment or uncomment the lines responsible for enabling CR. Then run `make -C docker-images testbox-rocky-9`
 
 When done, push these images and pull from them the CI server.
 
@@ -268,12 +272,12 @@ If a packaging test job fails, here's what you should do.
 
  3. Build packages for the distribution for which the test failed.
 
-        ./build -w ~/work -c ~/cache -o ~/output -p /passenger -d el7 -a x86_64 -j 2 -R rpm:all
+        ./build -w ~/work -c ~/cache -o ~/output -p /passenger -d el9 -a x86_64 -A amd64 -j 2 -R rpm:all
 
     Be sure to customize the value passed to `-d` based on the distribution for which the test failed.
  4. Run the tests with the debugging console enabled:
 
-        ./test -p /passenger -x centos7 -d ~/output/el7 -c ~/cache -D
+        ./test -p /passenger -x rocky9 -d ~/output/el9 -a x86_64 -A amd64 -c ~/cache -D
 
     Be sure to customize the values passed to `-x` and `-d` based on the distribution for which the test failed.
 
@@ -303,9 +307,9 @@ First, clone the Passenger git repository and its submodules:
     cd passenger
     git submodule update --init --recursive
 
-Checkout the branch you want. At the time of writing (2015 May 13), you will most likely be interested in the `stable-5.0` branch because that's the branch that is slated to become the next release version.
+Checkout the branch you want. At the time of writing (2015 May 13), you will most likely be interested in the `stable-6.0` branch because that's the branch that is slated to become the next release version.
 
-    git checkout stable-5.0
+    git checkout stable-6.0
 
 Then go to the directory `packaging/rpm`:
 
@@ -329,26 +333,28 @@ You will now be dropped in an SSH session inside the VM. Any futher steps must b
 
 Use the `./build` script to build RPMs. You must tell the build script which distribution and architecture it should build for. Run:
 
-    ./build -p <PATH TO PASSENGER> -w ~/work -c ~/cache -o output -a <ARCHITECTURE> -d <DISTRIBUTION> rpm:all
+    ./build -p <PATH TO PASSENGER> -w ~/work -c ~/cache -o output -a <RHEL ARCHITECTURE> -A <DOCKER ARCHITECTURE> -d <DISTRIBUTION> rpm:all
 
 Replace `<PATH TO PASSENGER>` with one of these:
 
  * If you are on a Linux system, it should be `../..`.
  * If you are on a non-Linux system (and using Vagrant), it should be `/passenger`.
 
-Replace `<ARCHITECTURE>` with either `i386` or `x86_64`. Replace `<DISTRIBUTION>` with either `el6` or `el7`.
+Replace `<RHEL ARCHITECTURE>` with either `x86_64` or `aarch64`. Replace `<DOCKER ARCHITECTURE>` with either `amd64` or `arm64`.
 
- * `el6` is for Red Hat Enterprise Linux 6.x and CentOS 6.x.
- * `el7` is for Red Hat Enterprise Linux 7.x and CentOS 7.x.
+Replace `<DISTRIBUTION>` with either `el8` or `el9`.
 
-Here is an example invocation for building packages for Red Hat 7, x86_64:
+ * `el8` is for Red Hat Enterprise Linux 8.x and compatible.
+ * `el9` is for Red Hat Enterprise Linux 9.x and compatible.
+
+Here is an example invocation for building packages for Red Hat 9, x86_64:
 
 ```bash
 # If you are on a Linux system:
-./build -p ../.. -w ~/work -c ~/cache -o output -a x86_64 -d el7 rpm:all
+./build -p ../.. -w ~/work -c ~/cache -o output -a x86_64 -A amd64 -d el9 rpm:all
 
 # If you are on a non-Linux system (and using Vagrant):
-./build -p /passenger -w ~/work -c ~/cache -o output -a x86_64 -d el7 rpm:all
+./build -p /passenger -w ~/work -c ~/cache -o output -a x86_64 -A amd64 -d el9 rpm:all
 ```
 
 ### Step 4: get packages, clean up

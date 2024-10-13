@@ -103,10 +103,8 @@ namespace :srpm do
         end
 
         task.sh "rpmbuild -bs --root ~/rpmbuild/root-passenger-#{distro_id} #{spec_target_file}"
-        ARCHITECTURES.each do |arch|
-          task.sh "mkdir -p /work/#{distro_id}-#{arch}"
-          task.sh "cp #{RPM_SRPMS_DIR}/#{passenger_srpm_name(distro_id)} /work/#{distro_id}-#{arch}/"
-        end
+        task.sh "mkdir -p /work/#{distro_id}-#{RPM_ARCH}"
+        task.sh "cp #{RPM_SRPMS_DIR}/#{passenger_srpm_name(distro_id)} /work/#{distro_id}-#{RPM_ARCH}/"
       end
     end
   end
@@ -141,10 +139,8 @@ namespace :srpm do
         end
 
         task.sh "rpmbuild -bs --root ~/rpmbuild/root-nginx-#{distro_id} #{spec_target_file}"
-        ARCHITECTURES.each do |arch|
-          task.sh "mkdir -p /work/#{distro_id}-#{arch}"
-          task.sh "cp #{RPM_SRPMS_DIR}/#{nginx_srpm_name(distro_id)} /work/#{distro_id}-#{arch}/"
-        end
+          task.sh "mkdir -p /work/#{distro_id}-#{RPM_ARCH}"
+          task.sh "cp #{RPM_SRPMS_DIR}/#{nginx_srpm_name(distro_id)} /work/#{distro_id}-#{RPM_ARCH}/"
       end
     end
   end
@@ -156,66 +152,58 @@ end
 register_tracking_category(:rpm, 'Building binary RPMs')
 
 namespace :rpm do
-  desc "Build RPMs for all distributions and all architectures"
+  desc "Build RPMs for all distributions"
   task :all
 
   ### Passenger ###
 
-  desc "Build Passenger RPMs for all distributions and all architectures"
+  desc "Build Passenger RPMs for all distributions"
   task "passenger:all"
 
   DISTROS.each do |distro_id|
     distro = DISTRO_BUILD_PARAMS[distro_id]
 
-    ARCHITECTURES.each do |arch|
-      next if !distro_architecture_allowed?(distro_id, arch)
+    task "all" => "^rpm:passenger:#{distro_id}:#{RPM_ARCH}"
+    task "passenger:all" => "^rpm:passenger:#{distro_id}:#{RPM_ARCH}"
+    register_tracking_task(:rpm, "passenger:#{distro_id}:#{RPM_ARCH}")
 
-      task "all" => "^rpm:passenger:#{distro_id}:#{arch}"
-      task "passenger:all" => "^rpm:passenger:#{distro_id}:#{arch}"
-      register_tracking_task(:rpm, "passenger:#{distro_id}:#{arch}")
-
-      desc "Build Passenger RPM for #{distro[:name]}, #{arch}"
-      task("passenger:#{distro_id}:#{arch}" => ["srpm:passenger:#{distro_id}"]) do
-        track_task(:rpm, "passenger:#{distro_id}:#{arch}") do |task|
-          mock_chroot_name = "#{distro[:mock_chroot_name]}-#{arch}"
-          task.sh "/usr/bin/mock --verbose #{MOCK_FLAGS} " +
-            "-r #{mock_chroot_name} " +
-            "--resultdir '/work/#{distro_id}-#{arch}' " +
-            "--uniqueext passenger-#{distro_id}-#{arch} " +
-            "--enable-plugin=ccache " +
-            "--rebuild /work/#{distro_id}-#{arch}/#{passenger_srpm_name(distro_id)}"
-        end
+    desc "Build Passenger RPM for #{distro[:name]}, #{RPM_ARCH}"
+    task("passenger:#{distro_id}:#{RPM_ARCH}" => ["srpm:passenger:#{distro_id}"]) do
+      track_task(:rpm, "passenger:#{distro_id}:#{RPM_ARCH}") do |task|
+        mock_chroot_name = "#{distro[:mock_chroot_name]}-#{RPM_ARCH}"
+        task.sh "/usr/bin/mock --verbose #{MOCK_FLAGS} " +
+          "-r #{mock_chroot_name} " +
+          "--resultdir '/work/#{distro_id}-#{RPM_ARCH}' " +
+          "--uniqueext passenger-#{distro_id}-#{RPM_ARCH} " +
+          "--enable-plugin=ccache " +
+          "--rebuild /work/#{distro_id}-#{RPM_ARCH}/#{passenger_srpm_name(distro_id)}"
       end
     end
   end
 
   ### Nginx ###
 
-  desc "Build Nginx RPMs for all distributions and all architectures"
+  desc "Build Nginx RPMs for all distributions"
   task "nginx:all"
 
   DISTROS.each do |distro_id|
     next if dynamic_module_supported?(distro_id)
     distro = DISTRO_BUILD_PARAMS[distro_id]
 
-    ARCHITECTURES.each do |arch|
-      next if !distro_architecture_allowed?(distro_id, arch)
+    task "all" => "^rpm:nginx:#{distro_id}:#{RPM_ARCH}"
+    task "nginx:all" => "^rpm:nginx:#{distro_id}:#{RPM_ARCH}"
+    register_tracking_task(:rpm, "nginx:#{distro_id}:#{RPM_ARCH}")
 
-      task "all" => "^rpm:nginx:#{distro_id}:#{arch}"
-      task "nginx:all" => "^rpm:nginx:#{distro_id}:#{arch}"
-      register_tracking_task(:rpm, "nginx:#{distro_id}:#{arch}")
-
-      desc "Build Nginx RPM for #{distro[:name]}, #{arch}"
-      task("nginx:#{distro_id}:#{arch}" => ["srpm:nginx:#{distro_id}"]) do
-        track_task(:rpm, "nginx:#{distro_id}:#{arch}") do |task|
-          mock_chroot_name = "#{distro[:mock_chroot_name]}-#{arch}"
-          task.sh "/usr/bin/mock --verbose #{MOCK_FLAGS} " +
-            "-r #{mock_chroot_name} " +
-            "--resultdir '/work/#{distro_id}-#{arch}' " +
-            "--uniqueext nginx-#{distro_id}-#{arch} " +
-            "--enable-plugin=ccache " +
-            "--rebuild /work/#{distro_id}-#{arch}/#{nginx_srpm_name(distro_id)}"
-        end
+    desc "Build Nginx RPM for #{distro[:name]}, #{RPM_ARCH}"
+    task("nginx:#{distro_id}:#{RPM_ARCH}" => ["srpm:nginx:#{distro_id}"]) do
+      track_task(:rpm, "nginx:#{distro_id}:#{RPM_ARCH}") do |task|
+        mock_chroot_name = "#{distro[:mock_chroot_name]}-#{RPM_ARCH}"
+        task.sh "/usr/bin/mock --verbose #{MOCK_FLAGS} " +
+          "-r #{mock_chroot_name} " +
+          "--resultdir '/work/#{distro_id}-#{RPM_ARCH}' " +
+          "--uniqueext nginx-#{distro_id}-#{RPM_ARCH} " +
+          "--enable-plugin=ccache " +
+          "--rebuild /work/#{distro_id}-#{RPM_ARCH}/#{nginx_srpm_name(distro_id)}"
       end
     end
   end
@@ -247,10 +235,7 @@ task :finish do
     files = Dir["/work/#{distro_id}-*/*.rpm"]
     if files.any?
       sh "mkdir -p /output/#{distro_id}"
-      ARCHITECTURES.each do |arch|
-        next if !distro_architecture_allowed?(distro_id, arch)
-        sh "cp /work/#{distro_id}-#{arch}/*.rpm /output/#{distro_id}/"
-      end
+      sh "cp /work/#{distro_id}-#{RPM_ARCH}/*.rpm /output/#{distro_id}/"
     end
   end
 end

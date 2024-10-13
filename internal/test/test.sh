@@ -23,7 +23,7 @@ header "Installing packages..."
 echo '%_excludedocs 0' > /etc/rpm/macros.imgcreate
 run sed -i 's/nodocs//' /etc/yum.conf
 run dnf module enable -y nginx:$(nginx_minor_version $(latest_nginx_for_distro $DISTRIBUTION))
-run yum install -y /output/*.${ARCHITECTURE}.rpm /output/*.noarch.rpm
+run yum install -y /output/*.${RPM_ARCH}.rpm /output/*.noarch.rpm
 
 echo
 header "Preparing Passenger source code..."
