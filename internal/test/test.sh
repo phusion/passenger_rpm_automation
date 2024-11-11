@@ -38,7 +38,7 @@ if [[ -e /passenger/.git ]]; then
 	echo "+ Git copying to /tmp/passenger"
 	(
 		set -o pipefail
-		git config --global --add safe.directory /passenger
+		git config --global --add safe.directory '*'
 		git archive --format=tar HEAD | setuser app tar -C /tmp/passenger -x
 		submodules=`git submodule status | awk '{ print $2 }'`
 		for submodule in $submodules; do
