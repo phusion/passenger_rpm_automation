@@ -33,14 +33,14 @@ run dnf install -y alternatives \
     libxslt openssl-devel \
     rubygem-rack ccache
 run gem install bundler --no-document
-run gem install bundler -v 1.17.3 --no-document
+run gem install bundler -v '~>1.0' --no-document
 run env BUNDLE_GEMFILE=/pra_build/Gemfile bundle install
 
 header "Installing node related dependencies"
 run dnf install -y nodejs
 
 header "Miscellaneous"
-run ln -s /usr/bin/python3.9 /sbin/my_init_python
+run ln -s /usr/bin/python3 /sbin/my_init_python
 run alternatives --install /usr/bin/python python /usr/bin/python3 1
 
 run mkdir /etc/container_environment

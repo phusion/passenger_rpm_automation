@@ -29,8 +29,8 @@ run yum install -y --enablerepo plus \
 	ccache perl git tar which python3 \
 	httpd httpd-devel httpd-tools zlib-devel sqlite-devel curl-devel \
 	GeoIP libxslt openssl-devel
-run gem install bundler -v 2.3.26 --no-document
-run gem install bundler -v 1.17.3 --no-document
+run gem install bundler -v '~>2.3.0' --no-document # last ruby 2.5 supporting bundler
+run gem install bundler -v '~>1.0' --no-document # last 1.* bundler
 run env BUNDLE_GEMFILE=/pra_build/Gemfile bundle install
 
 # Enable RockyLinux CR: https://wiki.centos.org/AdditionalResources/Repositories/CR
