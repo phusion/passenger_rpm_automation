@@ -26,7 +26,7 @@ run yum install -y --enablerepo plus epel-release yum-utils drpm
 run yum groupinstall -y "Development Tools" --exclude asciidoc
 run yum install -y --enablerepo plus \
 	ruby ruby-devel rubygems rubygem-rack rubygem-rake \
-	ccache perl git tar which python27 \
+	ccache perl git tar which python3 \
 	httpd httpd-devel httpd-tools zlib-devel sqlite-devel curl-devel \
 	GeoIP libxslt openssl-devel
 run gem install bundler -v 2.3.26 --no-document
@@ -41,11 +41,11 @@ run env BUNDLE_GEMFILE=/pra_build/Gemfile bundle install
 #run yum-config-manager --enable cr
 
 header "Installing node related dependencies"
-run dnf module install -y nodejs:16
+run dnf module install -y nodejs:18
 
 header "Miscellaneous"
-run ln -s /usr/bin/python2.7 /sbin/my_init_python
-run alternatives --set python /usr/bin/python2
+run ln -s /usr/bin/python3 /sbin/my_init_python
+run alternatives --set python /usr/bin/python3
 run mkdir /etc/container_environment
 run mkdir /pra
 run cp /pra_build/Gemfile* /pra/
