@@ -142,8 +142,8 @@ jobs:
         id: build
         uses: docker/build-push-action@v6
         with:
-          context: ./docker-images/testbox-distro-rocky-${{ env.DISTRO_NUM }}
-          file: ./docker-images/testbox-distro-rocky-${{ env.DISTRO_NUM }}/Dockerfile
+          context: ./docker-images/testbox-rocky-${{ env.DISTRO_NUM }}
+          file: ./docker-images/testbox-rocky-${{ env.DISTRO_NUM }}/Dockerfile
           platforms: linux/${{ matrix.arch.name }}
           labels: ${{ steps.meta.outputs.labels }}
           tags: ${{ steps.meta.outputs.tags }}
@@ -158,7 +158,7 @@ jobs:
       - name: Upload digest
         uses: actions/upload-artifact@v4
         with:
-          name: digests-distro-${{ matrix.distro }}-${{ env.PLATFORM_PAIR }}
+          name: digests-${{ matrix.distro }}-${{ env.PLATFORM_PAIR }}
           path: /tmp/digests/*
           if-no-files-found: error
           retention-days: 1
