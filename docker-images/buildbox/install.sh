@@ -36,10 +36,8 @@ run dnf install -y --skip-broken \
 	nodejs npm createrepo mock rpmdevtools
 run dnf --disablerepo=\* --enablerepo=baseos groupinstall -y "Development Tools"
 
-run ln -sf /etc/mock/eol/centos+epel-7-aarch64.cfg /etc/mock/centos+epel-7-aarch64.cfg
 
 KEYSERVERS=(
-	hkp://keyserver.pgp.com
 	hkp://keys.gnupg.net
 	ha.pool.sks-keyservers.net
 	hkp://p80.pool.sks-keyservers.net:80
@@ -74,7 +72,7 @@ done
 run curl --fail -sSLo /tmp/rvm.sh https://get.rvm.io
 run bash /tmp/rvm.sh stable
 source /usr/local/rvm/scripts/rvm
-RUBY=3.1.2
+RUBY=3.1.6
 run rvm install ruby-$RUBY || cat /usr/local/rvm/log/*_ruby-$RUBY/make.log
 rvm use ruby-$RUBY
 rvm --default ruby-$RUBY
@@ -85,7 +83,7 @@ header "Miscellaneous"
 run sed -i 's/Defaults    requiretty//' /etc/sudoers
 run cp /pra_build/sudoers.conf /etc/sudoers.d/app
 run chmod 440 /etc/sudoers.d/app
-
+sed -ie 's/\(account     required      pam_unix.so\)/\1 broken_shadow/g' /etc/pam.d/system-auth
 run usermod -a -G mock app
 run sudo -u app -H rpmdev-setuptree
 
