@@ -3,6 +3,8 @@ name: Build all images
 on:
   push:
     branches: [ master ]
+  pull_request:
+    branches: [ master ]
 
 defaults:
   run:
@@ -52,6 +54,7 @@ jobs:
 
       - name: Login to GHCR
         uses: docker/login-action@v3
+        if: github.event_name != 'pull_request'
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
@@ -72,9 +75,10 @@ jobs:
           platforms: linux/${{ matrix.arch.name }}
           labels: ${{ steps.meta.outputs.labels }}
           tags: ${{ steps.meta.outputs.tags }}
-          outputs: "type=image,name=ghcr.io/${{ env.BUILDBOX_IMAGE_NAME }},push-by-digest=false,name-canonical=true,push=true"
+          outputs: "type=image,name=ghcr.io/${{ env.BUILDBOX_IMAGE_NAME }},push-by-digest=false,name-canonical=true,push=${{ github.event_name == 'pull_request' && 'false' || 'true' }}"
 
       - name: Export digest
+        if: github.event_name != 'pull_request'
         run: |
           mkdir -p /tmp/digests
           digest="${{ steps.build.outputs.digest }}"
@@ -82,6 +86,7 @@ jobs:
 
       - name: Upload digest
         uses: actions/upload-artifact@v4
+        if: github.event_name != 'pull_request'
         with:
           name: digests-buildbox-${{ env.PLATFORM_PAIR }}
           path: /tmp/digests/*
@@ -127,6 +132,7 @@ jobs:
 
       - name: Login to GHCR
         uses: docker/login-action@v3
+        if: github.event_name != 'pull_request'
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
@@ -147,9 +153,10 @@ jobs:
           platforms: linux/${{ matrix.arch.name }}
           labels: ${{ steps.meta.outputs.labels }}
           tags: ${{ steps.meta.outputs.tags }}
-          outputs: "type=image,name=ghcr.io/${{ env.TESTBOX_IMAGE_NAME }},push-by-digest=false,name-canonical=true,push=true"
+          outputs: "type=image,name=ghcr.io/${{ env.TESTBOX_IMAGE_NAME }},push-by-digest=false,name-canonical=true,push=${{ github.event_name == 'pull_request' && 'false' || 'true' }}"
 
       - name: Export digest
+        if: github.event_name != 'pull_request'
         run: |
           mkdir -p /tmp/digests
           digest="${{ steps.build.outputs.digest }}"
@@ -157,6 +164,7 @@ jobs:
 
       - name: Upload digest
         uses: actions/upload-artifact@v4
+        if: github.event_name != 'pull_request'
         with:
           name: digests-${{ matrix.distro }}-${{ env.PLATFORM_PAIR }}
           path: /tmp/digests/*
