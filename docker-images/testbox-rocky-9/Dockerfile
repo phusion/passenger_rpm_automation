@@ -1,4 +1,4 @@
-FROM rockylinux:9
+FROM rockylinux/rockylinux:9
 LABEL org.opencontainers.image.authors="Phusion <info@phusion.nl>"
 
 ADD . /pra_build
