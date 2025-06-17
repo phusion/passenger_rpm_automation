@@ -1,36 +1,33 @@
 require 'open-uri'
 require 'nokogiri'
 
+# After editing this file, regenerate distro_info.sh by running:
+# internal/scripts/regen_distro_info_script.sh
+
+def numeric(distro)
+  distro.delete_prefix('el').to_i
+end
+
 REDHAT_ENTERPRISE_DISTRIBUTIONS = {
   "el8" => "el8.0",
   "el9" => "el9.0",
+  "el10" => "el10.0",
 }
 
-DISTRO_BUILD_PARAMS = {
-  "el8" => {
-    :mock_chroot_name => "rocky+epel-8",
-    :name => "Enterprise Linux 8"
-  },
-  "el9" => {
-    :mock_chroot_name => "rocky+epel-9",
-    :name => "Enterprise Linux 9"
-  },
+DISTRO_BUILD_PARAMS = REDHAT_ENTERPRISE_DISTRIBUTIONS.transform_values do |v| {
+       mock_chroot_name: "rocky+epel-#{numeric(v)}",
+       name: "Enterprise Linux #{numeric(v)}"
 }
+end
 
 def dynamic_module_supported?(distro)
-  distro.delete_prefix("el").to_i > 6
+  numeric(distro) > 6
 end
 
 def latest_nginx_available_parts(distro)
   cache_file = "/tmp/#{distro}_nginx_version.txt"
   if !File.exist?(cache_file) || ((Time.now - 60*60*24) > File.mtime(cache_file))
-    if distro == "el8"
-      url = "https://dl.rockylinux.org/pub/rocky/8/AppStream/x86_64/os/Packages/n/"
-    elsif distro == "el9"
-      url = "https://dl.rockylinux.org/pub/rocky/9/AppStream/x86_64/os/Packages/n/"
-    else
-      abort "Unknown distro: '#{distro.to_s}', add to latest_nginx_available method in #{__FILE__}."
-    end
+    url = "https://dl.rockylinux.org/pub/rocky/#{numeric(distro)}/AppStream/x86_64/os/Packages/n/"
     if RUBY_VERSION >= '2.5'
       doc = URI.open(url) do |io|
         Nokogiri.HTML(io)
