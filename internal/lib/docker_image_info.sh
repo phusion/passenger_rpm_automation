@@ -16,11 +16,11 @@ fi
 if [ $1 == "buildbox_name" ]; then
 	echo -n "phusion/passenger_rpm_automation_buildbox"
 elif [ $1 == "buildbox_version" ]; then
-	echo -n "2.0.6"
+	echo -n "2.0.7"
 elif [ $1 == "testbox_base_name" ]; then
 	echo -n "phusion/passenger_rpm_automation_testbox"
 elif [ $1 == "testbox_version" ]; then
-	echo -n "2.0.7"
+	echo -n "2.0.8"
 else
 	echo "$USAGE"
 	exit 1
