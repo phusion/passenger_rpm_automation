@@ -43,7 +43,7 @@ header "Miscellaneous"
 run sed -i 's/Defaults    requiretty//' /etc/sudoers
 run cp /pra_build/sudoers.conf /etc/sudoers.d/app
 run chmod 440 /etc/sudoers.d/app
-sed -ie 's/\(account     required      pam_unix.so\)/\1 broken_shadow/g' /etc/pam.d/system-auth
+run sed -ie 's/\(account[ 	][ 	]*required[ 	][ 	]*pam_unix\.so\)/\1 broken_shadow/g' /etc/pam.d/system-auth
 run usermod -a -G mock app
 run sudo -u app -H rpmdev-setuptree
 
