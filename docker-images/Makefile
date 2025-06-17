@@ -4,7 +4,7 @@ BUILDBOX_VERSION = $(shell ../internal/lib/docker_image_info.sh buildbox_version
 TESTBOX_BASE_NAME = $(shell ../internal/lib/docker_image_info.sh testbox_base_name)
 TESTBOX_VERSION = $(shell ../internal/lib/docker_image_info.sh testbox_version)
 
-.PHONY: all buildbox testboxes tag_latest_buildbox tag_latest_testboxes tag_latest upload_buildbox upload_testboxes upload
+.PHONY: all buildbox testboxes tag_latest_buildbox tag_latest_testboxes tag_latest upload_buildbox upload_testboxes upload pull pull_buildbox pull_testboxes
 
 all: buildbox testboxes
 
@@ -77,3 +77,22 @@ release_testboxes: upload_testboxes
 
 upload: upload_buildbox upload_testboxes
 release: release_buildbox release_testboxes
+
+pull: pull_buildbox pull_testboxes
+
+pull_buildbox:
+	docker pull --platform linux/arm64 "ghcr.io/$(BUILDBOX_NAME):$(BUILDBOX_VERSION)-arm64"
+	docker pull --platform linux/amd64 "ghcr.io/$(BUILDBOX_NAME):$(BUILDBOX_VERSION)-amd64"
+	docker tag "ghcr.io/$(BUILDBOX_NAME):$(BUILDBOX_VERSION)-arm64" "$(BUILDBOX_NAME):$(BUILDBOX_VERSION)-arm64"
+	docker tag "ghcr.io/$(BUILDBOX_NAME):$(BUILDBOX_VERSION)-amd64" "$(BUILDBOX_NAME):$(BUILDBOX_VERSION)-amd64"
+
+pull_testboxes:
+	$(MAKE) pull_testbox_8
+	$(MAKE) pull_testbox_9
+	$(MAKE) pull_testbox_10
+
+pull_testbox_%:
+	docker pull --platform linux/arm64 "ghcr.io/$(TESTBOX_BASE_NAME)_rocky_$*:$(TESTBOX_VERSION)-arm64"
+	docker pull --platform linux/amd64 "ghcr.io/$(TESTBOX_BASE_NAME)_rocky_$*:$(TESTBOX_VERSION)-amd64"
+	docker tag "ghcr.io/$(TESTBOX_BASE_NAME)_rocky_$*:$(TESTBOX_VERSION)-arm64" "$(TESTBOX_BASE_NAME)_rocky_$*:$(TESTBOX_VERSION)-arm64"
+	docker tag "ghcr.io/$(TESTBOX_BASE_NAME)_rocky_$*:$(TESTBOX_VERSION)-amd64" "$(TESTBOX_BASE_NAME)_rocky_$*:$(TESTBOX_VERSION)-amd64"
