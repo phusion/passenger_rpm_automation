@@ -125,7 +125,7 @@ BuildRequires: libcurl-devel
 BuildRequires: curl-devel
 %endif
 
-%if 0%{?rhel} = 8 || ( 0%{?fedora} >= 28 && 0%{?fedora} <= 34 )
+%if 0%{?rhel} == 8 || ( 0%{?fedora} >= 28 && 0%{?fedora} <= 34 )
 BuildRequires: /usr/bin/pathfix.py
 %else
 %if 0%{?rhel} > 8 || 0%{?fedora} > 34
