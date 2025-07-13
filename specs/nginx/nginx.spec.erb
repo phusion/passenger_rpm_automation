@@ -77,7 +77,7 @@ BuildRequires:     gperftools-devel
 %endif
 BuildRequires:     libxslt-devel
 BuildRequires:     openssl-devel
-BuildRequires:     pcre-devel
+BuildRequires:     pcre2-devel
 BuildRequires:     perl-devel
 BuildRequires:     perl(ExtUtils::Embed)
 BuildRequires:     zlib-devel
@@ -89,7 +89,7 @@ Requires:          GeoIP
 %endif
 Requires:          gd
 Requires:          openssl
-Requires:          pcre
+Requires:          pcre2
 Requires:          perl(:MODULE_COMPAT_%(eval "`%{__perl} -V:version`"; echo $version))
 Requires(pre):     nginx-filesystem
 Conflicts:         %{passenger_package_name}%{?_isa} < %{passenger_package_version}
@@ -230,7 +230,7 @@ export DESTDIR=%{buildroot}
 %endif
     --add-module=`pwd`/%{passenger_tarball_name}-%{passenger_version}/src/nginx_module \
     --with-debug \
-    --with-cc-opt="%{optflags} $(pcre-config --cflags)" \
+    --with-cc-opt="%{optflags} $(pcre2-config --cflags)" \
     --with-ld-opt="$RPM_LD_FLAGS -Wl,-E" # so the perl module finds its symbols
 
 make %{?_smp_mflags}
