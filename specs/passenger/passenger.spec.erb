@@ -124,8 +124,16 @@ BuildRequires: libcurl-devel
 %else
 BuildRequires: curl-devel
 %endif
-%if 0%{?rhel} >= 8 || 0%{?fedora} >= 28
+
+%if 0%{?rhel} = 8 || ( 0%{?fedora} >= 28 && 0%{?fedora} <= 34 )
 BuildRequires: /usr/bin/pathfix.py
+%else
+%if 0%{?rhel} > 8 || 0%{?fedora} > 34
+BuildRequires: python3-rpm-macros
+%endif
+%endif
+
+%if 0%{?rhel} >= 8 || 0%{?fedora} >= 28
 BuildRequires: python3-devel
 %endif
 
@@ -395,7 +403,7 @@ touch -r %{SOURCE201} nginx.conf
 
 # Fix Python scripts with shebang which are not executable
 %if 0%{?rhel} >= 8 || 0%{?fedora} >= 28
-pathfix.py -pni "%{__python3} %{py3_shbang_opts}" %{buildroot}%{_datadir}/%{namespace}/helper-scripts/wsgi-loader.py
+%py3_shebang_fix %{buildroot}%{_datadir}/%{namespace}/helper-scripts/wsgi-loader.py
 %endif
 %{__chmod} +x %{buildroot}%{_datadir}/%{namespace}/helper-scripts/wsgi-loader.py
 
