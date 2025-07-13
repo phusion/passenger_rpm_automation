@@ -63,5 +63,9 @@ def latest_nginx_release(distro)
 end
 
 def latest_nginx_epoch(distro)
-  1
+  if numeric(distro) > 8
+    2
+  else
+    1
+  end
 end
