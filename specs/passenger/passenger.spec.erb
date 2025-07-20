@@ -129,6 +129,7 @@ BuildRequires: curl-devel
 BuildRequires: /usr/bin/pathfix.py
 %else
 %if 0%{?rhel} > 8 || 0%{?fedora} > 34
+# on el9+ we can drop the nested if and use: %elif 0%{?rhel} > 8 || 0%{?fedora} > 34
 BuildRequires: python3-rpm-macros
 %endif
 %endif
