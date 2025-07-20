@@ -21,7 +21,7 @@ echo
 header "Installing packages..."
 # Allows installing passenger-doc
 echo '%_excludedocs 0' > /etc/rpm/macros.imgcreate
-run sed -i 's/nodocs//' /etc/yum.conf
+run sed -i 's/nodocs//' /etc/yum.conf /etc/dnf/dnf.conf
 
 if [ "$(dnf info nginx | awk '/^Version/{print $NF}')" != "$(latest_nginx_for_distro $DISTRIBUTION)" ]; then
 	run dnf module enable -y nginx:$(nginx_minor_version $(latest_nginx_for_distro $DISTRIBUTION))
