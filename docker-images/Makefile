@@ -46,11 +46,8 @@ upload_buildbox: tag_latest_buildbox
 	docker push $(BUILDBOX_NAME):$(BUILDBOX_VERSION)-amd64
 
 release_buildbox: upload_buildbox
-	docker manifest rm  $(BUILDBOX_NAME):latest || true
-	docker manifest create $(BUILDBOX_NAME):$(BUILDBOX_VERSION) $(BUILDBOX_NAME):$(BUILDBOX_VERSION)-amd64 $(BUILDBOX_NAME):$(BUILDBOX_VERSION)-arm64
-	docker manifest create $(BUILDBOX_NAME):latest              $(BUILDBOX_NAME):latest-amd64              $(BUILDBOX_NAME):latest-arm64
-	docker manifest push $(BUILDBOX_NAME):$(BUILDBOX_VERSION)
-	docker manifest push --purge $(BUILDBOX_NAME):latest
+	docker buildx imagetools create --tag $(BUILDBOX_NAME):$(BUILDBOX_VERSION) $(BUILDBOX_NAME):$(BUILDBOX_VERSION)-amd64 $(BUILDBOX_NAME):$(BUILDBOX_VERSION)-arm64
+	docker buildx imagetools create --tag $(BUILDBOX_NAME):latest              $(BUILDBOX_NAME):latest-amd64              $(BUILDBOX_NAME):latest-arm64
 
 upload_testbox_%:
 	docker push $(TESTBOX_BASE_NAME)_rocky_$*:latest-arm64
@@ -63,12 +60,9 @@ upload_testboxes: tag_latest_testboxes
 	$(MAKE) upload_testbox_9
 	$(MAKE) upload_testbox_10
 
-release_testbox_%:
-	docker manifest rm $(TESTBOX_BASE_NAME)_rocky_$*:latest || true
-	docker manifest create $(TESTBOX_BASE_NAME)_rocky_$*:latest             $(TESTBOX_BASE_NAME)_rocky_$*:latest-amd64	     $(TESTBOX_BASE_NAME)_rocky_$*:latest-arm64
-	docker manifest create $(TESTBOX_BASE_NAME)_rocky_$*:$(TESTBOX_VERSION) $(TESTBOX_BASE_NAME)_rocky_$*:$(TESTBOX_VERSION)-amd64 $(TESTBOX_BASE_NAME)_rocky_$*:$(TESTBOX_VERSION)-arm64
-	docker manifest push --purge $(TESTBOX_BASE_NAME)_rocky_$*:latest
-	docker manifest push $(TESTBOX_BASE_NAME)_rocky_$*:$(TESTBOX_VERSION)
+release_testbox_%: upload_testbox_%
+	docker buildx imagetools create --tag $(TESTBOX_BASE_NAME)_rocky_$*:latest             $(TESTBOX_BASE_NAME)_rocky_$*:latest-amd64	     $(TESTBOX_BASE_NAME)_rocky_$*:latest-arm64
+	docker buildx imagetools create --tag $(TESTBOX_BASE_NAME)_rocky_$*:$(TESTBOX_VERSION) $(TESTBOX_BASE_NAME)_rocky_$*:$(TESTBOX_VERSION)-amd64 $(TESTBOX_BASE_NAME)_rocky_$*:$(TESTBOX_VERSION)-arm64
 
 release_testboxes: upload_testboxes
 	$(MAKE) release_testbox_8
