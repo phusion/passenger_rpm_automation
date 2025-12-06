@@ -22,6 +22,7 @@ run adduser --uid 2467 --gid 2467 --password '#' app
 header "Installing dependencies"
 
 run dnf install -y 'dnf-command(config-manager)'
+run dnf update -y
 run dnf config-manager --set-enabled crb
 run dnf install -y epel-release yum-utils
 
@@ -30,7 +31,7 @@ run dnf install -y alternatives \
     ruby ruby-devel rubygems rubygem-rake \
     perl git tar which python3 \
     httpd httpd-devel httpd-tools zlib-devel sqlite-devel curl-devel \
-    libxslt openssl-devel \
+    libxslt openssl-devel openssl-libs \
     rubygem-rack ccache
 run gem install bundler --no-document
 run gem install bundler -v '~>1.0' --no-document
