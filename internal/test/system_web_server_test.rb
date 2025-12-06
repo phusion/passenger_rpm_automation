@@ -1,5 +1,6 @@
 require 'fileutils'
 require 'open-uri'
+require 'logger'
 require File.expand_path(File.dirname(__FILE__) + '/misc/test_support')
 require '/tmp/passenger/src/ruby_supportlib/phusion_passenger'
 PhusionPassenger.locate_directories
@@ -144,6 +145,12 @@ describe "The system's Apache with Passenger enabled" do
 
   before :each do
     sh("passenger-config restart-app / --ignore-app-not-running")
+  end
+
+  after :each do |test|
+    logger = Logger.new(STDOUT)
+    logger.level = Logger::WARN
+    logger.error(File.read("/var/log/httpd/error_log")) if test.exception
   end
 
   describe "Ruby support" do
