@@ -61,14 +61,5 @@ def eventually(deadline_duration = 10, check_interval = 0.05)
 end
 
 def clear_bundler_env!
-  orig_env = if Bundler.method_defined?(:with_unbundled_env)
-    Bundler.with_unbundled_env do
-      ENV.to_hash
-    end
-  else
-    Bundler.with_clean_env do
-      ENV.to_hash
-    end
-  end
-  ENV.replace(orig_env)
+  ENV.replace(Bundler.respond_to?(:unbundled_env) ? Bundler.unbundled_env : Bundler.clean_env)
 end

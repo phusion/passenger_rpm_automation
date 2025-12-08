@@ -252,11 +252,7 @@ def check_distros_supported!
 end
 
 def clean_bundler_env!
-  clean_env = nil
-  Bundler.with_clean_env do
-    clean_env = ENV.to_hash
-  end
-  ENV.replace(clean_env)
+  ENV.replace(Bundler.respond_to?(:unbundled_env) ? Bundler.unbundled_env : Bundler.clean_env)
 end
 
 def register_tracking_category(name, description)
