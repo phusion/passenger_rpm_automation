@@ -16,7 +16,7 @@ jobs:
     outputs:
       distros: ${{ steps.distros.outputs.distros }}
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
       - name: Define Distros
         id: distros
         run: echo "distros=[$(awk -F= '/DEFAULT_DISTROS/{print $2}' ./internal/lib/distro_info.sh | sed -e 's/ /", "/g')]" >> "$GITHUB_OUTPUT"
@@ -33,7 +33,7 @@ jobs:
     name: build buildbox-${{ matrix.arch.name }}
     runs-on: ${{ matrix.arch.runner }}
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
       - name: Prepare
         run: |
           echo "PLATFORM_PAIR=${platform//\//-}" >> $GITHUB_ENV
@@ -44,7 +44,7 @@ jobs:
 
       - name: Docker meta
         id: meta
-        uses: docker/metadata-action@v6
+        uses: docker/metadata-action@030e881283bb7a6894de51c315a6bfe6a94e05cf
         with:
           images: |
             ghcr.io/${{ env.BUILDBOX_IMAGE_NAME }}
@@ -53,7 +53,7 @@ jobs:
             type=edge,enable=true,priority=700,prefix=,suffix=${{ matrix.arch.name }},branch=$repo.default_branch
 
       - name: Login to GHCR
-        uses: docker/login-action@v4
+        uses: docker/login-action@4907a6ddec9925e35a0a9e82d7399ccc52663121
         if: github.event_name != 'pull_request'
         with:
           registry: ghcr.io
@@ -61,14 +61,14 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Set up QEMU
-        uses: docker/setup-qemu-action@v4
+        uses: docker/setup-qemu-action@ce360397dd3f832beb865e1373c09c0e9f86d70a
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v4
+        uses: docker/setup-buildx-action@4d04d5d9486b7bd6fa91e7baf45bbb4f8b9deedd
 
       - name: Build and push by tag
         id: build
-        uses: docker/build-push-action@v7
+        uses: docker/build-push-action@bcafcacb16a39f128d818304e6c9c0c18556b85f
         with:
           context: ./docker-images/buildbox
           file: ./docker-images/buildbox/Dockerfile
@@ -85,7 +85,7 @@ jobs:
           touch "/tmp/digests/${digest#sha256:}"
 
       - name: Upload digest
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         if: github.event_name != 'pull_request'
         with:
           name: digests-buildbox-${{ env.PLATFORM_PAIR }}
@@ -107,7 +107,7 @@ jobs:
     name: build testbox ${{ matrix.distro }}-${{ matrix.arch.name }}
     runs-on: ${{ matrix.arch.runner }}
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
       - name: Prepare
         run: |
           echo "PLATFORM_PAIR=${platform//\//-}" >> $GITHUB_ENV
@@ -120,7 +120,7 @@ jobs:
 
       - name: Docker meta
         id: meta
-        uses: docker/metadata-action@v6
+        uses: docker/metadata-action@030e881283bb7a6894de51c315a6bfe6a94e05cf
         with:
           images: |
             ghcr.io/${{ env.TESTBOX_IMAGE_NAME }}
@@ -129,7 +129,7 @@ jobs:
             type=edge,enable=true,priority=700,prefix=,suffix=${{ matrix.arch.name }},branch=$repo.default_branch
 
       - name: Login to GHCR
-        uses: docker/login-action@v4
+        uses: docker/login-action@4907a6ddec9925e35a0a9e82d7399ccc52663121
         if: github.event_name != 'pull_request'
         with:
           registry: ghcr.io
@@ -137,14 +137,14 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Set up QEMU
-        uses: docker/setup-qemu-action@v4
+        uses: docker/setup-qemu-action@ce360397dd3f832beb865e1373c09c0e9f86d70a
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v4
+        uses: docker/setup-buildx-action@4d04d5d9486b7bd6fa91e7baf45bbb4f8b9deedd
 
       - name: Build and push by tag
         id: build
-        uses: docker/build-push-action@v7
+        uses: docker/build-push-action@bcafcacb16a39f128d818304e6c9c0c18556b85f
         with:
           context: ./docker-images/testbox-rocky-${{ env.DISTRO_NUM }}
           file: ./docker-images/testbox-rocky-${{ env.DISTRO_NUM }}/Dockerfile
@@ -161,7 +161,7 @@ jobs:
           touch "/tmp/digests/${digest#sha256:}"
 
       - name: Upload digest
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         if: github.event_name != 'pull_request'
         with:
           name: digests-${{ matrix.distro }}-${{ env.PLATFORM_PAIR }}
@@ -175,24 +175,24 @@ jobs:
     needs:
       - build-buildbox
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
       - name: Prepare env
         run: |
           echo "BUILDBOX_IMAGE_VERSION=$(./internal/lib/docker_image_info.sh buildbox_version)" >> $GITHUB_ENV
           echo "BUILDBOX_IMAGE_NAME=$(./internal/lib/docker_image_info.sh buildbox_name)" >> $GITHUB_ENV
 
       - name: Login to GHCR
-        uses: docker/login-action@v4
+        uses: docker/login-action@4907a6ddec9925e35a0a9e82d7399ccc52663121
         with:
           registry: ghcr.io
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v4
+        uses: docker/setup-buildx-action@4d04d5d9486b7bd6fa91e7baf45bbb4f8b9deedd
 
       - name: Download digests
-        uses: actions/download-artifact@v8
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c
         with:
           path: /tmp/digests
           pattern: digests-buildbox-*
@@ -200,7 +200,7 @@ jobs:
 
       - name: Docker meta
         id: meta
-        uses: docker/metadata-action@v6
+        uses: docker/metadata-action@030e881283bb7a6894de51c315a6bfe6a94e05cf
         with:
           images: |
             ghcr.io/${{ env.BUILDBOX_IMAGE_NAME }}
@@ -229,7 +229,7 @@ jobs:
         distro: ${{ fromJSON(needs.define-matrix.outputs.distros) }}
 
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
       - name: Prepare env
         run: |
           echo "TESTBOX_IMAGE_VERSION=$(./internal/lib/docker_image_info.sh testbox_version)" >> $GITHUB_ENV
@@ -239,17 +239,17 @@ jobs:
           distro: ${{ matrix.distro }}
 
       - name: Login to GHCR
-        uses: docker/login-action@v4
+        uses: docker/login-action@4907a6ddec9925e35a0a9e82d7399ccc52663121
         with:
           registry: ghcr.io
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v4
+        uses: docker/setup-buildx-action@4d04d5d9486b7bd6fa91e7baf45bbb4f8b9deedd
 
       - name: Download digests
-        uses: actions/download-artifact@v8
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c
         with:
           path: /tmp/digests
           pattern: digests-${{ matrix.distro }}-*
@@ -257,7 +257,7 @@ jobs:
 
       - name: Docker meta
         id: meta
-        uses: docker/metadata-action@v6
+        uses: docker/metadata-action@030e881283bb7a6894de51c315a6bfe6a94e05cf
         with:
           images: |
             ghcr.io/${{ env.TESTBOX_IMAGE_NAME }}
