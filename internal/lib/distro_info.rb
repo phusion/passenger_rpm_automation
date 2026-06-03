@@ -16,7 +16,7 @@ REDHAT_ENTERPRISE_DISTRIBUTIONS = {
 
 DISTRO_BUILD_PARAMS = REDHAT_ENTERPRISE_DISTRIBUTIONS.transform_values do |v| {
        mock_chroot_name: "rocky+epel-#{numeric(v)}",
-       name: "Enterprise Linux #{numeric(v)}"
+       name: "Enterprise Linux #{numeric(v)}",
 }
 end
 
@@ -33,17 +33,17 @@ def latest_nginx_available_parts(distro)
         Nokogiri.HTML(io)
       end
     else
-	    doc = open(url) do |io|
+      doc = open(url) do |io|
         Nokogiri.HTML(io)
       end
     end
     version_parts = doc
                       .css('a[href^="nginx-"]')
                       .map { |el| el['href'] }
-                      .reject { |s| ["-mod-",".noarch.","-core-"].any?{ |p| s.include?(p) } }
-                      .max_by { |v| Gem::Version.new(v.split('-').find{ |s| is_version? s}) }
+                      .reject { |s| [ "-mod-", ".noarch.", "-core-" ].any? { |p| s.include?(p) } }
+                      .max_by { |v| Gem::Version.new(v.split('-').find { |s| is_version? s }) }
                       .strip
-    File.write(cache_file,version_parts)
+    File.write(cache_file, version_parts)
   else
     version_parts = File.read(cache_file)
   end
@@ -55,7 +55,7 @@ def is_version?(s)
 end
 
 def latest_nginx_version(distro)
-  latest_nginx_available_parts(distro).find{ |s| is_version? s }
+  latest_nginx_available_parts(distro).find { |s| is_version? s }
 end
 
 def latest_nginx_release(distro)

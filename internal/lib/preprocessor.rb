@@ -1,4 +1,5 @@
 # encoding: utf-8
+
 #  Phusion Passenger - https://www.phusionpassenger.com/
 #  Copyright (c) 2013-2015 Phusion
 #
@@ -58,7 +59,7 @@ private
   class Evaluator
     def _infer_distro_table(name)
       if REDHAT_ENTERPRISE_DISTRIBUTIONS.has_key?(name)
-        return REDHAT_ENTERPRISE_DISTRIBUTIONS
+        REDHAT_ENTERPRISE_DISTRIBUTIONS
       end
     end
 
@@ -83,17 +84,17 @@ private
 
         case comparator
         when ">"
-          return v1 > v2
+          v1 > v2
         when ">="
-          return v1 >= v2
+          v1 >= v2
         when "<"
-          return v1 < v2
+          v1 < v2
         when "<="
-          return v1 <= v2
+          v1 <= v2
         when "=="
-          return v1 == v2
+          v1 == v2
         when "!="
-          return v1 != v2
+          v1 != v2
         else
           raise "BUG"
         end
@@ -106,7 +107,7 @@ private
     variables.each_pair do |key, val|
       object.send(:instance_variable_set, "@#{key}", val)
     end
-    return object.instance_eval do
+    object.instance_eval do
       binding
     end
   end

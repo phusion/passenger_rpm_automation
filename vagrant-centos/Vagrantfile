@@ -18,5 +18,5 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     vf.vmx["memsize"]  = 1536
   end
 
-  config.vm.provision :shell, :path => "setup.sh"
+  config.vm.provision :shell, path: "setup.sh"
 end

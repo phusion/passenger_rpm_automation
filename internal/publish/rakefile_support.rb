@@ -23,7 +23,7 @@ def infer_distros_info
     dir = File.basename(path)
     dir =~ /^el(.+)/
     distro_version = $1
-    result << [dir, distro_version]
+    result << [ dir, distro_version ]
   end
   result
 end
@@ -36,7 +36,7 @@ def initialize_repo_server_client!
     Kernel.const_set(:REPO_SERVER_API_TOKEN, File.read("/repo_server_api_token.txt").strip)
     Kernel.const_set(:REPO_SERVER_HTTP, make_repo_server_http)
     if YANK_ALL
-      Kernel.const_set(:REPO_SERVER_YANK_ALL_TASKS, [:yank_all])
+      Kernel.const_set(:REPO_SERVER_YANK_ALL_TASKS, [ :yank_all ])
     else
       Kernel.const_set(:REPO_SERVER_YANK_ALL_TASKS, [])
     end

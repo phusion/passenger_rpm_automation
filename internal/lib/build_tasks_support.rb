@@ -163,11 +163,11 @@ def recursive_copy_files(files, destination_dir, preprocess = false, variables =
     if !File.directory?(filename)
       if preprocess && filename =~ /\.template$/
         real_filename = filename.sub(/\.template$/, '')
-        FileUtils.install(filename, "#{destination_dir}/#{real_filename}", :preserve => true)
+        FileUtils.install(filename, "#{destination_dir}/#{real_filename}", preserve: true)
         Preprocessor.new.start(filename, "#{destination_dir}/#{real_filename}",
           variables)
       else
-        FileUtils.install(filename, "#{destination_dir}/#{filename}", :preserve => true)
+        FileUtils.install(filename, "#{destination_dir}/#{filename}", preserve: true)
       end
     end
     if STDOUT.tty?

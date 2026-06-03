@@ -86,7 +86,7 @@ namespace :srpm do
 
     register_tracking_task(:srpm, "passenger:#{distro_id}")
     desc "Build Passenger SRPM for #{distro[:name]}"
-    task("passenger:#{distro_id}" => ["source:passenger:#{distro_id}", 'source:nginx', 'source:packaging_additions']) do
+    task("passenger:#{distro_id}" => [ "source:passenger:#{distro_id}", 'source:nginx', 'source:packaging_additions' ]) do
       track_task(:srpm, "passenger:#{distro_id}") do |task|
         spec_target_dir  = "#{RPM_SPECS_DIR}/#{distro_id}"
         spec_target_file = "#{spec_target_dir}/#{PASSENGER_RPM_NAME}.spec"
@@ -96,7 +96,7 @@ namespace :srpm do
         begin
           Preprocessor.new.start("/system/specs/passenger/passenger.spec.erb",
             spec_target_file,
-            :distribution => distro_id)
+            distribution: distro_id)
         rescue Exception => e
           task.log "Specfile preprocessing failed"
           raise e
@@ -122,7 +122,7 @@ namespace :srpm do
 
     register_tracking_task(:srpm, "nginx:#{distro_id}")
     desc "Build Nginx SRPM for #{distro[:name]}"
-    task("nginx:#{distro_id}" => ["source:passenger:#{distro_id}", 'source:nginx', 'source:packaging_additions']) do
+    task("nginx:#{distro_id}" => [ "source:passenger:#{distro_id}", 'source:nginx', 'source:packaging_additions' ]) do
       track_task(:srpm, "nginx:#{distro_id}") do |task|
         spec_target_dir  = "#{RPM_SPECS_DIR}/#{distro_id}"
         spec_target_file = "#{spec_target_dir}/#{NGINX_RPM_NAME}.spec"
@@ -132,7 +132,7 @@ namespace :srpm do
         begin
           Preprocessor.new.start("/system/specs/nginx/nginx.spec.erb",
             spec_target_file,
-            :distribution => distro_id)
+            distribution: distro_id)
         rescue Exception => e
           task.log "Specfile preprocessing failed"
           raise e
@@ -168,7 +168,7 @@ namespace :rpm do
     register_tracking_task(:rpm, "passenger:#{distro_id}:#{RPM_ARCH}")
 
     desc "Build Passenger RPM for #{distro[:name]}, #{RPM_ARCH}"
-    task("passenger:#{distro_id}:#{RPM_ARCH}" => ["srpm:passenger:#{distro_id}"]) do
+    task("passenger:#{distro_id}:#{RPM_ARCH}" => [ "srpm:passenger:#{distro_id}" ]) do
       track_task(:rpm, "passenger:#{distro_id}:#{RPM_ARCH}") do |task|
         mock_chroot_name = "#{distro[:mock_chroot_name]}-#{RPM_ARCH}"
         task.sh "/usr/bin/mock --verbose #{MOCK_FLAGS} " +
@@ -195,7 +195,7 @@ namespace :rpm do
     register_tracking_task(:rpm, "nginx:#{distro_id}:#{RPM_ARCH}")
 
     desc "Build Nginx RPM for #{distro[:name]}, #{RPM_ARCH}"
-    task("nginx:#{distro_id}:#{RPM_ARCH}" => ["srpm:nginx:#{distro_id}"]) do
+    task("nginx:#{distro_id}:#{RPM_ARCH}" => [ "srpm:nginx:#{distro_id}" ]) do
       track_task(:rpm, "nginx:#{distro_id}:#{RPM_ARCH}") do |task|
         mock_chroot_name = "#{distro[:mock_chroot_name]}-#{RPM_ARCH}"
         task.sh "/usr/bin/mock --verbose #{MOCK_FLAGS} " +

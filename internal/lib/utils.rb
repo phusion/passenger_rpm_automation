@@ -20,7 +20,7 @@ module Utils
     "MediumOrchid1",
     "DeepSkyBlue",
     "chartreuse1",
-    "aquamarine"
+    "aquamarine",
   ].freeze
 
   def distance_of_time_in_hours_and_minutes(from_time, to_time)
@@ -55,11 +55,11 @@ module Utils
       if !File.directory?(filename)
         if preprocess && filename =~ /\.erb$/
           real_filename = filename.sub(/\.erb$/, '')
-          FileUtils.install(filename, "#{destination_dir}/#{real_filename}", :preserve => true)
+          FileUtils.install(filename, "#{destination_dir}/#{real_filename}", preserve: true)
           Preprocessor.new.start(filename, "#{destination_dir}/#{real_filename}",
             variables)
         else
-          FileUtils.install(filename, "#{destination_dir}/#{filename}", :preserve => true)
+          FileUtils.install(filename, "#{destination_dir}/#{filename}", preserve: true)
         end
       end
       if STDOUT.tty?

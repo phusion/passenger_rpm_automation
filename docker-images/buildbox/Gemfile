@@ -5,4 +5,3 @@ gem 'bluecloth'
 gem 'mizuho'
 gem 'paint'
 gem 'net-http-persistent'
-
