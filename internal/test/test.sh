@@ -23,7 +23,8 @@ header "Installing packages..."
 echo '%_excludedocs 0' > /etc/rpm/macros.imgcreate
 run sed -i 's/nodocs//' /etc/yum.conf /etc/dnf/dnf.conf
 
-if [ "$(dnf info nginx | awk '/^Version/{print $NF}')" != "$(latest_nginx_for_distro $DISTRIBUTION)" ]; then
+if [ "$DISTRIBUTION" != rocky10 ]; then
+	run dnf module reset nginx
 	run dnf module enable -y nginx:$(nginx_minor_version $(latest_nginx_for_distro $DISTRIBUTION))
 fi
 run dnf install -y /output/*.${RPM_ARCH}.rpm /output/*.noarch.rpm
