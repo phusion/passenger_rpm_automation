@@ -58,6 +58,10 @@ def latest_nginx_version(distro)
   latest_nginx_available_parts(distro).find { |s| is_version? s }
 end
 
+def latest_nginx_module(distro)
+  latest_nginx_version(distro).split('.').first(2).join('.')
+end
+
 def latest_nginx_release(distro)
   latest_nginx_available_parts(distro).last.split('.').first
 end

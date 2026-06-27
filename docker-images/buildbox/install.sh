@@ -50,6 +50,8 @@ run sudo -u app -H rpmdev-setuptree
 run mkdir -p /etc/container_environment
 run cp /pra_build/my_init_python /sbin/my_init_python
 run cp /pra_build/site-defaults.cfg /etc/mock/site-defaults.cfg
+# The 'a' below is neccesary due to umask
+run chmod -R a+w /etc/mock
 
 header "Cleaning up"
 run dnf clean all

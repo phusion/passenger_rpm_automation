@@ -19,13 +19,7 @@ namespace :source do
           if FETCH_PASSENGER_TARBALL_FROM_CACHE && File.exist?("/cache/#{distro}_#{PASSENGER_TARBALL}")
             task.sh "cp /cache/#{distro}_#{PASSENGER_TARBALL} #{RPM_SOURCES_DIR}/#{PASSENGER_TARBALL}"
           else
-            available_nginx_version = latest_nginx_version(distro)
-            if ! File.exist?("/cache/nginx_#{available_nginx_version}.source.tar.gz")
-              task.sh "./download-nginx-orig-tarball.sh #{available_nginx_version} #{RPM_SOURCES_DIR}/nginx_#{available_nginx_version}.source.tar.gz"
-              task.sh "cp #{RPM_SOURCES_DIR}/nginx_#{available_nginx_version}.source.tar.gz /cache/"
-            end
-            task.sh "cp /cache/nginx_#{available_nginx_version}.source.tar.gz #{RPM_SOURCES_DIR}/nginx-#{available_nginx_version}.tar.gz"
-            task.sh "./build-passenger-source-tarball.sh #{RPM_SOURCES_DIR}/#{PASSENGER_TARBALL} #{available_nginx_version}"
+            task.sh "./build-passenger-source-tarball.sh #{RPM_SOURCES_DIR}/#{PASSENGER_TARBALL} #{latest_nginx_version(distro)}"
             task.sh "cp #{RPM_SOURCES_DIR}/#{PASSENGER_TARBALL} /cache/#{distro}_#{PASSENGER_TARBALL}"
           end
         end
@@ -171,39 +165,13 @@ namespace :rpm do
     task("passenger:#{distro_id}:#{RPM_ARCH}" => [ "srpm:passenger:#{distro_id}" ]) do
       track_task(:rpm, "passenger:#{distro_id}:#{RPM_ARCH}") do |task|
         mock_chroot_name = "#{distro[:mock_chroot_name]}-#{RPM_ARCH}"
+        File.write("/etc/mock/#{mock_chroot_name}.cfg", "config_opts['module_setup_commands'] = [ ('enable', 'nginx:#{latest_nginx_module(distro_id)}') ]", mode: 'a+') unless distro_id == 'el10'
         task.sh "/usr/bin/mock --verbose #{MOCK_FLAGS} " +
           "-r #{mock_chroot_name} " +
           "--resultdir '/work/#{distro_id}-#{RPM_ARCH}' " +
           "--uniqueext passenger-#{distro_id}-#{RPM_ARCH} " +
           "--enable-plugin=ccache " +
           "--rebuild /work/#{distro_id}-#{RPM_ARCH}/#{passenger_srpm_name(distro_id)}"
-      end
-    end
-  end
-
-  ### Nginx ###
-
-  desc "Build Nginx RPMs for all distributions"
-  task "nginx:all"
-
-  DISTROS.each do |distro_id|
-    next if dynamic_module_supported?(distro_id)
-    distro = DISTRO_BUILD_PARAMS[distro_id]
-
-    task "all" => "^rpm:nginx:#{distro_id}:#{RPM_ARCH}"
-    task "nginx:all" => "^rpm:nginx:#{distro_id}:#{RPM_ARCH}"
-    register_tracking_task(:rpm, "nginx:#{distro_id}:#{RPM_ARCH}")
-
-    desc "Build Nginx RPM for #{distro[:name]}, #{RPM_ARCH}"
-    task("nginx:#{distro_id}:#{RPM_ARCH}" => [ "srpm:nginx:#{distro_id}" ]) do
-      track_task(:rpm, "nginx:#{distro_id}:#{RPM_ARCH}") do |task|
-        mock_chroot_name = "#{distro[:mock_chroot_name]}-#{RPM_ARCH}"
-        task.sh "/usr/bin/mock --verbose #{MOCK_FLAGS} " +
-          "-r #{mock_chroot_name} " +
-          "--resultdir '/work/#{distro_id}-#{RPM_ARCH}' " +
-          "--uniqueext nginx-#{distro_id}-#{RPM_ARCH} " +
-          "--enable-plugin=ccache " +
-          "--rebuild /work/#{distro_id}-#{RPM_ARCH}/#{nginx_srpm_name(distro_id)}"
       end
     end
   end

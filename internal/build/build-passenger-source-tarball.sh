@@ -66,9 +66,6 @@ echo "+ cd $PASSENGER_TARBALL_NAME-$PASSENGER_VERSION"
 cd $PASSENGER_TARBALL_NAME-$PASSENGER_VERSION
 run tar xzf ~/rpmbuild/SOURCES/$NGINX_TARBALL
 
-header "Extracting Nginx into Passenger directory for Module"
-run tar xzf ~/rpmbuild/SOURCES/${NGINX_TARBALL_NAME}-${2}.tar.gz
-
 header "Packaging up"
 cd ..
 echo "+ Normalizing timestamps"
