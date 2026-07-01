@@ -25,7 +25,7 @@ run sed -i 's/nodocs//' /etc/yum.conf /etc/dnf/dnf.conf
 
 if [ "$DISTRIBUTION" != rocky10 ]; then
 	run dnf module reset nginx
-	run dnf module enable -y nginx:$(nginx_minor_version $(latest_nginx_for_distro $DISTRIBUTION))
+	run dnf module enable -y nginx:$(dnf module list nginx | grep -Ee '^nginx.*[0-9\.]+' | cut -d ' ' -f 2 | sort -V | tail -1)
 fi
 run dnf install -y /output/*.${RPM_ARCH}.rpm /output/*.noarch.rpm
 

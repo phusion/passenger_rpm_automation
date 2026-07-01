@@ -79,28 +79,6 @@ function dynamic_module_supported()
 	echo false
 }
 
-function latest_nginx_for_distro()
-{
-        local CODENAME=$(distro_name_to_el_name "$1")
-
-        
-	if [[ "$CODENAME" = "el8" ]]; then
-			echo "1.24.0"
-			return
-		fi
-	
-	if [[ "$CODENAME" = "el9" ]]; then
-			echo "1.26.3"
-			return
-		fi
-	
-	if [[ "$CODENAME" = "el10" ]]; then
-			echo "1.26.3"
-			return
-		fi
-	
-}
-
 function nginx_minor_version()
 {
 	 cut -d. -f 1-2 <<< $1
