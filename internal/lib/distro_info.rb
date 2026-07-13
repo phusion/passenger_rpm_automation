@@ -26,8 +26,9 @@ end
 
 def latest_nginx_available_parts(distro)
   cache_file = "/tmp/#{distro}_nginx_version.txt"
+  arch = "x86_64"
   if !File.exist?(cache_file) || ((Time.now - 60*60*24) > File.mtime(cache_file))
-    url = "https://dl.rockylinux.org/pub/rocky/#{numeric(distro)}/AppStream/x86_64/os/Packages/n/"
+    url = "https://dl.rockylinux.org/pub/rocky/#{numeric(distro)}/AppStream/#{arch}/os/Packages/n/"
     if RUBY_VERSION >= '2.5'
       doc = URI.open(url) do |io|
         Nokogiri.HTML(io)
@@ -41,21 +42,20 @@ def latest_nginx_available_parts(distro)
                       .css('a[href^="nginx-"]')
                       .map { |el| el['href'] }
                       .reject { |s| [ "-mod-", ".noarch.", "-core-" ].any? { |p| s.include?(p) } }
-                      .max_by { |v| Gem::Version.new(v.split('-').find { |s| is_version? s }) }
-                      .strip
-    File.write(cache_file, version_parts)
+                      .map { |url| URI.decode_uri_component(url).delete_suffix(".#{arch}.rpm").split('-').slice(1..) }
+                      .group_by(&:first)
+                      .max_by { |v| Gem::Version.new(v.first) }
+                      .last
+                      .max_by { |e| e.last.split('+').last.split('.').at(1).to_i }
+    File.write(cache_file, version_parts.join('-'))
   else
-    version_parts = File.read(cache_file)
+    version_parts = File.read(cache_file).split('-')
   end
-  version_parts.split('-')
-end
-
-def is_version?(s)
-  /^[\d\.]+$/.match?(s)
+  version_parts
 end
 
 def latest_nginx_version(distro)
-  latest_nginx_available_parts(distro).find { |s| is_version? s }
+  latest_nginx_available_parts(distro).first
 end
 
 def latest_nginx_module(distro)
@@ -63,7 +63,7 @@ def latest_nginx_module(distro)
 end
 
 def latest_nginx_release(distro)
-  latest_nginx_available_parts(distro).last.split('.').first
+  latest_nginx_available_parts(distro).last
 end
 
 def latest_nginx_epoch(distro)
