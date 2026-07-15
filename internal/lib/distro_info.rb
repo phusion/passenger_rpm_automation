@@ -24,11 +24,15 @@ def dynamic_module_supported?(distro)
   numeric(distro) > 6
 end
 
-def latest_nginx_available_parts(distro)
-  cache_file = "/tmp/#{distro}_nginx_version.txt"
+def latest_nginx_available_parts(release, distro)
   arch = "x86_64"
+  url = case distro
+    when :rocky then "https://dl.rockylinux.org/pub/rocky/#{numeric(release)}/AppStream/#{arch}/os/Packages/n/"
+    when :alma  then "https://repo.almalinux.org/almalinux/#{numeric(release)}/AppStream/#{arch}/os/Packages/"
+    when :rhel  then "https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi#{numeric(release)}/#{numeric(release)}/#{arch}/appstream/os/Packages/n/"
+  end
+  cache_file = "/tmp/#{distro}_#{release}_nginx_version.txt"
   if !File.exist?(cache_file) || ((Time.now - 60*60*24) > File.mtime(cache_file))
-    url = "https://dl.rockylinux.org/pub/rocky/#{numeric(distro)}/AppStream/#{arch}/os/Packages/n/"
     if RUBY_VERSION >= '2.5'
       doc = URI.open(url) do |io|
         Nokogiri.HTML(io)
@@ -54,16 +58,16 @@ def latest_nginx_available_parts(distro)
   version_parts
 end
 
-def latest_nginx_version(distro)
-  latest_nginx_available_parts(distro).first
+def latest_nginx_version(release, distro)
+  latest_nginx_available_parts(release, distro).first
 end
 
-def latest_nginx_module(distro)
-  latest_nginx_version(distro).split('.').first(2).join('.')
+def latest_nginx_module(release, distro)
+  latest_nginx_version(release, distro).split('.').first(2).join('.')
 end
 
-def latest_nginx_release(distro)
-  latest_nginx_available_parts(distro).last
+def latest_nginx_release(release, distro)
+  latest_nginx_available_parts(release, distro).last
 end
 
 def latest_nginx_epoch(distro)

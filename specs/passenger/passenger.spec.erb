@@ -14,8 +14,10 @@
 <% if dynamic_module_supported?(@distribution) %>
 %global dynamic_module_supported 1
 %global latest_nginx_epoch <%= latest_nginx_epoch(@distribution) %>
-%global latest_nginx_version <%= latest_nginx_version(@distribution) %>
-%global latest_nginx_release <%= latest_nginx_release(@distribution) %>
+%global latest_nginx_version <%= latest_nginx_version(@distribution, :rocky) %>
+%global latest_nginx_rocky_release <%= latest_nginx_release(@distribution, :rocky) %>
+%global latest_nginx_alma_release <%= latest_nginx_release(@distribution, :alma) %>
+%global latest_nginx_rhel_release <%= latest_nginx_release(@distribution, :rhel) %>
 <% else %>
 %global dynamic_module_supported 0
 <% end %>
@@ -226,9 +228,9 @@ This package contains documentation files for Phusion Passenger®.
 %package -n %{nginx_module_package_name}
 Summary: Nginx Module for Phusion Passenger
 Group: System Environment/Daemons
-BuildRequires: nginx-mod-devel = %{latest_nginx_epoch}:%{latest_nginx_version}-%{latest_nginx_release}
+BuildRequires: nginx-mod-devel = %{latest_nginx_epoch}:%{latest_nginx_version}-%{latest_nginx_rocky_release}
 Requires: nginx(abi) = %{latest_nginx_version}
-Requires: nginx = %{latest_nginx_epoch}:%{latest_nginx_version}-%{latest_nginx_release}
+Requires: (nginx = %{latest_nginx_epoch}:%{latest_nginx_version}-%{latest_nginx_rocky_release} or nginx = %{latest_nginx_epoch}:%{latest_nginx_version}-%{latest_nginx_alma_release} or nginx = %{latest_nginx_epoch}:%{latest_nginx_version}-%{latest_nginx_rhel_release})
 Requires: %{package_name}%{?_isa} = %{version}-%{release}
 %if %{is_enterprise}
 Obsoletes: nginx-mod-http-passenger
