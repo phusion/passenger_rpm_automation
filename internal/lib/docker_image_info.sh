@@ -14,11 +14,11 @@ if [ -z "$1" ]; then
 fi
 
 if [ $1 == "buildbox_name" ]; then
-	echo -n "phusion/passenger_rpm_automation_buildbox"
+	echo -n "ghcr.io/phusion/passenger_rpm_automation_buildbox"
 elif [ $1 == "buildbox_version" ]; then
 	echo -n "2.0.9"
 elif [ $1 == "testbox_base_name" ]; then
-	echo -n "phusion/passenger_rpm_automation_testbox"
+	echo -n "ghcr.io/phusion/passenger_rpm_automation_testbox"
 elif [ $1 == "testbox_version" ]; then
 	echo -n "2.0.10"
 else
