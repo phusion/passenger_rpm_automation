@@ -1,0 +1,215 @@
+#!/bin/bash
+set -e
+
+SELFDIR=$(dirname "$0")
+SELFDIR=$(cd "$SELFDIR" && pwd)
+# shellcheck source=internal/lib/library.sh
+source "$SELFDIR/internal/lib/library.sh"
+# shellcheck source=internal/lib/distro_info.sh
+source "$SELFDIR/internal/lib/distro_info.sh"
+
+PASSENGER_DIR=
+WORK_DIR=
+CACHE_DIR=
+OUTPUT_DIR=
+CONCURRENCY=1
+DISTRIBUTIONS="$DEFAULT_DISTROS"
+RPM_ARCH=
+DOCKER_ARCH=
+FETCH_PASSENGER_TARBALL_FROM_CACHE=true
+CLEAR_WORK_DIR=true
+SHOW_OVERVIEW_PERIODICALLY=false
+SHOW_BACKTRACES=false
+SHOW_TASKS=false
+ARGV=
+
+function usage()
+{
+	echo "Usage: ./build [OPTIONS]"
+	echo "Build RPM packages."
+	echo
+	echo "Required options:"
+	echo "  -p DIR     Path to Passenger source directory"
+	echo "  -w DIR     Path to work directory (for temporary files)"
+	echo "  -c DIR     Path to cache directory"
+	echo "  -o DIR     Path in which to store build products"
+	echo "  -a NAME    RPM architecture name to build for (e.g., x86_64); must match -A"
+	echo "  -A NAME    Docker architecture name to build for (e.g. amd64); must match -a"
+	echo
+	echo "Optional options:"
+	echo "  -j NUM     Set build concurrency. Default: 1"
+	echo "  -d NAMES   Build only for given distributions. This is a space-separated list"
+	echo "             of distribution names."
+	echo "             Default: $DISTRIBUTIONS"
+	echo "  -R         Do not fetch Passenger tarball from cache"
+	echo "  -N         Do not clear work directory on startup"
+	echo "  -O         Periodically show progress overview"
+	echo "  -t         Show backtraces on error"
+	echo
+	echo "  -T         Show all tasks"
+	echo "  -h         Show usage"
+}
+
+function parse_options()
+{
+	local OPTIND=1
+	local ORIG_ARGV
+	local opt
+	while getopts "p:w:c:o:j:d:a:A:tNROTh" opt; do
+		case "$opt" in
+		p)
+			PASSENGER_DIR="$OPTARG"
+			;;
+		w)
+			WORK_DIR="$OPTARG"
+			;;
+		c)
+			CACHE_DIR="$OPTARG"
+			;;
+		o)
+			OUTPUT_DIR="$OPTARG"
+			;;
+		j)
+			CONCURRENCY=$OPTARG
+			;;
+		d)
+			DISTRIBUTIONS="$OPTARG"
+			;;
+		a)
+			RPM_ARCH="$OPTARG"
+			;;
+		A)
+			DOCKER_ARCH="$OPTARG"
+			;;
+		t)
+			SHOW_BACKTRACES=true
+			;;
+		N)
+			CLEAR_WORK_DIR=false
+			;;
+		R)
+			FETCH_PASSENGER_TARBALL_FROM_CACHE=false
+			;;
+		O)
+			SHOW_OVERVIEW_PERIODICALLY=true
+			;;
+		T)
+			SHOW_TASKS=true
+			;;
+		h)
+			usage
+			exit
+			;;
+		*)
+			return 1
+			;;
+		esac
+	done
+
+	(( OPTIND -= 1 )) || true
+	shift $OPTIND || true
+	ORIG_ARGV=("$@")
+
+	BUILDBOX_IMAGE=`get_buildbox_image`
+
+	if [[ ${#ORIG_ARGV[@]} = 0 ]]; then
+		SHOW_TASKS=true
+	else
+		ARGV=()
+		if $CLEAR_WORK_DIR; then
+			ARGV+=(clear_work_dir)
+		fi
+		ARGV+=(start "${ORIG_ARGV[@]}" finish)
+		if $SHOW_BACKTRACES; then
+			ARGV+=(--trace)
+		fi
+	fi
+
+	if ! $SHOW_TASKS; then
+		if [[ "$PASSENGER_DIR" = "" ]]; then
+			echo "ERROR: please specify a Passenger source directory with -p."
+			exit 1
+		fi
+		if [[ ! -e "$PASSENGER_DIR" ]]; then
+			echo "ERROR: $PASSENGER_DIR does not exist."
+			exit 1
+		fi
+		if [[ "$WORK_DIR" = "" ]]; then
+			echo "ERROR: please specify a work directory with -w."
+			exit 1
+		fi
+		if [[ "$CACHE_DIR" = "" ]]; then
+			echo "ERROR: please specify a cache directory with -c."
+			exit 1
+		fi
+		if [[ "$OUTPUT_DIR" = "" ]]; then
+			echo "ERROR: please specify an output directory with -o."
+			exit 1
+		fi
+	fi
+	if [[ "$RPM_ARCH" = "" ]]; then
+		echo "ERROR: please specify an RPM architecture with -a."
+		exit 1
+	fi
+	if [[ "$DOCKER_ARCH" = "" ]]; then
+		echo "ERROR: please specify a Docker architecture with -a."
+		exit 1
+	fi
+}
+
+parse_options "$@"
+
+if tty -s; then
+	TTY_ARGS="-t -i"
+else
+	TTY_ARGS=
+fi
+
+if $SHOW_TASKS; then
+	exec docker run \
+		--rm $TTY_ARGS \
+		-v "$SELFDIR:/system:ro" \
+		-e "DISTRIBUTIONS=$DISTRIBUTIONS" \
+		-e "RPM_ARCH=$RPM_ARCH" \
+		-e "SHOW_TASKS=true" \
+		-e "LC_CTYPE=en_US.UTF-8" \
+		--platform "linux/$DOCKER_ARCH" \
+		$BUILDBOX_IMAGE \
+		/system/internal/scripts/my_init --quiet --skip-runit --skip-startup-files -- \
+		/system/internal/build/resetpaths.sh \
+		rake -f /system/internal/build/Rakefile -T --trace
+else
+	PASSENGER_DIR="`absolute_path \"$PASSENGER_DIR\"`"
+	WORK_DIR="`absolute_path \"$WORK_DIR\"`"
+	CACHE_DIR="`absolute_path \"$CACHE_DIR\"`"
+	OUTPUT_DIR="`absolute_path \"$OUTPUT_DIR\"`"
+
+	run mkdir -p "$WORK_DIR"
+	run mkdir -p "$CACHE_DIR"
+	run mkdir -p "$OUTPUT_DIR"
+
+	echo "-------- Entering Docker container --------"
+	exec docker run \
+		--rm $TTY_ARGS \
+		--privileged \
+		-v "$SELFDIR:/system:ro" \
+		-v "$PASSENGER_DIR:/passenger:ro" \
+		-v "$WORK_DIR:/work" \
+		-v "$CACHE_DIR:/cache" \
+		-v "$OUTPUT_DIR:/output" \
+		-e "DISTRIBUTIONS=$DISTRIBUTIONS" \
+		-e "RPM_ARCH=$RPM_ARCH" \
+		-e "SHOW_OVERVIEW_PERIODICALLY=$SHOW_OVERVIEW_PERIODICALLY" \
+		-e "FETCH_PASSENGER_TARBALL_FROM_CACHE=$FETCH_PASSENGER_TARBALL_FROM_CACHE" \
+		-e "APP_UID=`/usr/bin/id -u`" \
+		-e "APP_GID=`/usr/bin/id -g`" \
+		-e "LC_CTYPE=en_US.UTF-8" \
+		--platform "linux/$DOCKER_ARCH" \
+		$BUILDBOX_IMAGE \
+		/system/internal/scripts/my_init --quiet --skip-runit --skip-startup-files -- \
+		/system/internal/scripts/inituidgid.sh \
+		/system/internal/build/preinit.sh \
+		/system/internal/scripts/setuser app \
+		/system/internal/build/resetpaths.sh \
+		rake -f /system/internal/build/Rakefile -j $CONCURRENCY "${ARGV[@]}"
+fi
