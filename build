@@ -167,7 +167,7 @@ fi
 
 if $SHOW_TASKS; then
 	exec docker run \
-		--rm $TTY_ARGS \
+		--rm \
 		-v "$SELFDIR:/system:ro" \
 		-e "DISTRIBUTIONS=$DISTRIBUTIONS" \
 		-e "RPM_ARCH=$RPM_ARCH" \
@@ -179,10 +179,10 @@ if $SHOW_TASKS; then
 		/system/internal/build/resetpaths.sh \
 		rake -f /system/internal/build/Rakefile -T --trace
 else
-	PASSENGER_DIR="`absolute_path \"$PASSENGER_DIR\"`"
-	WORK_DIR="`absolute_path \"$WORK_DIR\"`"
-	CACHE_DIR="`absolute_path \"$CACHE_DIR\"`"
-	OUTPUT_DIR="`absolute_path \"$OUTPUT_DIR\"`"
+	PASSENGER_DIR="$(absolute_path "$PASSENGER_DIR")"
+	WORK_DIR="$(absolute_path "$WORK_DIR")"
+	CACHE_DIR="$(absolute_path "$CACHE_DIR")"
+	OUTPUT_DIR="$(absolute_path "$OUTPUT_DIR")"
 
 	run mkdir -p "$WORK_DIR"
 	run mkdir -p "$CACHE_DIR"
