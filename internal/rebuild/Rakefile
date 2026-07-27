@@ -12,52 +12,17 @@ register_tracking_category(:preparation, 'Preparation')
 namespace :source do
   DISTROS.each do |distro|
     register_tracking_task(:preparation, "passenger:#{distro}")
-    desc "Create Passenger source tarball"
-    if dynamic_module_supported?(distro)
-      task("passenger:#{distro}" => :nginx) do
-        track_task(:preparation, "passenger:#{distro}") do |task|
-          if FETCH_PASSENGER_TARBALL_FROM_CACHE && File.exist?("/cache/#{distro}_#{PASSENGER_TARBALL}")
-            task.sh "cp /cache/#{distro}_#{PASSENGER_TARBALL} #{RPM_SOURCES_DIR}/#{PASSENGER_TARBALL}"
-          else
-            task.sh "./build-passenger-source-tarball.sh #{RPM_SOURCES_DIR}/#{PASSENGER_TARBALL} #{latest_nginx_version(distro, :rocky)}"
-            task.sh "cp #{RPM_SOURCES_DIR}/#{PASSENGER_TARBALL} /cache/#{distro}_#{PASSENGER_TARBALL}"
-          end
+    desc "Fetch Passenger source tarball"
+    task("passenger:#{distro}") do
+      track_task(:preparation, "passenger:#{distro}") do |task|
+        passenger_srpm_name=passenger_srpm_name(distro)
+        if FETCH_PASSENGER_TARBALL_FROM_CACHE && File.exist?("/cache/#{passenger_srpm_name}")
+          cp "/cache/#{passenger_srpm_name}", "#{RPM_SOURCES_DIR}/#{passenger_srpm_name}"
+        else
+          task.sh "./fetch-passenger-source-tarball.sh #{RPM_SOURCES_DIR}/#{passenger_srpm_name} #{distro}"
+          cp "#{RPM_SOURCES_DIR}/#{passenger_srpm_name}", "/cache/#{passenger_srpm_name}"
         end
       end
-    else
-      task("passenger:#{distro}" => :nginx) do
-        track_task(:preparation, "passenger:#{distro}") do |task|
-          if FETCH_PASSENGER_TARBALL_FROM_CACHE && File.exist?("/cache/#{PASSENGER_TARBALL}")
-            task.sh "cp /cache/#{PASSENGER_TARBALL} #{RPM_SOURCES_DIR}/#{PASSENGER_TARBALL}"
-          else
-            task.sh "./build-passenger-source-tarball.sh #{RPM_SOURCES_DIR}/#{PASSENGER_TARBALL} #{NGINX_VERSION}"
-            task.sh "cp #{RPM_SOURCES_DIR}/#{PASSENGER_TARBALL} /cache/#{PASSENGER_TARBALL}"
-          end
-        end
-      end
-    end
-  end
-
-  register_tracking_task(:preparation, 'nginx')
-  desc "Create Nginx source tarball"
-  task :nginx do
-    track_task(:preparation, 'nginx') do |task|
-      if File.exist?("/cache/#{NGINX_TARBALL}") && File.exist?("/cache/#{NGINX_TARBALL}.asc")
-        task.sh "cp /cache/#{NGINX_TARBALL} #{RPM_SOURCES_DIR}/"
-        task.sh "cp /cache/#{NGINX_TARBALL}.asc #{RPM_SOURCES_DIR}/"
-      else
-        task.sh "./download-nginx-orig-tarball.sh #{NGINX_VERSION} #{RPM_SOURCES_DIR}/#{NGINX_TARBALL}"
-        task.sh "cp #{RPM_SOURCES_DIR}/#{NGINX_TARBALL} /cache/"
-        task.sh "cp #{RPM_SOURCES_DIR}/#{NGINX_TARBALL}.asc /cache/"
-      end
-    end
-  end
-
-  register_tracking_task(:preparation, 'packaging_additions')
-  desc "Copy over various packaging sources"
-  task :packaging_additions do
-    track_task(:preparation, 'packaging_additions') do |task|
-      task.sh "cp -R /system/specs/passenger/* /system/specs/nginx/* #{RPM_SOURCES_DIR}/"
     end
   end
 end
@@ -80,61 +45,17 @@ namespace :srpm do
 
     register_tracking_task(:srpm, "passenger:#{distro_id}")
     desc "Build Passenger SRPM for #{distro[:name]}"
-    task("passenger:#{distro_id}" => [ "source:passenger:#{distro_id}", 'source:nginx', 'source:packaging_additions' ]) do
+    task("passenger:#{distro_id}" => [ "source:passenger:#{distro_id}" ]) do
       track_task(:srpm, "passenger:#{distro_id}") do |task|
-        spec_target_dir  = "#{RPM_SPECS_DIR}/#{distro_id}"
-        spec_target_file = "#{spec_target_dir}/#{PASSENGER_RPM_NAME}.spec"
-
-        task.sh "mkdir -p #{spec_target_dir}"
-        task.log "Preprocessing specfile"
-        begin
-          Preprocessor.new.start("/system/specs/passenger/passenger.spec.erb",
-            spec_target_file,
-            distribution: distro_id)
-        rescue Exception => e
-          task.log "Specfile preprocessing failed"
-          raise e
-        end
-
-        task.sh "rpmbuild -bs --root ~/rpmbuild/root-passenger-#{distro_id} #{spec_target_file}"
-        task.sh "mkdir -p /work/#{distro_id}-#{RPM_ARCH}"
-        task.sh "cp #{RPM_SRPMS_DIR}/#{passenger_srpm_name(distro_id)} /work/#{distro_id}-#{RPM_ARCH}/"
-      end
-    end
-  end
-
-  ### Nginx ###
-
-  desc "Build Nginx SRPMs for all distributions"
-  task "nginx:all"
-
-  DISTROS.each do |distro_id|
-    next if dynamic_module_supported?(distro_id)
-    distro = DISTRO_BUILD_PARAMS[distro_id]
-
-    task "nginx:all" => "nginx:#{distro_id}"
-
-    register_tracking_task(:srpm, "nginx:#{distro_id}")
-    desc "Build Nginx SRPM for #{distro[:name]}"
-    task("nginx:#{distro_id}" => [ "source:passenger:#{distro_id}", 'source:nginx', 'source:packaging_additions' ]) do
-      track_task(:srpm, "nginx:#{distro_id}") do |task|
-        spec_target_dir  = "#{RPM_SPECS_DIR}/#{distro_id}"
-        spec_target_file = "#{spec_target_dir}/#{NGINX_RPM_NAME}.spec"
-
-        task.sh "mkdir -p #{spec_target_dir}"
-        task.log "Preprocessing specfile"
-        begin
-          Preprocessor.new.start("/system/specs/nginx/nginx.spec.erb",
-            spec_target_file,
-            distribution: distro_id)
-        rescue Exception => e
-          task.log "Specfile preprocessing failed"
-          raise e
-        end
-
-        task.sh "rpmbuild -bs --root ~/rpmbuild/root-nginx-#{distro_id} #{spec_target_file}"
-          task.sh "mkdir -p /work/#{distro_id}-#{RPM_ARCH}"
-          task.sh "cp #{RPM_SRPMS_DIR}/#{nginx_srpm_name(distro_id)} /work/#{distro_id}-#{RPM_ARCH}/"
+        task.sh "./update-source-rpm.sh",
+                PASSENGER_SRPM_NAME: passenger_srpm_name(distro_id),
+                RPM_SOURCES_DIR: RPM_SOURCES_DIR,
+                RPM_SPECS_DIR: RPM_SPECS_DIR,
+                RPM_SRPMS_DIR: RPM_SRPMS_DIR,
+                DISTRO_ID: distro_id,
+                ROCKY_NGINX_VERSION: latest_nginx_release(distro_id, :rocky),
+                ALMA_NGINX_VERSION: latest_nginx_release(distro_id, :alma),
+                RHEL_NGINX_VERSION: latest_nginx_release(distro_id, :rhel)
       end
     end
   end
@@ -166,12 +87,13 @@ namespace :rpm do
       track_task(:rpm, "passenger:#{distro_id}:#{RPM_ARCH}") do |task|
         mock_chroot_name = "#{distro[:mock_chroot_name]}-#{RPM_ARCH}"
         File.write("/etc/mock/#{mock_chroot_name}.cfg", "config_opts['module_setup_commands'] = [ ('enable', 'nginx:#{latest_nginx_module(distro_id, :rocky)}') ]", mode: 'a+') unless distro_id == 'el10'
+        srpm=Dir["/work/#{distro_id}-#{RPM_ARCH}/#{PASSENGER_RPM_NAME}*#{distro_id}*.src.rpm"].first
         task.sh "/usr/bin/mock --verbose #{MOCK_FLAGS} " +
-          "-r #{mock_chroot_name} " +
-          "--resultdir '/work/#{distro_id}-#{RPM_ARCH}' " +
-          "--uniqueext passenger-#{distro_id}-#{RPM_ARCH} " +
-          "--enable-plugin=ccache " +
-          "--rebuild /work/#{distro_id}-#{RPM_ARCH}/#{passenger_srpm_name(distro_id)}"
+                "-r #{mock_chroot_name} " +
+                "--resultdir '/work/#{distro_id}-#{RPM_ARCH}' " +
+                "--uniqueext passenger-#{distro_id}-#{RPM_ARCH} " +
+                "--enable-plugin=ccache " +
+                "--rebuild #{srpm}"
       end
     end
   end
@@ -200,10 +122,13 @@ task :finish do
   puts "Committing build products to output directory..."
   sh "rm -rf /output/*"
   DISTROS.each do |distro_id|
-    files = Dir["/work/#{distro_id}-*/*.rpm"]
+    rpms = Dir["/work/#{distro_id}-*/nginx-mod-http-*.rpm"]
+    srpms = Dir["/work/#{distro_id}-*/*.src.rpm"]
+    debuginfo = Dir["/work/#{distro_id}-*/*debuginfo*.rpm"]
+    files = rpms + srpms + debuginfo
     if files.any?
       sh "mkdir -p /output/#{distro_id}"
-      sh "cp /work/#{distro_id}-#{RPM_ARCH}/*.rpm /output/#{distro_id}/"
+      cp files, "/output/#{distro_id}/"
     end
   end
 end

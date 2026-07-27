@@ -25,20 +25,20 @@ ARGV=
 
 function usage()
 {
-	echo "Usage: ./build [OPTIONS]"
-	echo "Build RPM packages."
+	echo "Usage: ./rebuild [OPTIONS]"
+	echo "Rebuild RPM packages."
 	echo
 	echo "Required options:"
 	echo "  -p DIR     Path to Passenger source directory"
 	echo "  -w DIR     Path to work directory (for temporary files)"
 	echo "  -c DIR     Path to cache directory"
 	echo "  -o DIR     Path in which to store build products"
-	echo "  -a NAME    RPM architecture name to build for (e.g., x86_64); must match -A"
-	echo "  -A NAME    Docker architecture name to build for (e.g. amd64); must match -a"
+	echo "  -a NAME    RPM architecture name to rebuild for (e.g., x86_64); must match -A"
+	echo "  -A NAME    Docker architecture name to rebuild for (e.g. amd64); must match -a"
 	echo
 	echo "Optional options:"
 	echo "  -j NUM     Set build concurrency. Default: 1"
-	echo "  -d NAMES   Build only for given distributions. This is a space-separated list"
+	echo "  -d NAMES   Rebuild only for given distributions. This is a space-separated list"
 	echo "             of distribution names."
 	echo "             Default: $DISTRIBUTIONS"
 	echo "  -R         Do not fetch Passenger tarball from cache"
@@ -176,8 +176,8 @@ if $SHOW_TASKS; then
 		--platform "linux/$DOCKER_ARCH" \
 		$BUILDBOX_IMAGE \
 		/system/internal/scripts/my_init --quiet --skip-runit --skip-startup-files -- \
-		/system/internal/build/resetpaths.sh \
-		rake -f /system/internal/build/Rakefile -T --trace
+		/system/internal/rebuild/resetpaths.sh \
+		rake -f /system/internal/rebuild/Rakefile -T --trace
 else
 	PASSENGER_DIR="`absolute_path \"$PASSENGER_DIR\"`"
 	WORK_DIR="`absolute_path \"$WORK_DIR\"`"
@@ -208,8 +208,8 @@ else
 		$BUILDBOX_IMAGE \
 		/system/internal/scripts/my_init --quiet --skip-runit --skip-startup-files -- \
 		/system/internal/scripts/inituidgid.sh \
-		/system/internal/build/preinit.sh \
+		/system/internal/rebuild/preinit.sh \
 		/system/internal/scripts/setuser app \
-		/system/internal/build/resetpaths.sh \
-		rake -f /system/internal/build/Rakefile -j $CONCURRENCY "${ARGV[@]}"
+		/system/internal/rebuild/resetpaths.sh \
+		rake -f /system/internal/rebuild/Rakefile -j $CONCURRENCY "${ARGV[@]}"
 fi

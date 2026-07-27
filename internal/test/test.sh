@@ -27,7 +27,9 @@ if [ "$DISTRIBUTION" != rocky10 ]; then
 	run dnf module reset nginx
 	run dnf module enable -y nginx:$(dnf module list nginx | grep -Ee '^nginx.*[0-9\.]+' | cut -d ' ' -f 2 | sort -V | tail -1)
 fi
+shopt -s nullglob
 run dnf install -y /output/*.${RPM_ARCH}.rpm /output/*.noarch.rpm
+shopt -u nullglob
 
 echo
 header "Preparing Passenger source code..."
