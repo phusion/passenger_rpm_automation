@@ -57,7 +57,7 @@ namespace :source do
   desc "Copy over various packaging sources"
   task :packaging_additions do
     track_task(:preparation, 'packaging_additions') do |task|
-      task.sh "cp -R /system/specs/passenger/* /system/specs/nginx/* #{RPM_SOURCES_DIR}/"
+      task.sh "cp -R /system/specs/passenger/* #{RPM_SOURCES_DIR}/"
     end
   end
 end
@@ -99,42 +99,6 @@ namespace :srpm do
         task.sh "rpmbuild -bs --root ~/rpmbuild/root-passenger-#{distro_id} #{spec_target_file}"
         task.sh "mkdir -p /work/#{distro_id}-#{RPM_ARCH}"
         task.sh "cp #{RPM_SRPMS_DIR}/#{passenger_srpm_name(distro_id)} /work/#{distro_id}-#{RPM_ARCH}/"
-      end
-    end
-  end
-
-  ### Nginx ###
-
-  desc "Build Nginx SRPMs for all distributions"
-  task "nginx:all"
-
-  DISTROS.each do |distro_id|
-    next if dynamic_module_supported?(distro_id)
-    distro = DISTRO_BUILD_PARAMS[distro_id]
-
-    task "nginx:all" => "nginx:#{distro_id}"
-
-    register_tracking_task(:srpm, "nginx:#{distro_id}")
-    desc "Build Nginx SRPM for #{distro[:name]}"
-    task("nginx:#{distro_id}" => [ "source:passenger:#{distro_id}", 'source:nginx', 'source:packaging_additions' ]) do
-      track_task(:srpm, "nginx:#{distro_id}") do |task|
-        spec_target_dir  = "#{RPM_SPECS_DIR}/#{distro_id}"
-        spec_target_file = "#{spec_target_dir}/#{NGINX_RPM_NAME}.spec"
-
-        task.sh "mkdir -p #{spec_target_dir}"
-        task.log "Preprocessing specfile"
-        begin
-          Preprocessor.new.start("/system/specs/nginx/nginx.spec.erb",
-            spec_target_file,
-            distribution: distro_id)
-        rescue Exception => e
-          task.log "Specfile preprocessing failed"
-          raise e
-        end
-
-        task.sh "rpmbuild -bs --root ~/rpmbuild/root-nginx-#{distro_id} #{spec_target_file}"
-          task.sh "mkdir -p /work/#{distro_id}-#{RPM_ARCH}"
-          task.sh "cp #{RPM_SRPMS_DIR}/#{nginx_srpm_name(distro_id)} /work/#{distro_id}-#{RPM_ARCH}/"
       end
     end
   end
