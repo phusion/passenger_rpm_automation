@@ -8,6 +8,7 @@ source "$SELFDIR/internal/lib/library.sh"
 # shellcheck source=internal/lib/distro_info.sh
 source "$SELFDIR/internal/lib/distro_info.sh"
 
+PASSENGER_ENTERPRISE_DOWNLOAD_TOKEN=
 PASSENGER_DIR=
 WORK_DIR=
 CACHE_DIR=
@@ -22,6 +23,10 @@ SHOW_OVERVIEW_PERIODICALLY=false
 SHOW_BACKTRACES=false
 SHOW_TASKS=false
 ARGV=
+
+function enterprise(){
+    test -f "$PASSENGER_DIR/passenger-enterprise-server.gemspec"
+}
 
 function usage()
 {
@@ -41,6 +46,7 @@ function usage()
 	echo "  -d NAMES   Rebuild only for given distributions. This is a space-separated list"
 	echo "             of distribution names."
 	echo "             Default: $DISTRIBUTIONS"
+        echo "  -e         Use the given Passenger Enterprise download token"
 	echo "  -R         Do not fetch Passenger tarball from cache"
 	echo "  -N         Do not clear work directory on startup"
 	echo "  -O         Periodically show progress overview"
@@ -55,7 +61,7 @@ function parse_options()
 	local OPTIND=1
 	local ORIG_ARGV
 	local opt
-	while getopts "p:w:c:o:j:d:a:A:tNROTh" opt; do
+	while getopts "e:p:w:c:o:j:d:a:A:tNROTh" opt; do
 		case "$opt" in
 		p)
 			PASSENGER_DIR="$OPTARG"
@@ -84,6 +90,9 @@ function parse_options()
 		t)
 			SHOW_BACKTRACES=true
 			;;
+                e)
+                        PASSENGER_ENTERPRISE_DOWNLOAD_TOKEN="$OPTARG"
+                        ;;
 		N)
 			CLEAR_WORK_DIR=false
 			;;
@@ -160,14 +169,18 @@ function parse_options()
 parse_options "$@"
 
 if tty -s; then
-	TTY_ARGS="-t -i"
+	TTY_ARGS=(-t -i)
 else
-	TTY_ARGS=
+	TTY_ARGS=()
+fi
+
+if enterprise && [ -z "$PASSENGER_ENTERPRISE_DOWNLOAD_TOKEN" ]; then
+    echo "please set an enterprise download token using -e MY_DL_TOKEN"
+    exit 1
 fi
 
 if $SHOW_TASKS; then
 	exec docker run \
-		--rm $TTY_ARGS \
 		-v "$SELFDIR:/system:ro" \
 		-e "DISTRIBUTIONS=$DISTRIBUTIONS" \
 		-e "RPM_ARCH=$RPM_ARCH" \
@@ -190,7 +203,7 @@ else
 
 	echo "-------- Entering Docker container --------"
 	exec docker run \
-		--rm $TTY_ARGS \
+		--rm "${TTY_ARGS[@]}" \
 		--privileged \
 		-v "$SELFDIR:/system:ro" \
 		-v "$PASSENGER_DIR:/passenger:ro" \
@@ -201,6 +214,7 @@ else
 		-e "RPM_ARCH=$RPM_ARCH" \
 		-e "SHOW_OVERVIEW_PERIODICALLY=$SHOW_OVERVIEW_PERIODICALLY" \
 		-e "FETCH_PASSENGER_TARBALL_FROM_CACHE=$FETCH_PASSENGER_TARBALL_FROM_CACHE" \
+                -e "PASSENGER_ENTERPRISE_DOWNLOAD_TOKEN=$PASSENGER_ENTERPRISE_DOWNLOAD_TOKEN" \
 		-e "APP_UID=`/usr/bin/id -u`" \
 		-e "APP_GID=`/usr/bin/id -g`" \
 		-e "LC_CTYPE=en_US.UTF-8" \

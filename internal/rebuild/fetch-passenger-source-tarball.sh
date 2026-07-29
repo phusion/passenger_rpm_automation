@@ -20,15 +20,30 @@ require_envvar PASSENGER_RPM_NAME "$PASSENGER_RPM_NAME"
 
 RELEASEVER="${2#el}"
 
-mkdir -p /work/passenger.repos.d
-if [ ! -f /work/passenger.repos.d/el.repo ]; then
-    curl --fail -sSLo /work/passenger.repos.d/el.repo https://oss-binaries.phusionpassenger.com/yum/definitions/el-passenger.repo
+if [ "$PASSENGER_RPM_NAME" != "passenger-enterprise" ]; then
+    REPOS_DIR="/work/passenger.repos.d"
+    REPO_URL="https://oss-binaries.phusionpassenger.com/yum/definitions/el-passenger.repo"
+else
+    REPOS_DIR="/work/passenger-enterprise.repos.d"
+    REPO_URL="https://www.phusionpassenger.com/enterprise_yum/el-passenger-enterprise.repo"
+
+    if [ -z "$PASSENGER_ENTERPRISE_DOWNLOAD_TOKEN" ]; then
+	echo "Please set PASSENGER_ENTERPRISE_DOWNLOAD_TOKEN env var when rebuilding enterprise packages" >&2
+	exit 1
+    else
+	echo "machine www.phusionpassenger.com login download password $PASSENGER_ENTERPRISE_DOWNLOAD_TOKEN" > "$HOME/.netrc"
+    fi
+fi
+
+mkdir -p "$REPOS_DIR"
+if [ ! -f "$REPOS_DIR/el.repo" ]; then
+    run curl --netrc-optional -fsSLo "$REPOS_DIR/el.repo" "$REPO_URL"
 fi
 
 header "Fetching Passenger official srpm"
 
 SRCPKG=$(dnf -vy repoquery \
-    --setopt=reposdir=/work/passenger.repos.d \
+    --setopt=reposdir="$REPOS_DIR" \
     --releasever="$RELEASEVER" \
     --show-duplicates \
     --arch=src \
@@ -38,7 +53,7 @@ cd /work
 
 run dnf -vy download \
     --source \
-    --setopt=reposdir=/work/passenger.repos.d \
+    --setopt=reposdir="$REPOS_DIR" \
     --releasever="$RELEASEVER" \
     "$SRCPKG"
 

@@ -52,7 +52,7 @@ sed -E \
     -e "s/^(%global package_release )[0-9]+/\1 $NEW_PASSENGER_RPM_RELEASE/" \
     -e "s/^(Requires: %\{package_name\}(%\{\?_isa\})? = %\{version\})-%\{release\}/\1-${PASSENGER_RPM_RELEASE}%{?release_dist}/g" \
     -e '/^(%global release_dist.*$)/a\%global __debug_requires_exclude ^passenger-debuginfo' \
-    "${RPM_SOURCES_DIR}/passenger.spec" > "${spec_target_file}"
+    "${RPM_SOURCES_DIR}/${PASSENGER_RPM_NAME}.spec" > "${spec_target_file}"
 
 run rpmbuild -bs --root "$HOME/rpmbuild/root-passenger-${DISTRO_ID}" "${spec_target_file}"
 
