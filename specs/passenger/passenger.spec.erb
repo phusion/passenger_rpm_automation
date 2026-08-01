@@ -11,16 +11,11 @@
 %global nginx_version <%= NGINX_VERSION %>
 %global bundled_boost_version 1.80.0
 %global is_enterprise <%= PASSENGER_ENTERPRISE ? 1 : 0 %>
-<% if dynamic_module_supported?(@distribution) %>
-%global dynamic_module_supported 1
 %global latest_nginx_epoch <%= latest_nginx_epoch(@distribution) %>
 %global latest_nginx_version <%= latest_nginx_version(@distribution, :rocky) %>
 %global latest_nginx_rocky_release <%= latest_nginx_release(@distribution, :rocky) %>
 %global latest_nginx_alma_release <%= latest_nginx_release(@distribution, :alma) %>
 %global latest_nginx_rhel_release <%= latest_nginx_release(@distribution, :rhel) %>
-<% else %>
-%global dynamic_module_supported 0
-<% end %>
 %global release_dist .<%= @distribution %>
 
 # Fedora <= 18 and RHEL <= 6 used the rubyabi requirement.
@@ -93,10 +88,8 @@ Source10: passenger.logrotate
 Source100: apache-passenger.conf.in
 Source101: apache-passenger-module.conf
 Source102: passenger.tmpfiles
-%if %{dynamic_module_supported}
 Source200: nginx-passenger-module.conf
 Source201: nginx-mod-passenger.conf
-%endif
 
 # https://bugzilla.redhat.com/show_bug.cgi?id=985634
 Patch107:       rubygem-passenger-4.0.18-GLIBC_HAVE_LONG_LONG.patch
@@ -224,7 +217,6 @@ License: CC-BY-SA and MIT and (MIT or GPL+)
 %description doc
 This package contains documentation files for Phusion Passenger®.
 
-%if %{dynamic_module_supported}
 %package -n %{nginx_module_package_name}
 Summary: Nginx Module for Phusion Passenger
 Group: System Environment/Daemons
@@ -239,7 +231,6 @@ License: Boost and BSD and BSD with advertising and MIT and zlib
 
 %description -n %{nginx_module_package_name}
 This package contains the pluggable Nginx server module for Phusion Passenger®.
-%endif
 
 %prep
 %setup -q -n %{tarball_name}-%{tarball_version}
@@ -290,15 +281,13 @@ pushd nginx-%{nginx_version}
 make
 popd
 
-%if %{dynamic_module_supported}
-    cp -r /usr/src/nginx-%{latest_nginx_version}-* nginx-%{latest_nginx_version}
-    nginx -V 2>&1 | awk -F: '/configure arguments/ {print $2}' | xargs -n1 | grep -v '^--add-dynamic-module=' > config_args
-    /usr/bin/rake nginx:as_dynamic_module && \
-      pushd nginx-%{latest_nginx_version} && \
-      xargs -a ../config_args -d '\n' ./configure --add-dynamic-module=`pwd`/../src/nginx_module && \
-      make -f objs/Makefile modules && \
-      popd
-%endif
+cp -r /usr/src/nginx-%{latest_nginx_version}-* nginx-%{latest_nginx_version}
+nginx -V 2>&1 | awk -F: '/configure arguments/ {print $2}' | xargs -n1 | grep -v '^--add-dynamic-module=' > config_args
+/usr/bin/rake nginx:as_dynamic_module && \
+    pushd nginx-%{latest_nginx_version} && \
+    xargs -a ../config_args -d '\n' ./configure --add-dynamic-module=`pwd`/../src/nginx_module && \
+    make -f objs/Makefile modules && \
+    popd
 
 # Build SELinux policy modules.
 %{__cp} %{SOURCE3} %{SOURCE4} .
@@ -323,7 +312,6 @@ export LC_ALL=en_US.UTF-8
 %{__cp} -a pkg/fakeroot/* %{buildroot}/
 %{__cp} nginx-%{nginx_version}/objs/nginx %{buildroot}%{_libdir}/%{namespace}/support-binaries/nginx-%{nginx_version}
 
-%if %{dynamic_module_supported}
 %{__mkdir_p} %{buildroot}%{_nginx_moddir} %{buildroot}%{_nginx_confdir} %{buildroot}%{_nginx_modconfdir}
 
 %if %{is_enterprise}
@@ -343,8 +331,6 @@ export LC_ALL=en_US.UTF-8
 %{__sed} -e 's|@PASSENGERROOT@|%{passenger_ruby_libdir}/phusion_passenger/locations.ini|g' %{SOURCE201} > nginx.conf
 touch -r %{SOURCE201} nginx.conf
 %{__install} -pm 0644 nginx.conf %{buildroot}%{_nginx_confdir}/passenger.conf
-
-%endif
 
 # Install bootstrapping code into the executables and the Nginx config script.
 ./dev/install_scripts_bootstrap_code.rb --ruby %{passenger_ruby_libdir} \
@@ -499,12 +485,10 @@ fi
 %endif
 %{_httpd_moddir}/mod_passenger.so
 
-%if %{dynamic_module_supported}
 %files -n %{nginx_module_package_name}
     %config(noreplace) %{_nginx_modconfdir}/*.conf
     %config(noreplace) %{_nginx_confdir}/*.conf
 %{_nginx_moddir}/ngx_http_passenger*_module.so
-%endif
 
 %changelog
 * Fri Sep 16 2022 Camden Narzt <camden@phusion.nl> - All versions

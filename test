@@ -107,7 +107,6 @@ function parse_options()
 		exit 1
 	else
 		TEST_IMAGE="$(distro_name_to_testbox_image "$DISTRIBUTION")"
-		DYNAMIC_MODULE_SUPPORTED="$(dynamic_module_supported "$DISTRIBUTION")"
 	fi
 	if [[ "$OUTPUT_DIR" = "" ]]; then
 		echo "ERROR: please specify a build products directory with -d."

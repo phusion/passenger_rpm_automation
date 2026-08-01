@@ -55,30 +55,6 @@ function distro_name_to_testbox_image()
 	fi
 }
 
-function dynamic_module_supported()
-{
-	local CODENAME=$(distro_name_to_el_name "$1")
-
-	
-		if [[ "$CODENAME" = "el8" ]]; then
-			echo true
-			return
-		fi
-	
-		if [[ "$CODENAME" = "el9" ]]; then
-			echo true
-			return
-		fi
-	
-		if [[ "$CODENAME" = "el10" ]]; then
-			echo true
-			return
-		fi
-	
-
-	echo false
-}
-
 function nginx_minor_version()
 {
 	 cut -d. -f 1-2 <<< $1

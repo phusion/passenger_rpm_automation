@@ -13,26 +13,13 @@ namespace :source do
   DISTROS.each do |distro|
     register_tracking_task(:preparation, "passenger:#{distro}")
     desc "Create Passenger source tarball"
-    if dynamic_module_supported?(distro)
-      task("passenger:#{distro}" => :nginx) do
-        track_task(:preparation, "passenger:#{distro}") do |task|
-          if FETCH_PASSENGER_TARBALL_FROM_CACHE && File.exist?("/cache/#{distro}_#{PASSENGER_TARBALL}")
-            task.sh "cp /cache/#{distro}_#{PASSENGER_TARBALL} #{RPM_SOURCES_DIR}/#{PASSENGER_TARBALL}"
-          else
-            task.sh "./build-passenger-source-tarball.sh #{RPM_SOURCES_DIR}/#{PASSENGER_TARBALL} #{latest_nginx_version(distro, :rocky)}"
-            task.sh "cp #{RPM_SOURCES_DIR}/#{PASSENGER_TARBALL} /cache/#{distro}_#{PASSENGER_TARBALL}"
-          end
-        end
-      end
-    else
-      task("passenger:#{distro}" => :nginx) do
-        track_task(:preparation, "passenger:#{distro}") do |task|
-          if FETCH_PASSENGER_TARBALL_FROM_CACHE && File.exist?("/cache/#{PASSENGER_TARBALL}")
-            task.sh "cp /cache/#{PASSENGER_TARBALL} #{RPM_SOURCES_DIR}/#{PASSENGER_TARBALL}"
-          else
-            task.sh "./build-passenger-source-tarball.sh #{RPM_SOURCES_DIR}/#{PASSENGER_TARBALL} #{NGINX_VERSION}"
-            task.sh "cp #{RPM_SOURCES_DIR}/#{PASSENGER_TARBALL} /cache/#{PASSENGER_TARBALL}"
-          end
+    task("passenger:#{distro}" => :nginx) do
+      track_task(:preparation, "passenger:#{distro}") do |task|
+        if FETCH_PASSENGER_TARBALL_FROM_CACHE && File.exist?("/cache/#{distro}_#{PASSENGER_TARBALL}")
+          task.sh "cp /cache/#{distro}_#{PASSENGER_TARBALL} #{RPM_SOURCES_DIR}/#{PASSENGER_TARBALL}"
+        else
+          task.sh "./build-passenger-source-tarball.sh #{RPM_SOURCES_DIR}/#{PASSENGER_TARBALL} #{latest_nginx_version(distro, :rocky)}"
+          task.sh "cp #{RPM_SOURCES_DIR}/#{PASSENGER_TARBALL} /cache/#{distro}_#{PASSENGER_TARBALL}"
         end
       end
     end

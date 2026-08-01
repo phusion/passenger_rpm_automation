@@ -20,10 +20,6 @@ DISTRO_BUILD_PARAMS = REDHAT_ENTERPRISE_DISTRIBUTIONS.transform_values do |v| {
 }
 end
 
-def dynamic_module_supported?(distro)
-  numeric(distro) > 6
-end
-
 def latest_nginx_available_parts(release, distro)
   arch = "x86_64"
   url = case distro
