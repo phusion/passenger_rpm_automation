@@ -58,4 +58,4 @@ run dnf -vy download \
     "$SRCPKG"
 
 header "Putting srpm in place"
-mv ./*.src.rpm  "$1"
+mv ./*.src.rpm  "$1/"

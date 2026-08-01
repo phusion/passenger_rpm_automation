@@ -15,12 +15,12 @@ namespace :source do
     desc "Fetch Passenger source tarball"
     task("passenger:#{distro}") do
       track_task(:preparation, "passenger:#{distro}") do |task|
-        passenger_srpm_name=passenger_srpm_name(distro)
-        if FETCH_PASSENGER_TARBALL_FROM_CACHE && File.exist?("/cache/#{passenger_srpm_name}")
-          cp "/cache/#{passenger_srpm_name}", "#{RPM_SOURCES_DIR}/#{passenger_srpm_name}"
+        passenger_srpm_name=passenger_srpm_name(distro, "*")
+        if FETCH_PASSENGER_TARBALL_FROM_CACHE && !Dir["/cache/#{passenger_srpm_name}"].empty?
+          cp Dir["/cache/#{passenger_srpm_name}"].first, RPM_SOURCES_DIR
         else
-          task.sh "./fetch-passenger-source-tarball.sh #{RPM_SOURCES_DIR}/#{passenger_srpm_name} #{distro}"
-          cp "#{RPM_SOURCES_DIR}/#{passenger_srpm_name}", "/cache/#{passenger_srpm_name}"
+          task.sh "./fetch-passenger-source-tarball.sh #{RPM_SOURCES_DIR} #{distro}"
+          cp Dir["#{RPM_SOURCES_DIR}/#{passenger_srpm_name}"].first, "/cache"
         end
       end
     end
@@ -48,7 +48,6 @@ namespace :srpm do
     task("passenger:#{distro_id}" => [ "source:passenger:#{distro_id}" ]) do
       track_task(:srpm, "passenger:#{distro_id}") do |task|
         task.sh "./update-source-rpm.sh",
-                PASSENGER_SRPM_NAME: passenger_srpm_name(distro_id),
                 RPM_SOURCES_DIR: RPM_SOURCES_DIR,
                 RPM_SPECS_DIR: RPM_SPECS_DIR,
                 RPM_SRPMS_DIR: RPM_SRPMS_DIR,
@@ -127,7 +126,7 @@ task :finish do
   DISTROS.each do |distro_id|
     rpms = Dir["/work/#{distro_id}-*/nginx-mod-http-*.rpm"]
     srpms = Dir["/work/#{distro_id}-*/*.src.rpm"]
-    debuginfo = Dir["/work/#{distro_id}-*/*debuginfo*.rpm"]
+    debuginfo = Dir["/work/#{distro_id}-*/[np]*-debuginfo*.rpm"]
     files = rpms + srpms + debuginfo
     if files.any?
       sh "mkdir -p /output/#{distro_id}"

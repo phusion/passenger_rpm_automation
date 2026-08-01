@@ -95,10 +95,6 @@ def passenger_enterprise?
   defined?(PhusionPassenger::PASSENGER_IS_ENTERPRISE)
 end
 
-def passenger_srpm_name(distro_id)
-  "#{PASSENGER_RPM_NAME}-#{PASSENGER_VERSION}-#{PASSENGER_RPM_RELEASE}.#{distro_id}.src.rpm"
-end
-
-def nginx_srpm_name(distro_id)
-  "#{NGINX_RPM_NAME}-#{NGINX_VERSION}-#{NGINX_RPM_RELEASE}.#{distro_id}.src.rpm"
+def passenger_srpm_name(distro_id, release)
+  "#{PASSENGER_RPM_NAME}-#{PASSENGER_VERSION}-#{release}.#{distro_id}.src.rpm"
 end

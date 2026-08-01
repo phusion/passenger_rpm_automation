@@ -7,7 +7,6 @@ source "$ROOTDIR/internal/lib/library.sh"
 #require_args_exact 2 "$@"
 require_envvar PASSENGER_VERSION "$PASSENGER_VERSION"
 require_envvar PASSENGER_RPM_NAME "$PASSENGER_RPM_NAME"
-require_envvar PASSENGER_SRPM_NAME "$PASSENGER_SRPM_NAME"
 require_envvar PASSENGER_RPM_RELEASE "$PASSENGER_RPM_RELEASE"
 require_envvar RPM_ARCH "$RPM_ARCH"
 require_envvar RPM_SOURCES_DIR "$RPM_SOURCES_DIR"
@@ -46,12 +45,11 @@ declare NEW_PASSENGER_SRPM_NAME="${OLD_PASSENGER_RPM_NAME/$PASSENGER_VERSION-*.e
 
 header "Updating specfile"
 sed -E \
-    -e "s/^(%global latest_nginx_rocky_release ).*/\1 $ROCKY_NGINX_VERSION/" \
-    -e "s/^(%global latest_nginx_alma_release ).*/\1 $ALMA_NGINX_VERSION/" \
-    -e "s/^(%global latest_nginx_rhel_release ).*/\1 $RHEL_NGINX_VERSION/" \
-    -e "s/^(%global package_release )[0-9]+/\1 $NEW_PASSENGER_RPM_RELEASE/" \
+    -e "s/^(%global latest_nginx_rocky_release) .*/\1 $ROCKY_NGINX_VERSION/" \
+    -e "s/^(%global latest_nginx_alma_release) .*/\1 $ALMA_NGINX_VERSION/" \
+    -e "s/^(%global latest_nginx_rhel_release) .*/\1 $RHEL_NGINX_VERSION/" \
+    -e "s/^(%global package_release) +[0-9]+/\1 $NEW_PASSENGER_RPM_RELEASE/" \
     -e "s/^(Requires: %\{package_name\}(%\{\?_isa\})? = %\{version\})-%\{release\}/\1-${PASSENGER_RPM_RELEASE}%{?release_dist}/g" \
-    -e '/^(%global release_dist.*$)/a\%global __debug_requires_exclude ^passenger-debuginfo' \
     "${RPM_SOURCES_DIR}/${PASSENGER_RPM_NAME}.spec" > "${spec_target_file}"
 
 run rpmbuild -bs --root "$HOME/rpmbuild/root-passenger-${DISTRO_ID}" "${spec_target_file}"
