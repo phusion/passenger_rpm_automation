@@ -47,7 +47,7 @@ SRCPKG=$(dnf -vy repoquery \
     --releasever="$RELEASEVER" \
     --show-duplicates \
     --arch=src \
-    "$PASSENGER_RPM_NAME" | grep "$PASSENGER_VERSION" | rev | cut -d. -f2- | rev)
+    "$PASSENGER_RPM_NAME" | grep "$PASSENGER_VERSION" | rev | cut -d. -f2- | rev | sort -Vr | head -1)
 
 cd /work
 
