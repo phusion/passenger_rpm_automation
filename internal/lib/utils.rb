@@ -75,4 +75,25 @@ module Utils
   def shesc(path)
     Shellwords.escape(path)
   end
+
+  def recursive_find_string_in_config(file, needle)
+    puts file
+    lines = File.readlines(file, chomp: true)
+    return file if lines.include?(needle)
+    dir = File.dirname(file)+"/"
+    lines.select { |l| l.include? "include" }.filter_map do |l|
+      path = l.split(/['"]/)[1]
+      path = dir+path unless path.start_with?("/")
+      recursive_find_string_in_config(path, needle)
+    end.flatten.compact
+  end
+
+  def gsub_file(file, patterns={})
+    pattern = Regexp.union(patterns.keys)
+    File.open(file, mode: "r+") do |f|
+      contents = f.read
+      contents.gsub!(pattern, patterns)
+      f.write(contents)
+    end
+  end
 end

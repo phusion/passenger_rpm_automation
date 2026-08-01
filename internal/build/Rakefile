@@ -130,6 +130,9 @@ namespace :rpm do
       track_task(:rpm, "passenger:#{distro_id}:#{RPM_ARCH}") do |task|
         mock_chroot_name = "#{distro[:mock_chroot_name]}-#{RPM_ARCH}"
         File.write("/etc/mock/#{mock_chroot_name}.cfg", "config_opts['module_setup_commands'] = [ ('enable', 'nginx:#{latest_nginx_module(distro_id, :rocky)}') ]", mode: 'a+') unless distro_id == 'el10'
+        recursive_find_string_in_config("/etc/mock/#{mock_chroot_name}.cfg", "[appstream]").each do |file|
+          gsub_file(file, 'mirrorlist' => '#mirrorlist', '#baseurl' => 'baseurl')
+        end
         task.sh "/usr/bin/mock --verbose #{MOCK_FLAGS} " +
           "-r #{mock_chroot_name} " +
           "--resultdir '/work/#{distro_id}-#{RPM_ARCH}' " +
