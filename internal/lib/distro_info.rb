@@ -23,10 +23,25 @@ end
 def latest_nginx_available_parts(release, distro)
   arch = "x86_64"
   url = case distro
-    when :rocky then "https://dl.rockylinux.org/pub/rocky/#{numeric(release)}/AppStream/#{arch}/os/Packages/n/"
-    when :alma  then "https://repo.almalinux.org/almalinux/#{numeric(release)}/AppStream/#{arch}/os/Packages/"
-    when :rhel  then "https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi#{numeric(release)}/#{numeric(release)}/#{arch}/appstream/os/Packages/n/"
+    when :rocky then "https://dl.rockylinux.org/pub/rocky/#{numeric(release)}"
+    when :alma  then "https://repo.almalinux.org/almalinux/#{numeric(release)}"
+    when :rhel  then "https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi#{numeric(release)}/#{numeric(release)}"
   end
+
+  if release < 10
+  url += case distro
+         when :rocky then "/AppStream/#{arch}/os/Packages/n/"
+         when :alma  then "/AppStream/#{arch}/os/Packages/"
+         when :rhel  then "/#{arch}/appstream/os/Packages/n/"
+         end
+  else
+    url += case distro
+           when :rocky then "/devel/#{arch}/os/Packages/n/"
+           when :alma  then "/CRB/#{arch}/os/Packages/"
+           when :rhel  then "/#{arch}/appstream/os/Packages/n/" # path for nginx-mod-stream because nginx-mod-devel not in ubi10
+           end
+  end
+
   cache_file = "/tmp/#{distro}_#{release}_nginx_version.txt"
   if !File.exist?(cache_file) || ((Time.now - 60*60*24) > File.mtime(cache_file))
     if RUBY_VERSION >= '2.5'
@@ -39,7 +54,7 @@ def latest_nginx_available_parts(release, distro)
       end
     end
     version_parts = doc
-                      .css('a[href^="nginx-"]')
+                      .css('a[href^="nginx-mod-"]') # cannot use full nginx-mod-devel name because ubi10 doesn't include that package for some reason
                       .map { |el| el['href'] }
                       .reject { |s| [ "-mod-", ".noarch.", "-core-" ].any? { |p| s.include?(p) } }
                       .map { |url| URI.decode_uri_component(url).delete_suffix(".#{arch}.rpm").split('-').slice(1..) }

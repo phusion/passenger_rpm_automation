@@ -18,6 +18,20 @@ require_envvar ROCKY_NGINX_VERSION "$ROCKY_NGINX_VERSION"
 require_envvar ALMA_NGINX_VERSION "$ALMA_NGINX_VERSION"
 require_envvar RHEL_NGINX_VERSION "$RHEL_NGINX_VERSION"
 
+# Being the upstream, RHEL should always update first. (Alma is based on CentOS Stream so that might not be true, but we can't help that)
+if [[ "$RHEL_NGINX_VERSION" =~ (\.[0-9]+)$ ]]; then
+    SUFFIX="${BASH_REMATCH[1]}"
+    if [[ "$ALMA_NGINX_VERSION" == *"$SUFFIX" ]] && [[ "$ROCKY_NGINX_VERSION" == *"$SUFFIX" ]]; then
+	# fine
+    else
+	echo "RHEL, Rocky, & Alma packages out of sync." >&2
+	echo "RHEL: $RHEL_NGINX_VERSION" >&2
+	echo "Alma: $ALMA_NGINX_VERSION" >&2
+	echo "Rocky: $ROCKY_NGINX_VERSION" >&2
+	exit 1
+    fi
+fi
+
 declare spec_target_dir="${RPM_SPECS_DIR}/${DISTRO_ID}"
 declare spec_target_file="${spec_target_dir}/${PASSENGER_RPM_NAME}.spec"
 readarray -t OLD_PASSENGER_RPM_NAME < <(find "${RPM_SOURCES_DIR}" -name "${PASSENGER_RPM_NAME}*${DISTRO_ID}*.src.rpm" -printf '%f\n')
