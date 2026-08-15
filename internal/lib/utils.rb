@@ -88,7 +88,7 @@ module Utils
     end.flatten.compact
   end
 
-  def gsub_file(file, patterns={})
+  def gsub_file(file, patterns = {})
     pattern = Regexp.union(patterns.keys)
     File.open(file, mode: "r+") do |f|
       contents = f.read
