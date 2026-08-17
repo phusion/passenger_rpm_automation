@@ -24,17 +24,17 @@ end
 def latest_nginx_available_parts(release, distro)
   arch = "x86_64"
   url = case distro
-    when :rocky then "https://dl.rockylinux.org/pub/rocky/#{numeric(release)}"
-    when :alma  then "https://repo.almalinux.org/almalinux/#{numeric(release)}"
-    when :rhel  then "https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi#{numeric(release)}/#{numeric(release)}"
+  when :rocky then "https://dl.rockylinux.org/pub/rocky/#{numeric(release)}"
+  when :alma  then "https://repo.almalinux.org/almalinux/#{numeric(release)}"
+  when :rhel  then "https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi#{numeric(release)}/#{numeric(release)}"
   end
 
-  #if release < 10
+  # if release < 10
   url += case distro
-         when :rocky then "/AppStream/#{arch}/os/Packages/n/"
-         when :alma  then "/AppStream/#{arch}/os/Packages/"
-         when :rhel  then "/#{arch}/appstream/os/Packages/n/"
-         end
+  when :rocky then "/AppStream/#{arch}/os/Packages/n/"
+  when :alma  then "/AppStream/#{arch}/os/Packages/"
+  when :rhel  then "/#{arch}/appstream/os/Packages/n/"
+  end
   # else
   # URLS for nginx-mod-devel
   #   url += case distro
@@ -59,7 +59,7 @@ def latest_nginx_available_parts(release, distro)
                       .css('a[href^="nginx-"]') # cannot use full nginx-mod-devel name because ubi10 doesn't include that package for some reason, use 'nginx' instead
                       .map { |el| el['href'] }
                       .reject { |s| [ "-mod-", ".noarch.", "-core-" ].any? { |p| s.include?(p) } }
-                      .map { |url| URI.decode_uri_component(url).delete_suffix(".#{arch}.rpm").split('-').slice(1..) }
+                      .map { |url| URI.decode_uri_component(url).delete_suffix(".#{arch}.rpm").split('-').slice(1..nil) }
                       .group_by(&:first)
                       .max_by { |v| Gem::Version.new(v.first) }
                       .last

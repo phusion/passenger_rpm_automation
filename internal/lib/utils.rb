@@ -3,6 +3,7 @@ require 'shellwords'
 require_relative 'preprocessor'
 
 module Utils
+
   extend self
 
   COLORS = [
@@ -96,4 +97,5 @@ module Utils
       f.write(contents)
     end
   end
+
 end
