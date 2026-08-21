@@ -38,6 +38,9 @@ typeattribute unconfined_t process_user_target;
 domain_entry_file(unconfined_t, passenger_exec_t)
 domtrans_pattern(httpd_t, passenger_exec_t, unconfined_t)
 
+allow unconfined_t passenger_instance_httpd_socket_t:tcp_socket getattr;
+allow unconfined_t passenger_instance_httpd_socket_t:unix_stream_socket getattr;
+allow unconfined_t passenger_instance_httpd_socket_t:unix_dgram_socket getattr;
 
 ###### Passenger instance registry dir rules ######
 

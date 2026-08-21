@@ -6,3 +6,4 @@ SUPPORT_BINARIES_DIR_ALT/PassengerAgent         --    gen_context(system_u:objec
 /var/run/passenger-instreg/[a-zA-Z0-9\-\.]+/web_server_info     -d   gen_context(system_u:object_r:passenger_instance_httpd_dir_t,s0)
 /var/run/passenger-instreg/[a-zA-Z0-9\-\.]+/web_server_info/.*  --   gen_context(system_u:object_r:passenger_instance_httpd_file_t,s0)
 /var/run/passenger-instreg/[a-zA-Z0-9\-\.]+/agents.s/core       -s   gen_context(system_u:object_r:passenger_instance_httpd_socket_t,s0)
+/usr/share/nginx/passenger_temp                 -d    gen_context(system_u:object_r:usr_t,s0)
