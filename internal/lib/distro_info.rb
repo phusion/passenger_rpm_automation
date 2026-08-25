@@ -63,7 +63,6 @@ def latest_nginx_available_parts(release, distro)
                       .group_by(&:first)
                       .max_by { |v| Gem::Version.new(v.first) }
                       .last
-                      .each { |v|STDOUT.puts v.inspect }
                       .max_by do |e|
                         case numeric(release)
                         when 10..nil then e.last.split(/(_|\.el)/).map(&:to_f)
