@@ -63,12 +63,8 @@ def latest_nginx_available_parts(release, distro)
                       .group_by(&:first)
                       .max_by { |v| Gem::Version.new(v.first) }
                       .last
-                      .max_by do |e|
-                        case numeric(release)
-                        when 10..nil then e.last.split(/(_|\.el)/).map(&:to_f)
-                        else         e.last.split('+').last.split('.').at(1).to_i
-                        end
-                      end
+                      .sort { |a, b| rpm_compare(a.join('-'), b.join('-')) }
+                      .last
     File.write(cache_file, version_parts.join('-'))
   else
     version_parts = File.read(cache_file).split('-')
@@ -93,5 +89,65 @@ def latest_nginx_epoch(distro)
     2
   else
     1
+  end
+end
+
+def rpm_compare(a, b)
+  a = a.dup
+  b = b.dup
+
+  next_segment = lambda do |str|
+    if (m = /\A\d+/.match(str))
+      [ m[0], true, m.post_match ]
+    elsif (m = /\A[[:alpha:]]+/.match(str))
+      [ m[0], false, m.post_match ]
+    else
+      raise "Expected version segment at #{str.inspect}"
+    end
+  end
+
+  handle_special = ->(char) do
+    if a.start_with?(char) || b.start_with?(char)
+      if a.start_with?(char) != b.start_with?(char)
+        return yield
+      end
+
+      a.delete_prefix!(char)
+      b.delete_prefix!(char)
+      true
+    end
+  end
+
+  loop do
+    # Delete prefix up-to: alnum, ~, ^
+    a.sub!(/\A[^[:alnum:]~^]+/, "")
+    b.sub!(/\A[^[:alnum:]~^]+/, "")
+
+    # empty handling
+    return 0 if a.empty? && b.empty?
+    return -1 if a.empty?
+    return  1 if b.empty?
+
+    # tilde & caret handling
+    next if handle_special.call("~") { a.start_with?("~") ? -1 : 1 }
+    next if handle_special.call("^") { a.start_with?("^") ? -1 : 1 }
+
+    segment_a, a_numeric, a = next_segment.call(a)
+    segment_b, b_numeric, b = next_segment.call(b)
+
+    # numeric always newer than alpha
+    if a_numeric != b_numeric
+      return a_numeric ? 1 : -1
+    end
+
+    if a_numeric
+      segment_a.sub!(/\A0+/, "")
+      segment_b.sub!(/\A0+/, "")
+
+      cmp = segment_a.length <=> segment_b.length
+      return cmp unless cmp.zero?
+    end
+    cmp = segment_a <=> segment_b
+    return cmp unless cmp.zero?
   end
 end
