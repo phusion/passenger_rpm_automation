@@ -21,9 +21,7 @@ require_envvar RHEL_NGINX_VERSION "$RHEL_NGINX_VERSION"
 # Being the upstream, RHEL should always update first. (Alma is based on CentOS Stream so that might not be true, but we can't help that)
 if [[ "$RHEL_NGINX_VERSION" =~ (\.[0-9]+)$ ]]; then
     SUFFIX="${BASH_REMATCH[1]}"
-    if [[ "$ALMA_NGINX_VERSION" == *"$SUFFIX" ]] && [[ "$ROCKY_NGINX_VERSION" == *"$SUFFIX" ]]; then
-	# fine
-    else
+    if ! [[ "$ALMA_NGINX_VERSION" == *"$SUFFIX" ]] || ! [[ "$ROCKY_NGINX_VERSION" == *"$SUFFIX" ]]; then
 	echo "RHEL, Rocky, & Alma packages out of sync." >&2
 	echo "RHEL: $RHEL_NGINX_VERSION" >&2
 	echo "Alma: $ALMA_NGINX_VERSION" >&2
