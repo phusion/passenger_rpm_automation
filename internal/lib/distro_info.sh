@@ -46,9 +46,9 @@ function distro_name_to_testbox_image()
 {
 	local DISTRIBUTION="$1"
 	if [[ "$DISTRIBUTION" =~ ^centos[0-9]+$ ]]; then
-		echo ghcr.io/phusion/passenger_rpm_automation_testbox_centos_${DISTRIBUTION#"centos"}:2.0.10
+		echo ghcr.io/phusion/passenger_rpm_automation_testbox_centos_${DISTRIBUTION#"centos"}:2.0.11
 	elif [[ "$DISTRIBUTION" =~ ^rocky[0-9]+$ ]]; then
-		echo ghcr.io/phusion/passenger_rpm_automation_testbox_rocky_${DISTRIBUTION#"rocky"}:2.0.10
+		echo ghcr.io/phusion/passenger_rpm_automation_testbox_rocky_${DISTRIBUTION#"rocky"}:2.0.11
 	else
 		echo "ERROR: unknown distribution name." >&2
 		return 1

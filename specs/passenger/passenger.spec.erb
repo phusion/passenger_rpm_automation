@@ -18,17 +18,6 @@
 %global latest_nginx_rhel_release <%= latest_nginx_release(@distribution, :rhel) %>
 %global release_dist .<%= @distribution %>
 
-# Fedora <= 18 and RHEL <= 6 used the rubyabi requirement.
-# This is gone in later versions.
-%if 0%{?fc18}
-%global uses_rubyabi 1
-%global rubyabi 1.9.1
-%endif
-%if 0%{?el6}
-%global uses_rubyabi 1
-%global rubyabi 1.8
-%endif
-
 %if 0%{?fedora} >= 19
 %global gem_extdir %{gem_extdir_mri}
 %endif

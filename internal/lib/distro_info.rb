@@ -22,29 +22,21 @@ DISTRO_BUILD_PARAMS = REDHAT_ENTERPRISE_DISTRIBUTIONS.transform_values do |v| {
 end
 
 def latest_nginx_available_parts(release, distro)
+  latest_package_available_parts('nginx', [ "-mod-", ".noarch.", "-core-" ], release, distro)
+end
+
+def latest_ruby_available_parts(release, distro)
+  latest_package_available_parts('ruby', [ '-libs-', '-irb-', '.noarch.', '-devel-', '-bundled-gems-', '-hivex-', '-libguestfs-' ], release, distro)
+end
+
+def latest_package_available_parts(package, rejects, release, distro)
   arch = "x86_64"
   url = case distro
-  when :rocky then "https://dl.rockylinux.org/pub/rocky/#{numeric(release)}"
-  when :alma  then "https://repo.almalinux.org/almalinux/#{numeric(release)}"
-  when :rhel  then "https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi#{numeric(release)}/#{numeric(release)}"
+  when :rocky then "https://dl.rockylinux.org/pub/rocky/#{numeric(release)}/AppStream/#{arch}/os/Packages/#{package.chr}/"
+  when :alma  then "https://repo.almalinux.org/almalinux/#{numeric(release)}/AppStream/#{arch}/os/Packages/"
+  when :rhel  then "https://cdn-ubi.redhat.com/content/public/ubi/dist/ubi#{numeric(release)}/#{numeric(release)}/#{arch}/appstream/os/Packages/#{package.chr}/"
   end
-
-  # if release < 10
-  url += case distro
-  when :rocky then "/AppStream/#{arch}/os/Packages/n/"
-  when :alma  then "/AppStream/#{arch}/os/Packages/"
-  when :rhel  then "/#{arch}/appstream/os/Packages/n/"
-  end
-  # else
-  # URLS for nginx-mod-devel
-  #   url += case distro
-  #          when :rocky then "/devel/#{arch}/os/Packages/n/"
-  #          when :alma  then "/CRB/#{arch}/os/Packages/"
-  #          when :rhel  then "" # doesn't exist
-  #          end
-  # end
-
-  cache_file = "/tmp/#{distro}_#{release}_nginx_version.txt"
+  cache_file = "/tmp/#{distro}_#{release}_#{package}_version.txt"
   if !File.exist?(cache_file) || ((Time.now - 60*60*24) > File.mtime(cache_file))
     if RUBY_VERSION >= '2.5'
       doc = URI.open(url) do |io|
@@ -56,9 +48,9 @@ def latest_nginx_available_parts(release, distro)
       end
     end
     version_parts = doc
-                      .css('a[href^="nginx-"]') # cannot use full nginx-mod-devel name because ubi10 doesn't include that package for some reason, use 'nginx' instead
+                      .css(%Q(a[href^="#{package}-"]))
                       .map { |el| el['href'] }
-                      .reject { |s| [ "-mod-", ".noarch.", "-core-" ].any? { |p| s.include?(p) } }
+                      .reject { |s| rejects.any? { |p| s.include?(p) } }
                       .map { |url| URI.decode_uri_component(url).delete_suffix(".#{arch}.rpm").split('-').slice(1..nil) }
                       .group_by(&:first)
                       .max_by { |v| Gem::Version.new(v.first) }
@@ -70,6 +62,14 @@ def latest_nginx_available_parts(release, distro)
     version_parts = File.read(cache_file).split('-')
   end
   version_parts
+end
+
+def latest_ruby_version(release, distro)
+  latest_ruby_available_parts(release, distro).first
+end
+
+def latest_ruby_module(release, distro)
+  latest_ruby_version(release, distro).split('.').first(2).join('.')
 end
 
 def latest_nginx_version(release, distro)

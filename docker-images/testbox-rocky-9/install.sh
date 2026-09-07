@@ -26,6 +26,7 @@ run dnf config-manager --set-enabled crb
 run dnf install -y epel-release yum-utils
 
 run dnf groupinstall -y "Development Tools" --exclude asciidoc
+run dnf module enable -y ruby:$(dnf module list ruby | grep -Ee '^ruby.*[0-9\.]+' | cut -d ' ' -f 2 | sort -V | tail -1)
 run dnf install -y alternatives \
     ruby ruby-devel rubygems rubygem-rake \
     perl git tar which python3 \
