@@ -20,11 +20,12 @@ run groupadd --gid 2467 app
 run adduser --uid 2467 --gid 2467 --password '#' app
 
 header "Installing dependencies"
-run yum --releasever=8 -y update # fix broken dnf/yum/rpm shit
-run yum install -y --enablerepo plus epel-release yum-utils drpm
+run dnf --releasever=8 -y update # fix broken dnf/dnf/rpm shit
+run dnf install -y --enablerepo plus epel-release dnf-utils drpm
 #asciidoc in rockylinux 8 installs all of X11
-run yum groupinstall -y "Development Tools" --exclude asciidoc
-run yum install -y --enablerepo plus \
+run dnf groupinstall -y "Development Tools" --exclude asciidoc
+run dnf module enable -y ruby:$(dnf module list ruby | grep -Ee '^ruby.*[0-9\.]+' | cut -d ' ' -f 2 | sort -V | tail -1)
+run dnf install -y --enablerepo plus \
 	ruby ruby-devel rubygems rubygem-rack rubygem-rake \
 	ccache perl git tar which python3 \
 	httpd httpd-devel httpd-tools zlib-devel sqlite-devel curl-devel \
@@ -37,8 +38,8 @@ run env BUNDLE_GEMFILE=/pra_build/Gemfile bundle install
 # Comment out the following two lines if you see any broken packages
 # For more information, see README.md section
 # "Dealing with broken packages: enabling/disabling CR".
-#run yum update -y
-#run yum-config-manager --enable cr
+#run dnf update -y
+#run dnf-config-manager --enable cr
 
 header "Installing node related dependencies"
 run dnf module install -y nodejs:18
@@ -51,5 +52,5 @@ run mkdir /pra
 run cp /pra_build/Gemfile* /pra/
 
 header "Cleaning up"
-run yum clean all
+run dnf clean all
 run rm -rf /pra_build
