@@ -30,6 +30,10 @@ fi
 shopt -s nullglob
 run dnf install -y /output/*.${RPM_ARCH}.rpm /output/*.noarch.rpm
 shopt -u nullglob
+# Installed here as well as in the testbox images, so that tests also work with
+# testbox images built before mod_session was added to them. Apache integration
+# tests need it for mod_session, mod_session_cookie and mod_auth_form.
+run dnf install -y mod_session
 
 echo
 header "Preparing Passenger source code..."

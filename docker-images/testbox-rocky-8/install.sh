@@ -27,7 +27,7 @@ run yum groupinstall -y "Development Tools" --exclude asciidoc
 run yum install -y --enablerepo plus \
 	ruby ruby-devel rubygems rubygem-rack rubygem-rake \
 	ccache perl git tar which python3 \
-	httpd httpd-devel httpd-tools zlib-devel sqlite-devel curl-devel \
+	httpd httpd-devel httpd-tools mod_session zlib-devel sqlite-devel curl-devel \
 	GeoIP libxslt openssl-devel
 run gem install bundler -v '~>2.3.0' --no-document # last ruby 2.5 supporting bundler
 run gem install bundler -v '~>1.0' --no-document # last 1.* bundler

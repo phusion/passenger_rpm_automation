@@ -29,7 +29,7 @@ run dnf groupinstall -y "Development Tools" --exclude asciidoc
 run dnf install -y alternatives \
     ruby ruby-devel rubygems rubygem-rake \
     perl git tar which python3 \
-    httpd httpd-devel httpd-tools zlib-devel sqlite-devel curl-devel \
+    httpd httpd-devel httpd-tools mod_session zlib-devel sqlite-devel curl-devel \
     libxslt openssl-devel \
     rubygem-rack ccache
 run gem install bundler --no-document
